@@ -11,6 +11,7 @@ find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   controller_interface
+  cartesian_controller_base
   kdl_parser
   tf
   tf_conversions

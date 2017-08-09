@@ -32,6 +32,7 @@ namespace cartesian_motion_controller
 template <class HardwareInterface>
 CartesianMotionController<HardwareInterface>::
 CartesianMotionController()
+: Base::CartesianControllerBase()
 {
 }
 
@@ -39,72 +40,12 @@ template <class HardwareInterface>
 bool CartesianMotionController<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  std::string robot_description;
-  urdf::Model robot_model;
-  KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
+  Base::init(hw,nh);
 
-  // Get controller specific configuration
-  if (!nh.getParam("/robot_description",robot_description))
-  {
-    ROS_ERROR("Failed to load '/robot_description' from parameter server");
-  }
-  if (!nh.getParam("robot_base_link",m_robot_base_link))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
-  }
-  if (!nh.getParam("end_effector_link",m_end_effector_link))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
-  }
   if (!nh.getParam("target_frame",m_target_frame))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
   }
-
-  // Build a kinematic chain of the robot
-  if (!robot_model.initString(robot_description))
-  {
-    ROS_ERROR("Failed to parse urdf model from 'robot_description'");
-  }
-  if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
-  {
-    const std::string error = ""
-      "Failed to parse KDL tree from urdf model";
-    ROS_ERROR_STREAM(error);
-    throw std::runtime_error(error);
-  }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
-  {
-    const std::string error = ""
-      "Failed to parse robot chain from urdf model. "
-      "Are you sure that both your 'robot_base_link' and 'end_effector_link' exist?";
-    ROS_ERROR_STREAM(error);
-    throw std::runtime_error(error);
-  }
-
-  // Get names of controllable joints from the parameter server
-  if (!nh.getParam("joints",m_joint_names))
-  {
-    const std::string error = ""
-    "Failed to load " + nh.getNamespace() + "/joints" + " from parameter server";
-    ROS_ERROR_STREAM(error);
-    throw std::runtime_error(error);
-  }
-
-  // Get the joint handles to use in the control loop
-  for (size_t i = 0; i < m_joint_names.size(); ++i)
-  {
-    m_joint_handles.push_back(hw->getHandle(m_joint_names[i]));
-  }
-
-  // Initialize solver
-  m_forward_dynamics_solver.init(robot_chain);
-
-  // Initialize Cartesian pid controllers
-  controlMotionError.init(nh);
-
-
 
   return true;
 }
@@ -113,14 +54,14 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  // Copy joint state to internal simulation
-  m_forward_dynamics_solver.setStartState(m_joint_handles);
+  Base::starting(time);
 }
 
 template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
-stopping(const ros::Time&)
+stopping(const ros::Time& time)
 {
+  Base::stopping(time);
 }
 
 template <class HardwareInterface>
@@ -141,49 +82,12 @@ update(const ros::Time& time, const ros::Duration& period)
     // Compute the motion error = target - current.
     ctrl::Vector6D error = computeMotionError();
 
-    // Compute system input from Cartesian motion error
-    ctrl::Vector6D cartesian_input = controlMotionError(error,internal_period);
-
-    // Turn Cartesian control command into joint motion
-    computeJointControlCmds(cartesian_input,internal_period,m_simulated_joint_motion);
+    // Turn Cartesian error into joint motion
+    Base::computeJointControlCmds(error,internal_period);
   }
 
   // Write final commands to the hardware interface
-  writeJointControlCmds(m_simulated_joint_motion);
-}
-
-template <>
-void CartesianMotionController<hardware_interface::PositionJointInterface>::
-writeJointControlCmds(const trajectory_msgs::JointTrajectoryPoint& motion)
-{
-  // Take position commands
-  for (size_t i = 0; i < m_joint_handles.size(); ++i)
-  {
-    m_joint_handles[i].setCommand(motion.positions[i]);
-  }
-}
-
-template <>
-void CartesianMotionController<hardware_interface::VelocityJointInterface>::
-writeJointControlCmds(const trajectory_msgs::JointTrajectoryPoint& motion)
-{
-  // Take velocity commands
-  for (size_t i = 0; i < m_joint_handles.size(); ++i)
-  {
-    m_joint_handles[i].setCommand(motion.velocities[i]);
-  }
-}
-
-template <class HardwareInterface>
-void CartesianMotionController<HardwareInterface>::
-computeJointControlCmds(
-        const ctrl::Vector6D& cartesian_input,
-        const ros::Duration& period,
-        trajectory_msgs::JointTrajectoryPoint& joint_output)
-{
-  joint_output = m_forward_dynamics_solver.getJointControlCmds(
-      period,
-      cartesian_input);
+  Base::writeJointControlCmds();
 }
 
 template <class HardwareInterface>
@@ -191,7 +95,7 @@ ctrl::Vector6D CartesianMotionController<HardwareInterface>::
 computeMotionError()
 {
   // Compute motion error wrt robot_base_link
-  tf::StampedTransform current_pose = m_forward_dynamics_solver.getEndEffectorPose();
+  tf::StampedTransform current_pose = Base::m_forward_dynamics_solver.getEndEffectorPose();
   tf::StampedTransform target_pose;
 
   try
@@ -209,11 +113,11 @@ computeMotionError()
     // This lookupTransform() version really uses the latest transform and
     // doesn't limit the lookup to the last common time.
     m_tf_listener.lookupTransform(
-        m_robot_base_link,  // I want my pose displayed in this frame
+        Base::m_robot_base_link,  // I want my pose displayed in this frame
         ros::Time(0),
         m_target_frame,
         ros::Time(0),
-        m_robot_base_link,  // Const reference
+        Base::m_robot_base_link,  // Const reference
         target_pose);
   }
   catch (tf::TransformException& e)
