@@ -129,13 +129,8 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/cartesian_motion_controller.cpp
-  src/ForwardDynamicsSolver.cpp
-  src/SpatialPIDController.cpp
   include/cartesian_motion_controller/cartesian_motion_controller.h
   include/cartesian_motion_controller/cartesian_motion_controller.hpp
-  include/cartesian_motion_controller/ForwardDynamicsSolver.h
-  include/cartesian_motion_controller/SpatialPIDController.h
-  include/cartesian_motion_controller/Utility.h
 )
 
 ## Add cmake target dependencies of the library
