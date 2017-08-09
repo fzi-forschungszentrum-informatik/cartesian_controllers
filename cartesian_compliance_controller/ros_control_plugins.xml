@@ -1,0 +1,21 @@
+<library path="lib/libcartesian_compliance_controller">
+
+  <class name="position_controllers/CartesianComplianceController"
+         type="position_controllers::CartesianComplianceController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      The CartesianComplianceController implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a set of joints.
+      This variant sends commands to a position interface.
+    </description>
+  </class>
+
+  <class name="velocity_controllers/CartesianComplianceController"
+         type="velocity_controllers::CartesianComplianceController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      The CartesianComplianceController implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a set of joints.
+      This variant sends commands to a velocity interface.
+    </description>
+  </class>
+
+</library>
