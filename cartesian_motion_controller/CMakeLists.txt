@@ -10,12 +10,9 @@ project(cartesian_motion_controller)
 find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  controller_interface
   cartesian_controller_base
-  kdl_parser
   tf
   tf_conversions
-  trajectory_msgs
 )
 
 ## System dependencies are found with CMake's conventions

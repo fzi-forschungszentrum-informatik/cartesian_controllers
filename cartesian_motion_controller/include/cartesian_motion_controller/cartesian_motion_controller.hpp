@@ -16,13 +16,6 @@
 // Project
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
 
-// KDL
-#include <kdl/tree.hpp>
-#include <kdl_parser/kdl_parser.hpp>
-
-// URDF
-#include <urdf/model.h>
-
 // Other
 #include <boost/algorithm/clamp.hpp>
 
