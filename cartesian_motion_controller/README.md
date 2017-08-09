@@ -1,6 +1,7 @@
 ## Cartesian Motion Controller ##
 
-This package provides a controller for mapping Cartesian end-effector motion to joint control commands of a set of rotary joints (kinematic chain).
+This package provides a controller for mapping Cartesian end-effector motion to joint control commands of a set of joints.
+The controller tracks a given tf target frame. The responsiveness can be adjusted with the controller gains.
 
 ## Example ##
 Below is an example entry for a controller specific configuration.
@@ -19,13 +20,13 @@ my_cartesian_motion_controller:
     - joint_name_6
 
     pid_gains:
-       rot_x: {p: 0.020, i: 0, d: 0.0001}
-       rot_y: {p: 0.020, i: 0, d: 0.0001}
-       rot_z: {p: 0.020, i: 0, d: 0.0001}
-       trans_x: {p: 0.020, i: 0, d: 0.0001}
-       trans_y: {p: 0.020, i: 0, d: 0.0001}
-       trans_z: {p: 0.020, i: 0, d: 0.0001}
+       rot_x: {p: 50.0, i: 0, d: 0}
+       rot_y: {p: 50.0, i: 0, d: 0}
+       rot_z: {p: 50.0, i: 0, d: 0}
+       trans_x: {p: 50.0, i: 0, d: 0}
+       trans_y: {p: 50.0, i: 0, d: 0}
+       trans_z: {p: 50.0, i: 0, d: 0}
 ```
 
 This configuration must be loaded to the ros parameter server and is accessed by the controller manager when looking for configuration for the loaded controller *my_cartesian_motion_controller*.
-A minimal example can be found in *test/test.launch* of this package.
+A minimal example can be found in *cartesian_controller_test* of this meta package.
