@@ -1,0 +1,34 @@
+my_cartesian_motion_controller:
+    type: "position_controllers/CartesianMotionController"
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    target_frame: "my_target"
+    joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+
+    pid_gains:
+        trans_x: {p: 50.0, i: 0, d: 0}
+        trans_y: {p: 50.0, i: 0, d: 0}
+        trans_z: {p: 50.0, i: 0, d: 0}
+        rot_x: {p: 50.0, i: 0, d: 0}
+        rot_y: {p: 50.0, i: 0, d: 0}
+        rot_z: {p: 50.0, i: 0, d: 0}
+
+joint_trajectory_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+
+joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+        <!-- Includes -->
+        <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+
+        <!-- Create robot instance -->
+        <xacro:ur5_robot prefix="" joint_limited="false"/>
+
+        <!-- Connect to world -->
+        <link name="world" />
+        <joint name="world_joint" type="fixed">
+                <parent link="world" />
+                <child link = "base_link" />
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </joint>
+
+        <!-- Testing reference frame for tf_publisher_gui -->
+        <link name="testing_ref" />
+        <joint name="testing_ref_joint" type="fixed">
+                <parent link="world" />
+                <child link="testing_ref" />
+                <origin xyz="0.386 0.165 0.530" rpy="-3.066 -0.026 -1.426" />
+        </joint>
+
+        <!-- Load control plugin -->
+        <!-- This exposes a controller_manager to manage controllers for gazebo -->
+        <gazebo>
+                <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+                </plugin>
+        </gazebo>
+</robot>
+
