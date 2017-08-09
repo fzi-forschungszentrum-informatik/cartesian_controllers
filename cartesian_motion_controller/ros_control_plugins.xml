@@ -1,0 +1,21 @@
+<library path="lib/libcartesian_motion_controller">
+
+  <class name="position_controllers/CartesianMotionController"
+         type="position_controllers::CartesianMotionController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      The CartesianMotionController executes end-effector motion on a set of joints.
+      This variant sends commands to a position interface.
+    </description>
+  </class>
+
+  <class name="velocity_controllers/CartesianMotionController"
+         type="velocity_controllers::CartesianMotionController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      The CartesianMotionController executes end-effector motion on a set of joints.
+      This variant sends commands to a velocity interface.
+    </description>
+  </class>
+
+</library>
