@@ -78,7 +78,7 @@ update(const ros::Time& time, const ros::Duration& period)
     // control cycle.
     ros::Duration internal_period(0.02);
 
-    // Control the net force
+    // Compute the net force
     ctrl::Vector6D error = computeComplianceError();
 
     // Turn Cartesian error into joint motion
