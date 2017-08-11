@@ -33,7 +33,7 @@ template <class HardwareInterface>
 bool CartesianMotionController<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  Base::init(hw,nh);
+  Base::internal_init(hw,nh);
 
   if (!nh.getParam("target_frame",m_target_frame))
   {
@@ -47,14 +47,13 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  Base::starting(time);
+  Base::internal_starting(time);
 }
 
 template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 stopping(const ros::Time& time)
 {
-  Base::stopping(time);
 }
 
 template <class HardwareInterface>

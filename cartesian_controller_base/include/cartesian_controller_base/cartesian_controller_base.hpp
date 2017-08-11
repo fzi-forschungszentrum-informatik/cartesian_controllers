@@ -34,7 +34,7 @@ CartesianControllerBase()
 
 template <class HardwareInterface>
 bool CartesianControllerBase<HardwareInterface>::
-init(HardwareInterface* hw, ros::NodeHandle& nh)
+internal_init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
   std::string robot_description;
   urdf::Model robot_model;
@@ -107,22 +107,10 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
 template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
-starting(const ros::Time& time)
+internal_starting(const ros::Time& time)
 {
   // Copy joint state to internal simulation
   m_forward_dynamics_solver.setStartState(m_joint_handles);
-}
-
-template <class HardwareInterface>
-void CartesianControllerBase<HardwareInterface>::
-stopping(const ros::Time& time)
-{
-}
-
-template <class HardwareInterface>
-void CartesianControllerBase<HardwareInterface>::
-update(const ros::Time& time, const ros::Duration& period)
-{
 }
 
 template <>

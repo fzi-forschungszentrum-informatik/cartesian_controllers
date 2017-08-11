@@ -42,14 +42,11 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 {
   public:
     CartesianControllerBase();
+    virtual ~CartesianControllerBase<HardwareInterface>(){};
 
-    bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+    bool internal_init(HardwareInterface* hw, ros::NodeHandle& nh);
 
-    void starting(const ros::Time& time);
-
-    void stopping(const ros::Time& time);
-
-    void update(const ros::Time& time, const ros::Duration& period);
+    void internal_starting(const ros::Time& time);
 
   protected:
     void writeJointControlCmds();
