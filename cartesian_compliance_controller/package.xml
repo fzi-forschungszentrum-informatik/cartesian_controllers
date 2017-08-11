@@ -50,6 +50,7 @@
   <run_depend>cartesian_controller_base</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>tf_conversions</run_depend>
+  <run_depend>controller_interface</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
