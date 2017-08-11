@@ -93,8 +93,8 @@ general_init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   // Initialize solvers
   m_forward_dynamics_solver.init(robot_chain);
-  KDL::Tree tmp;
-  tmp.addChain(robot_chain,robot_chain.segments[0].getName());
+  KDL::Tree tmp("not_relevant");
+  tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
 
   // Initialize Cartesian pid controllers
