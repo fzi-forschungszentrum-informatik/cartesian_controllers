@@ -1,4 +1,4 @@
-<library path="lib/libcartesian_compliance_controller">
+<library path="lib/libcartesian_force_controller">
 
   <class name="position_controllers/CartesianForceController"
          type="position_controllers::CartesianForceController"
