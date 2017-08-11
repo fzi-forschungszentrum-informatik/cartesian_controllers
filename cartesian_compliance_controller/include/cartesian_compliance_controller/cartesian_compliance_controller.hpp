@@ -33,7 +33,7 @@ template <class HardwareInterface>
 bool CartesianComplianceController<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  Base::init(hw,nh);
+  Base::general_init(hw,nh);
 
   if (!nh.getParam("compliance_ref_link",m_compliance_ref_link))
   {
@@ -55,7 +55,7 @@ template <class HardwareInterface>
 void CartesianComplianceController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  Base::starting(time);
+  Base::general_starting(time);
 }
 
 template <class HardwareInterface>

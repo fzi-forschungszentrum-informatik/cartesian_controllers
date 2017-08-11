@@ -33,7 +33,7 @@ template <class HardwareInterface>
 bool CartesianForceController<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  Base::init(hw,nh);
+  Base::general_init(hw,nh);
 
   if (!nh.getParam("ft_sensor_ref_link",m_ft_sensor_ref_link))
   {
@@ -50,7 +50,7 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  Base::starting(time);
+  Base::general_starting(time);
 }
 
 template <class HardwareInterface>
