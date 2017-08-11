@@ -40,6 +40,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/ft_sensor_ref_link" << " from parameter server");
   }
 
+  m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
+  m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
+
   return true;
 }
 
@@ -85,6 +88,21 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
+  return m_target_wrench - m_ft_sensor_wrench;
+}
+
+template <class HardwareInterface>
+void CartesianForceController<HardwareInterface>::
+targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
+{
+  m_target_wrench = Base::displayInBaseLink(wrench,Base::m_end_effector_link);
+}
+
+template <class HardwareInterface>
+void CartesianForceController<HardwareInterface>::
+ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
+{
+  m_ft_sensor_wrench = Base::displayInBaseLink(wrench,m_ft_sensor_ref_link);
 }
 
 }

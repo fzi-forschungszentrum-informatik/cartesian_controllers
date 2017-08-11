@@ -40,7 +40,13 @@ class CartesianForceController : public cartesian_controller_base::CartesianCont
 
   private:
     ctrl::Vector6D        computeForceError();
+    void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
+    void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
 
+    ros::Subscriber       m_target_wrench_subscriber;
+    ros::Subscriber       m_ft_sensor_wrench_subscriber;
+    ctrl::Vector6D        m_target_wrench;
+    ctrl::Vector6D        m_ft_sensor_wrench;
     std::string           m_ft_sensor_ref_link;
 };
 
