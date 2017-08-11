@@ -161,8 +161,8 @@ displayInBaseLink(const geometry_msgs::WrenchStamped& wrench, const std::string&
       transform_kdl,
       from);
 
-  // Display in new reference frame
-  wrench_kdl = transform_kdl * wrench_kdl;
+  // Rotate into new reference frame
+  wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;
 
   // Reassign
   ctrl::Vector6D out;
