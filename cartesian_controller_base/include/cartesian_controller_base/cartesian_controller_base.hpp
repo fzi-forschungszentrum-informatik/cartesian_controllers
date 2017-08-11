@@ -91,8 +91,11 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     m_joint_handles.push_back(hw->getHandle(m_joint_names[i]));
   }
 
-  // Initialize solver
+  // Initialize solvers
   m_forward_dynamics_solver.init(robot_chain);
+  KDL::Tree tmp;
+  tmp.addChain(robot_chain,robot_chain.segments[0].getName());
+  m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
 
   // Initialize Cartesian pid controllers
   m_spatial_controller.init(nh);
@@ -154,6 +157,33 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
   m_simulated_joint_motion = m_forward_dynamics_solver.getJointControlCmds(
       period,
       m_cartesian_input);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const geometry_msgs::WrenchStamped& wrench, const std::string& from)
+{
+  // Adjust format
+  KDL::Wrench wrench_kdl;
+  tf::wrenchMsgToKDL(wrench.wrench,wrench_kdl);
+
+  KDL::Frame transform_kdl;
+  m_forward_kinematics_solver->JntToCart(
+      m_forward_dynamics_solver.getPositions(),
+      transform_kdl,
+      from);
+
+  // Display in new reference frame
+  wrench_kdl = transform_kdl * wrench_kdl;
+
+  // Reassign
+  ctrl::Vector6D out;
+  for (int i = 0; i < 6; ++i)
+  {
+    out[i] = wrench_kdl(i);
+  }
+
+  return out;
 }
 
 } // namespace

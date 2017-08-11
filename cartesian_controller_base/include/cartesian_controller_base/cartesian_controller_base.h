@@ -16,10 +16,14 @@
 // ROS
 #include <ros/node_handle.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <geometry_msgs/WrenchStamped.h>
 
 // ros_controls
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
+
+// KDL
+#include <kdl/treefksolverpos_recursive.hpp>
 
 // Project
 #include <cartesian_controller_base/ForwardDynamicsSolver.h>
@@ -52,14 +56,17 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     void computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period);
 
-    std::vector<hardware_interface::JointHandle>  m_joint_handles;
-    std::vector<std::string>                      m_joint_names;
-    ForwardDynamicsSolver                         m_forward_dynamics_solver;
-    trajectory_msgs::JointTrajectoryPoint         m_simulated_joint_motion;
-    SpatialPIDController                          m_spatial_controller;
-    ctrl::Vector6D                                m_cartesian_input;
-    std::string                                   m_robot_base_link;
-    std::string                                   m_end_effector_link;
+    ctrl::Vector6D displayInBaseLink(const geometry_msgs::WrenchStamped& wrench, const std::string& from);
+
+    std::vector<hardware_interface::JointHandle>      m_joint_handles;
+    std::vector<std::string>                          m_joint_names;
+    ForwardDynamicsSolver                             m_forward_dynamics_solver;
+    boost::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
+    trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
+    SpatialPIDController                              m_spatial_controller;
+    ctrl::Vector6D                                    m_cartesian_input;
+    std::string                                       m_robot_base_link;
+    std::string                                       m_end_effector_link;
 };
 
 }
