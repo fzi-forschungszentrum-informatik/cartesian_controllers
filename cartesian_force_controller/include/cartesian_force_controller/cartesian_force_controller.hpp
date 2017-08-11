@@ -43,6 +43,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
   m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
 
+  m_target_wrench.setZero();
+  m_ft_sensor_wrench.setZero();
+
   return true;
 }
 
