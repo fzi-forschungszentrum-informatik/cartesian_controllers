@@ -77,6 +77,12 @@ namespace cartesian_controller_base{
   }
 
 
+  KDL::JntArray ForwardDynamicsSolver::getPositions()
+  {
+    return m_current_positions;
+  }
+
+
   bool ForwardDynamicsSolver::setStartState(
       const std::vector<hardware_interface::JointHandle>& joint_handles)
   {

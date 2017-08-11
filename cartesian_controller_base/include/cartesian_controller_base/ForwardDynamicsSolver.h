@@ -82,6 +82,13 @@ class ForwardDynamicsSolver
      */
     tf::StampedTransform getEndEffectorPose();
 
+    /**
+     * @brief Get the current joint positions of the simulated robot
+     *
+     * @return The current joint positions
+     */
+    KDL::JntArray getPositions();
+
     //! Set initial joint configuration
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
