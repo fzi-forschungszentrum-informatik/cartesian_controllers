@@ -15,6 +15,8 @@
 
 // Project
 #include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cartesian_motion_controller/cartesian_motion_controller.h>
+#include <cartesian_force_controller/cartesian_force_controller.h>
 
 // tf
 #include <tf/transform_listener.h>
@@ -23,7 +25,9 @@ namespace cartesian_compliance_controller
 {
 
 template <class HardwareInterface>
-class CartesianComplianceController : public cartesian_controller_base::CartesianControllerBase<HardwareInterface>
+class CartesianComplianceController
+: public cartesian_motion_controller::CartesianMotionController<HardwareInterface>
+, public cartesian_force_controller::CartesianForceController<HardwareInterface>
 {
   public:
     CartesianComplianceController();
@@ -37,20 +41,12 @@ class CartesianComplianceController : public cartesian_controller_base::Cartesia
     void update(const ros::Time& time, const ros::Duration& period);
 
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
+    typedef cartesian_motion_controller::CartesianMotionController<HardwareInterface> MotionBase;
+    typedef cartesian_force_controller::CartesianForceController<HardwareInterface> ForceBase;
 
   private:
     ctrl::Vector6D        computeComplianceError();
-    void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
-    void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
-
-    tf::TransformListener m_tf_listener;
-    ros::Subscriber       m_target_wrench_subscriber;
-    ros::Subscriber       m_ft_sensor_wrench_subscriber;
-    ctrl::Vector6D        m_target_wrench;
-    ctrl::Vector6D        m_ft_sensor_wrench;
-    std::string           m_ft_sensor_ref_link;
     std::string           m_compliance_ref_link;
-    std::string           m_target_frame;
 };
 
 }

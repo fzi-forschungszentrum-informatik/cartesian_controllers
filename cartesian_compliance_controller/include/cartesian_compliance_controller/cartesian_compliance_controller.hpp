@@ -25,7 +25,11 @@ namespace cartesian_compliance_controller
 template <class HardwareInterface>
 CartesianComplianceController<HardwareInterface>::
 CartesianComplianceController()
-: Base::CartesianControllerBase()
+// Base constructor won't be called in diamond inheritance, so call that
+// explicitly
+: Base::CartesianControllerBase(),
+  MotionBase::CartesianMotionController(),
+  ForceBase::CartesianForceController()
 {
 }
 
@@ -33,26 +37,15 @@ template <class HardwareInterface>
 bool CartesianComplianceController<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  Base::init(hw,nh);
+  // Only one of them will call Base::init(hw,nh);
+  MotionBase::init(hw,nh);
+  ForceBase::init(hw,nh);
 
   if (!nh.getParam("compliance_ref_link",m_compliance_ref_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/compliance_ref_link" << " from parameter server");
   }
-  if (!nh.getParam("ft_sensor_ref_link",m_ft_sensor_ref_link))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/ft_sensor_ref_link" << " from parameter server");
-  }
-  if (!nh.getParam("target_frame",m_target_frame))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
-  }
 
-  m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianComplianceController<HardwareInterface>::targetWrenchCallback,this);
-  m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianComplianceController<HardwareInterface>::ftSensorWrenchCallback,this);
-
-  m_target_wrench.setZero();
-  m_ft_sensor_wrench.setZero();
 
   return true;
 }
@@ -61,14 +54,17 @@ template <class HardwareInterface>
 void CartesianComplianceController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  Base::starting(time);
+  // Only on of them will call Base::starting(time);
+  MotionBase::starting(time);
+  ForceBase::starting(time);
 }
 
 template <class HardwareInterface>
 void CartesianComplianceController<HardwareInterface>::
 stopping(const ros::Time& time)
 {
-  Base::stopping(time);
+  MotionBase::stopping(time);
+  ForceBase::stopping(time);
 }
 
 template <class HardwareInterface>
@@ -99,22 +95,8 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianComplianceController<HardwareInterface>::
 computeComplianceError()
 {
-  ctrl::Vector6D net_force;
+  ctrl::Vector6D net_force(ctrl::Vector6D::Zero());
   return net_force;
-}
-
-template <class HardwareInterface>
-void CartesianComplianceController<HardwareInterface>::
-targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
-{
-  m_target_wrench = Base::displayInBaseLink(wrench,Base::m_end_effector_link);
-}
-
-template <class HardwareInterface>
-void CartesianComplianceController<HardwareInterface>::
-ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
-{
-  m_ft_sensor_wrench = Base::displayInBaseLink(wrench,m_ft_sensor_ref_link);
 }
 
 }

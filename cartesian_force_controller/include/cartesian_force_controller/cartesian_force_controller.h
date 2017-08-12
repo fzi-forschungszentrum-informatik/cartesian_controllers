@@ -23,7 +23,7 @@ namespace cartesian_force_controller
 {
 
 template <class HardwareInterface>
-class CartesianForceController : public cartesian_controller_base::CartesianControllerBase<HardwareInterface>
+class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
 {
   public:
     CartesianForceController();

@@ -23,7 +23,7 @@ namespace cartesian_motion_controller
 {
 
 template <class HardwareInterface>
-class CartesianMotionController : public cartesian_controller_base::CartesianControllerBase<HardwareInterface>
+class CartesianMotionController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
 {
   public:
     CartesianMotionController();
