@@ -40,6 +40,29 @@ my_cartesian_force_controller:
         rot_y: {p: 10.0, i: 0, d: 0}
         rot_z: {p: 10.0, i: 0, d: 0}
 
+my_cartesian_compliance_controller:
+    type: "position_controllers/CartesianComplianceController"
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "tool0"
+    compliance_ref_link: "tool0"
+    target_frame: "my_target"
+    joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+
+    pid_gains:
+        trans_x: {p: 10.0, i: 0, d: 0}
+        trans_y: {p: 10.0, i: 0, d: 0}
+        trans_z: {p: 10.0, i: 0, d: 0}
+        rot_x: {p: 10.0, i: 0, d: 0}
+        rot_y: {p: 10.0, i: 0, d: 0}
+        rot_z: {p: 10.0, i: 0, d: 0}
+
 joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
     joints:
