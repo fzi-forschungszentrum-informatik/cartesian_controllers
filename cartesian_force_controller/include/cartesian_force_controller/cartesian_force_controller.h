@@ -38,8 +38,10 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
 
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
 
-  private:
+  protected:
     ctrl::Vector6D        computeForceError();
+
+  private:
     void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
     void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
 

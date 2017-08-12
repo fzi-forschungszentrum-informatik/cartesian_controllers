@@ -38,9 +38,10 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
 
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
 
-  private:
+  protected:
     ctrl::Vector6D        computeMotionError();
 
+  private:
     tf::TransformListener m_tf_listener;
     std::string           m_target_frame;
 };
