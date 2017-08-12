@@ -80,14 +80,14 @@ class ForwardDynamicsSolver
      * @return The end effector pose with respect to the robot base link. This
      * link is the same as the one given in the init() function.
      */
-    tf::StampedTransform getEndEffectorPose();
+    const tf::StampedTransform& getEndEffectorPose() const;
 
     /**
      * @brief Get the current joint positions of the simulated robot
      *
      * @return The current joint positions
      */
-    KDL::JntArray getPositions();
+    const KDL::JntArray& getPositions() const;
 
     //! Set initial joint configuration
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);

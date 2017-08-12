@@ -71,13 +71,13 @@ namespace cartesian_controller_base{
   }
 
 
-  tf::StampedTransform ForwardDynamicsSolver::getEndEffectorPose()
+  const tf::StampedTransform& ForwardDynamicsSolver::getEndEffectorPose() const
   {
     return m_end_effector_pose;
   }
 
 
-  KDL::JntArray ForwardDynamicsSolver::getPositions()
+  const KDL::JntArray& ForwardDynamicsSolver::getPositions() const
   {
     return m_current_positions;
   }
