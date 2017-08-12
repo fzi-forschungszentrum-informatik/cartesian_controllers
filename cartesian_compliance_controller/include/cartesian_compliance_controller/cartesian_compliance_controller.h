@@ -40,10 +40,16 @@ class CartesianComplianceController : public cartesian_controller_base::Cartesia
 
   private:
     ctrl::Vector6D        computeComplianceError();
+    void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
+    void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
 
     tf::TransformListener m_tf_listener;
-    std::string           m_compliance_ref_link;
+    ros::Subscriber       m_target_wrench_subscriber;
+    ros::Subscriber       m_ft_sensor_wrench_subscriber;
+    ctrl::Vector6D        m_target_wrench;
+    ctrl::Vector6D        m_ft_sensor_wrench;
     std::string           m_ft_sensor_ref_link;
+    std::string           m_compliance_ref_link;
     std::string           m_target_frame;
 };
 
