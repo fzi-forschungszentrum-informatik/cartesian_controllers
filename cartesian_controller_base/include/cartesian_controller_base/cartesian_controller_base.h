@@ -64,6 +64,9 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     ctrl::Vector6D                                    m_cartesian_input;
     std::string                                       m_robot_base_link;
     std::string                                       m_end_effector_link;
+
+    // Against multi initialization in multi inheritance scenarios
+    bool m_already_initialized;;
 };
 
 }

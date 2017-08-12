@@ -54,7 +54,8 @@ template <class HardwareInterface>
 void CartesianComplianceController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  // Only on of them will call Base::starting(time);
+  // Base::starting(time) will get called twice,
+  // but that's fine.
   MotionBase::starting(time);
   ForceBase::starting(time);
 }

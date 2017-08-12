@@ -29,6 +29,7 @@ namespace cartesian_controller_base
 template <class HardwareInterface>
 CartesianControllerBase<HardwareInterface>::
 CartesianControllerBase()
+: m_already_initialized(false)
 {
 }
 
@@ -36,6 +37,11 @@ template <class HardwareInterface>
 bool CartesianControllerBase<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
+  if (m_already_initialized)
+  {
+    return true;
+  }
+
   std::string robot_description;
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
@@ -100,7 +106,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Initialize Cartesian pid controllers
   m_spatial_controller.init(nh);
 
-
+  m_already_initialized = true;
 
   return true;
 }
