@@ -60,7 +60,6 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 stopping(const ros::Time& time)
 {
-  Base::stopping(time);
 }
 
 template <class HardwareInterface>
