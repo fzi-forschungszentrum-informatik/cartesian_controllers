@@ -53,7 +53,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     void computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period);
 
-    ctrl::Vector6D displayInBaseLink(const geometry_msgs::WrenchStamped& wrench, const std::string& from);
+    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
 
     ForwardDynamicsSolver   m_forward_dynamics_solver;
     std::string             m_end_effector_link;

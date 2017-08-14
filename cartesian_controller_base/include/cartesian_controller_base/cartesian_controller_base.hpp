@@ -155,11 +155,14 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
 
 template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
-displayInBaseLink(const geometry_msgs::WrenchStamped& wrench, const std::string& from)
+displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
 {
   // Adjust format
   KDL::Wrench wrench_kdl;
-  tf::wrenchMsgToKDL(wrench.wrench,wrench_kdl);
+  for (int i = 0; i < 6; ++i)
+  {
+    wrench_kdl(i) = vector[i];
+  }
 
   KDL::Frame transform_kdl;
   m_forward_kinematics_solver->JntToCart(

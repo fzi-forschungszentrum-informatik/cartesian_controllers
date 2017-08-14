@@ -90,21 +90,33 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
-  return m_target_wrench - m_ft_sensor_wrench;
+  // Target - current in base orientation
+  return Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
+         - Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_ref_link);
 }
 
 template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
 {
-  m_target_wrench = Base::displayInBaseLink(wrench,Base::m_end_effector_link);
+  m_target_wrench[0] = wrench.wrench.force.x;
+  m_target_wrench[1] = wrench.wrench.force.y;
+  m_target_wrench[2] = wrench.wrench.force.z;
+  m_target_wrench[3] = wrench.wrench.torque.x;
+  m_target_wrench[4] = wrench.wrench.torque.y;
+  m_target_wrench[5] = wrench.wrench.torque.z;
 }
 
 template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
 {
-  m_ft_sensor_wrench = Base::displayInBaseLink(wrench,m_ft_sensor_ref_link);
+  m_ft_sensor_wrench[0] = wrench.wrench.force.x;
+  m_ft_sensor_wrench[1] = wrench.wrench.force.y;
+  m_ft_sensor_wrench[2] = wrench.wrench.force.z;
+  m_ft_sensor_wrench[3] = wrench.wrench.torque.x;
+  m_ft_sensor_wrench[4] = wrench.wrench.torque.y;
+  m_ft_sensor_wrench[5] = wrench.wrench.torque.z;
 }
 
 }
