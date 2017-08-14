@@ -19,11 +19,19 @@ my_controller_name:
     - joint_name_5
     - joint_name_6
 
+    stiffness:  # w.r.t. compliance_ref_link
+        trans_x: 1000
+        trans_y: 1000
+        trans_z: 1000
+        rot_x: 100
+        rot_y: 100
+        rot_z: 100
+
     pid_gains:
-        trans_x: {p: 50.0, i: 0, d: 0}
-        trans_y: {p: 50.0, i: 0, d: 0}
-        trans_z: {p: 50.0, i: 0, d: 0}
-        rot_x: {p: 50.0, i: 0, d: 0}
-        rot_y: {p: 50.0, i: 0, d: 0}
-        rot_z: {p: 50.0, i: 0, d: 0}
+        trans_x: {p: 0.01, i: 0, d: 0}
+        trans_y: {p: 0.01, i: 0, d: 0}
+        trans_z: {p: 0.01, i: 0, d: 0}
+        rot_x: {p: 0.01, i: 0, d: 0}
+        rot_y: {p: 0.01, i: 0, d: 0}
+        rot_z: {p: 0.01, i: 0, d: 0}
 ```
