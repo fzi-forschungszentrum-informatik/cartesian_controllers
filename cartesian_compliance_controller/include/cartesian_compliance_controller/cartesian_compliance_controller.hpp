@@ -45,6 +45,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   if (!nh.getParam("compliance_ref_link",m_compliance_ref_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/compliance_ref_link" << " from parameter server");
+    return false;
   }
 
   std::map<std::string, double> stiffness;
