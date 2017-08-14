@@ -38,6 +38,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   if (!nh.getParam("ft_sensor_ref_link",m_ft_sensor_ref_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/ft_sensor_ref_link" << " from parameter server");
+    return false;
   }
 
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
