@@ -51,20 +51,24 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   if (!nh.getParam("/robot_description",robot_description))
   {
     ROS_ERROR("Failed to load '/robot_description' from parameter server");
+    return false;
   }
   if (!nh.getParam("robot_base_link",m_robot_base_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
+    return false;
   }
   if (!nh.getParam("end_effector_link",m_end_effector_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
+    return false;
   }
 
   // Build a kinematic chain of the robot
   if (!robot_model.initString(robot_description))
   {
     ROS_ERROR("Failed to parse urdf model from 'robot_description'");
+    return false;
   }
   if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
   {
