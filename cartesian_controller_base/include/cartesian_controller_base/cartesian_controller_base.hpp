@@ -183,6 +183,39 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
   return out;
 }
 
+template <class HardwareInterface>
+ctrl::Matrix6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
+{
+  // Get rotation to base
+  KDL::Frame R_kdl;
+  m_forward_kinematics_solver->JntToCart(
+      m_forward_dynamics_solver.getPositions(),
+      R_kdl,
+      from);
+
+  // Adjust format
+  ctrl::Matrix3D R;
+  R <<
+      R_kdl.M.data[0],
+      R_kdl.M.data[1],
+      R_kdl.M.data[2],
+      R_kdl.M.data[3],
+      R_kdl.M.data[4],
+      R_kdl.M.data[5],
+      R_kdl.M.data[6],
+      R_kdl.M.data[7],
+      R_kdl.M.data[8];
+
+  // Treat diagonal blocks as individual 2nd rank tensors.
+  // Display in base frame.
+  ctrl::Matrix6D tmp = ctrl::Matrix6D::Zero();
+  tmp.topLeftCorner<3,3>() = R * tensor.topLeftCorner<3,3>() * R.transpose();
+  tmp.bottomRightCorner<3,3>() = R * tensor.bottomRightCorner<3,3>() * R.transpose();
+
+  return tmp;
+}
+
 } // namespace
 
 #endif
