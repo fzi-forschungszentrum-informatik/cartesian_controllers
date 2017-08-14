@@ -18,6 +18,7 @@
 
 // Other
 #include <boost/algorithm/clamp.hpp>
+#include <map>
 
 namespace cartesian_compliance_controller
 {
@@ -46,13 +47,21 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/compliance_ref_link" << " from parameter server");
   }
 
+  std::map<std::string, double> stiffness;
+  if (!nh.getParam("stiffness",stiffness))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/stiffness" << " from parameter server");
+    return false;
+  }
+
+  // Initialize stiffness
   ctrl::Vector6D tmp;
-  tmp[0] = 1;
-  tmp[1] = 1;
-  tmp[2] = 10;
-  tmp[3] = 1;
-  tmp[4] = 1;
-  tmp[5] = 1;
+  tmp[0] = stiffness["trans_x"];
+  tmp[1] = stiffness["trans_y"];
+  tmp[2] = stiffness["trans_z"];
+  tmp[3] = stiffness["rot_x"];
+  tmp[4] = stiffness["rot_y"];
+  tmp[5] = stiffness["rot_z"];
   m_stiffness = tmp.asDiagonal();
 
   return true;
