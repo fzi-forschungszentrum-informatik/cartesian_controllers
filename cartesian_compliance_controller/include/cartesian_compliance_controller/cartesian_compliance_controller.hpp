@@ -46,6 +46,14 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/compliance_ref_link" << " from parameter server");
   }
 
+  ctrl::Vector6D tmp;
+  tmp[0] = 1;
+  tmp[1] = 1;
+  tmp[2] = 10;
+  tmp[3] = 1;
+  tmp[4] = 1;
+  tmp[5] = 1;
+  m_stiffness = tmp.asDiagonal();
 
   return true;
 }
@@ -96,7 +104,14 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianComplianceController<HardwareInterface>::
 computeComplianceError()
 {
-  ctrl::Vector6D net_force(ctrl::Vector6D::Zero());
+  ctrl::Vector6D net_force =
+
+    // Spring force in base orientation
+    Base::displayInBaseLink(m_stiffness,m_compliance_ref_link) * MotionBase::computeMotionError()
+
+    // Sensor and target force in base orientation
+    + ForceBase::computeForceError();
+
   return net_force;
 }
 
