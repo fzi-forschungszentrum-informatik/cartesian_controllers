@@ -38,6 +38,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   if (!nh.getParam("target_frame",m_target_frame))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
+    return false;
   }
 
   return true;
