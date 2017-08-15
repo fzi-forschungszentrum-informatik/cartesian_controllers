@@ -1,7 +1,7 @@
 <library path="lib/libjoint_to_cartesian_controller">
 
   <class name="cartesian_controllers/JointTrajectoryController"
-         type="joint_to_cartesian_controllers::JointToCartesianController"
+         type="cartesian_controllers::JointTrajectoryController"
          base_class_type="controller_interface::ControllerBase">
     <description>
             Convert joint commands into Cartesian end-effector poses.
