@@ -71,6 +71,9 @@ my_cartesian_compliance_controller:
         rot_y: {p: 0.01, i: 0, d: 0}
         rot_z: {p: 0.01, i: 0, d: 0}
 
+my_joint_to_cartesian_controller:
+    type: "cartesian_controllers/JointTrajectoryController"
+
 joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
     joints:
