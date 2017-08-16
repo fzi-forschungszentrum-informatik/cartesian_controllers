@@ -9,8 +9,10 @@ project(joint_to_cartesian_controller)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  cartesian_controller_base
   controller_interface
   kdl_parser
+  tf
 )
 
 ## System dependencies are found with CMake's conventions

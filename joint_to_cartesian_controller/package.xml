@@ -41,10 +41,12 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>cartesian_controller_base</build_depend>
   <build_depend>controller_interface</build_depend>
   <build_depend>kdl_parser</build_depend>
 
   <run_depend>roscpp</run_depend>
+  <run_depend>cartesian_controller_base</run_depend>
   <run_depend>controller_interface</run_depend>
   <run_depend>kdl_parser</run_depend>
 

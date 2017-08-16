@@ -15,10 +15,20 @@
 
 // ROS
 #include <ros/ros.h>
+#include <control_msgs/JointTrajectoryControllerState.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 // ros_controls
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_state_interface.h>
+
+// KDL
+#include <kdl/chain.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
+
+// tf
+#include <tf/tf.h>
+#include <tf/transform_broadcaster.h>
 
 namespace joint_to_cartesian_controller
 {
@@ -36,6 +46,26 @@ class JointToCartesianController
     void stopping(const ros::Time& time);
 
     void update(const ros::Time& time, const ros::Duration& period);
+
+  private:
+    std::string                m_end_effector_link;
+    std::string                m_robot_base_link;
+    std::string                m_target_name;
+    KDL::JntArray              m_positions;
+    KDL::JntArray              m_velocities;
+    std::vector<std::string>   m_joint_names;
+    tf::TransformBroadcaster   m_tf_broadcaster;
+    ros::Publisher             m_controller_state_publisher;
+    ros::Subscriber            m_controller_command_subscriber;
+
+
+    std::vector<
+      hardware_interface::JointStateHandle>   m_joint_handles;
+
+    boost::shared_ptr<
+      KDL::ChainFkSolverPos_recursive>        m_fk_solver;
+
+    void controllerCommandCallback(const trajectory_msgs::JointTrajectory& cmd);
 };
 
 }

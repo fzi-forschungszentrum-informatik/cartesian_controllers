@@ -73,6 +73,16 @@ my_cartesian_compliance_controller:
 
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointTrajectoryController"
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    published_target_name: "my_target"
+    joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
 
 joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
