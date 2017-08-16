@@ -33,19 +33,19 @@
 namespace cartesian_controllers
 {
   /**
-   * @brief Turn joint positions into end-effector pose
+   * @brief Connect joint-based controllers and transform their commands to Cartesian target poses
    *
-   * The name JointTrajectoryController is somewhat misleading for this
-   * controller, since it only turns joint positions into end-effector poses
-   * without interpolation. The only reason for this is, that having the
-   * substring JointTrajectoryController in the loaded controller type assures
-   * compatibility with the rqt joint trajectory controller plugin, which
-   * checks for this substring when looking for controllers.
+   * This controller handles an internal controller manager, which can load
+   * standard ros_controllers. The control commands from these controllers are
+   * turned into Cartesian poses with forward kinematics, and can be used by
+   * the Cartesian_controllers. An application of this controller is to
+   * provide an easy interface to the rqt_joint_trajectory_controller plugin an
+   * MoveIt!.
    */
-  typedef joint_to_cartesian_controller::JointToCartesianController JointTrajectoryController;
+  typedef joint_to_cartesian_controller::JointToCartesianController JointControllerAdapter;
 }
 
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::JointTrajectoryController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(cartesian_controllers::JointControllerAdapter, controller_interface::ControllerBase)
 
 
 

@@ -72,7 +72,7 @@ my_cartesian_compliance_controller:
         rot_z: {p: 0.01, i: 0, d: 0}
 
 my_joint_to_cartesian_controller:
-    type: "cartesian_controllers/JointTrajectoryController"
+    type: "cartesian_controllers/JointControllerAdapter"
     end_effector_link: "tool0"
     robot_base_link: "base_link"
     published_target_name: "my_target"
