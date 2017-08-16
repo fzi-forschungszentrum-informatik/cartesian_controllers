@@ -130,7 +130,7 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   m_velocities.data = ctrl::VectorND::Zero(m_joint_handles.size());
 
   // Initialize controller adapter and according manager
-  m_controller_adapter.init(m_joint_names,nh);
+  m_controller_adapter.init(m_joint_handles,nh);
   m_controller_manager.reset(new controller_manager::ControllerManager(&m_controller_adapter, nh));
 
   // Initialize forward kinematics solver
@@ -161,6 +161,16 @@ void JointToCartesianController::stopping(const ros::Time& time)
 
 void JointToCartesianController::update(const ros::Time& time, const ros::Duration& period)
 {
+  // Note: The connected joint-based controller gets the feedback directly from
+  // the joint state handles of this joint_to_cartesian_controller. So,
+  // there's no need for a read() function.
+
+  // Update connected joint controller
+  m_controller_manager->update(time,period);
+
+  // Get commanded positions
+  m_controller_adapter.write(m_positions);
+
   // Solve forward kinematics
   KDL::Frame frame;
   m_fk_solver->JntToCart(m_positions,frame);
