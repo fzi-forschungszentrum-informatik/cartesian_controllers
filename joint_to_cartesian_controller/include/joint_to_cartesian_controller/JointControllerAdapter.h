@@ -59,9 +59,6 @@ class JointControllerAdapter : public hardware_interface::RobotHW
     std::vector<joint_limits_interface::PositionJointSoftLimitsHandle>  m_limits_handles;
 
     std::vector<double> m_cmd;
-    std::vector<double> m_pos;
-    std::vector<double> m_vel;
-    std::vector<double> m_eff;
 };
 
 } // end namespace
