@@ -116,6 +116,16 @@ my_joint_to_cartesian_controller:
         has_acceleration_limits: true
         max_acceleration: 10.0
 
+my_joint_to_cartesian_controller/joint_trajectory_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+
 joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
     joints:

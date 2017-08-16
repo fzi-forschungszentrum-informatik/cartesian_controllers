@@ -41,6 +41,11 @@
         <!-- Spawn controllers. The controller manager is loaded separately through a gazebo plugin -->
         <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_force_controller my_cartesian_compliance_controller my_joint_to_cartesian_controller joint_trajectory_controller" />
 
+        <!-- Spawn joint controller for testing my_joint_to_cartesian_controller  -->
+        <group ns="my_joint_to_cartesian_controller" >
+                <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped joint_trajectory_controller" />
+        </group>
+
         <!-- Testing tool for tf publishing -->
         <node pkg="tf_publisher_gui" type="tf_publisher_gui" name="tf_publisher_gui" output="screen">
                 <param name="parent_frame" value="testing_ref" />
