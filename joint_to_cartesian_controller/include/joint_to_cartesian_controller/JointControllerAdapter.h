@@ -23,6 +23,9 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 
+// KDL
+#include <kdl/jntarray.hpp>
+
 // Other
 #include <vector>
 
@@ -36,11 +39,9 @@ class JointControllerAdapter : public hardware_interface::RobotHW
     JointControllerAdapter();
     ~JointControllerAdapter();
 
-    bool init(const std::vector<std::string>& joint_names, ros::NodeHandle& nh);
+    bool init(const std::vector<hardware_interface::JointStateHandle>& handles, ros::NodeHandle& nh);
 
-    void read();
-
-    void write();
+    void write(KDL::JntArray& positions);
 
   private:
     //! Number of actuated joints
@@ -54,7 +55,6 @@ class JointControllerAdapter : public hardware_interface::RobotHW
 
     joint_limits_interface::PositionJointSoftLimitsInterface m_limits_interface;
 
-    std::vector<hardware_interface::JointStateHandle>                   m_joint_state_handles;
     std::vector<hardware_interface::JointHandle>                        m_joint_handles;
     std::vector<joint_limits_interface::PositionJointSoftLimitsHandle>  m_limits_handles;
 

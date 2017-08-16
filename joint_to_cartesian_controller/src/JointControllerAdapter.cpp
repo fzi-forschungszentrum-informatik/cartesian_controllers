@@ -26,26 +26,22 @@ JointControllerAdapter::JointControllerAdapter()
 {
 }
 
-bool JointControllerAdapter::init(const std::vector<std::string>& joint_names, ros::NodeHandle& nh)
+bool JointControllerAdapter::init(const std::vector<hardware_interface::JointStateHandle>& state_handles, ros::NodeHandle& nh)
 {
-  m_joint_names = joint_names;
+  for (size_t i = 0; i < state_handles.size(); ++i)
+  {
+    m_joint_names.push_back(state_handles[i].getName());
+  }
   m_number_joints = m_joint_names.size();
   m_cmd.resize(m_number_joints);
   m_pos.resize(m_number_joints);
   m_vel.resize(m_number_joints);
   m_eff.resize(m_number_joints);
 
-  // Initialize and register handles to the sensors
+  // Register external state_handles
   for (int i = 0; i < m_number_joints; ++i)
   {
-    m_joint_state_handles.push_back(
-        hardware_interface::JointStateHandle(
-          m_joint_names[i],
-          &m_pos[i],
-          &m_vel[i],
-          &m_eff[i]));
-
-    m_state_interface.registerHandle(m_joint_state_handles[i]);
+    m_state_interface.registerHandle(state_handles[i]);
   }
   registerInterface(&m_state_interface);
 
@@ -96,12 +92,18 @@ JointControllerAdapter::~JointControllerAdapter()
 {
 }
 
-void JointControllerAdapter::read()
+void JointControllerAdapter::write(KDL::JntArray& positions)
 {
-}
+  if (positions.data.size() != m_cmd.size())
+  {
+    throw std::runtime_error("Joint number mismatch!");
+  }
 
-void JointControllerAdapter::write()
-{
+  // Fill positions for forward kinematics
+  for (size_t i = 0; i < m_cmd.size(); ++i)
+  {
+    positions(i) = m_cmd[i];
+  }
 }
 
 } // end namespace
