@@ -36,22 +36,25 @@
         <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" args="joint_state_controller" respawn="false" output="screen"/>
 
         <!-- Load controller configuration -->
-        <rosparam file="$(find cartesian_controller_test)/controller.yaml" command="load" />
+        <rosparam file="$(find cartesian_controller_test)/controller.yaml" command="load"></rosparam>
 
         <!-- Spawn controllers. The controller manager is loaded separately through a gazebo plugin -->
         <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_force_controller my_cartesian_compliance_controller my_joint_to_cartesian_controller joint_trajectory_controller" />
 
         <!-- Spawn joint controller for testing my_joint_to_cartesian_controller  -->
+        <!-- Note: This controller should be loaded and started -->
         <group ns="my_joint_to_cartesian_controller" >
-                <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped joint_trajectory_controller" />
+                <node name="controller_spawner" pkg="controller_manager" type="spawner" args="joint_trajectory_controller" />
         </group>
 
         <!-- Testing tool for tf publishing -->
+        <!--
         <node pkg="tf_publisher_gui" type="tf_publisher_gui" name="tf_publisher_gui" output="screen">
                 <param name="parent_frame" value="testing_ref" />
                 <param name="child_frame" value="my_target" />
                 <param name="rate" value="100.0" />
         </node>
+        -->
 
         <!-- Visualization -->
         <arg name="my_rviz" value="-d $(find cartesian_controller_test)/test.rviz" />
