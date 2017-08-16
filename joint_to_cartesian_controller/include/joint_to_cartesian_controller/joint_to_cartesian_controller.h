@@ -18,18 +18,18 @@
 
 // ros_controls
 #include <controller_interface/controller.h>
-#include <hardware_interface/joint_command_interface.h>
+#include <hardware_interface/joint_state_interface.h>
 
 namespace joint_to_cartesian_controller
 {
 
 class JointToCartesianController
-  : public controller_interface::Controller<hardware_interface::PositionJointInterface>
+  : public controller_interface::Controller<hardware_interface::JointStateInterface>
 {
   public:
     JointToCartesianController();
 
-    bool init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& nh);
+    bool init(hardware_interface::JointStateInterface* hw, ros::NodeHandle& nh);
 
     void starting(const ros::Time& time);
 

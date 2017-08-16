@@ -45,7 +45,7 @@ JointToCartesianController::JointToCartesianController()
 {
 }
 
-bool JointToCartesianController::init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& nh)
+bool JointToCartesianController::init(hardware_interface::JointStateInterface* hw, ros::NodeHandle& nh)
 {
   return true;
 }
