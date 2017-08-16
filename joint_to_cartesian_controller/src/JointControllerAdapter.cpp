@@ -35,6 +35,12 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   m_number_joints = m_joint_names.size();
   m_cmd.resize(m_number_joints);
 
+  // Start where you are
+  for (size_t i = 0; i < m_number_joints; ++i)
+  {
+    m_cmd[i] = state_handles[i].getPosition();
+  }
+
   // Register external state_handles
   for (int i = 0; i < m_number_joints; ++i)
   {
