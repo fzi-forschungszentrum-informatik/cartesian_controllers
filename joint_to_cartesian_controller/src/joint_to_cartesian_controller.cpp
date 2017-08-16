@@ -129,6 +129,10 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   m_positions.data = ctrl::VectorND::Zero(m_joint_handles.size());
   m_velocities.data = ctrl::VectorND::Zero(m_joint_handles.size());
 
+  // Initialize controller adapter and according manager
+  m_controller_adapter.init(m_joint_names,nh);
+  m_controller_manager.reset(new controller_manager::ControllerManager(&m_controller_adapter, nh));
+
   // Initialize forward kinematics solver
   m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(robot_chain));
 

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_interface
   kdl_parser
   tf
+  controller_manager
 )
 
 ## System dependencies are found with CMake's conventions
@@ -125,6 +126,7 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/joint_to_cartesian_controller.cpp
+  src/JointControllerAdapter.cpp
 )
 
 ## Add cmake target dependencies of the library

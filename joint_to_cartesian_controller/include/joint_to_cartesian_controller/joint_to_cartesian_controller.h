@@ -13,6 +13,9 @@
 #ifndef JOINT_TO_CARTESIAN_CONTROLLER_H_INCLUDED
 #define JOINT_TO_CARTESIAN_CONTROLLER_H_INCLUDED
 
+// Project
+#include <joint_to_cartesian_controller/JointControllerAdapter.h>
+
 // ROS
 #include <ros/ros.h>
 #include <control_msgs/JointTrajectoryControllerState.h>
@@ -21,6 +24,7 @@
 // ros_controls
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_state_interface.h>
+#include <controller_manager/controller_manager.h>
 
 // KDL
 #include <kdl/chain.hpp>
@@ -58,12 +62,17 @@ class JointToCartesianController
     ros::Publisher             m_controller_state_publisher;
     ros::Subscriber            m_controller_command_subscriber;
 
+    JointControllerAdapter     m_controller_adapter;
 
     std::vector<
       hardware_interface::JointStateHandle>   m_joint_handles;
 
     boost::shared_ptr<
       KDL::ChainFkSolverPos_recursive>        m_fk_solver;
+
+    boost::shared_ptr<
+      controller_manager::ControllerManager>  m_controller_manager;
+
 
     void controllerCommandCallback(const trajectory_msgs::JointTrajectory& cmd);
 };
