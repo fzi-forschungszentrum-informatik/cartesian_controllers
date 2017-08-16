@@ -17,9 +17,6 @@
 #include <joint_to_cartesian_controller/JointControllerAdapter.h>
 
 // ROS
-#include <ros/ros.h>
-#include <control_msgs/JointTrajectoryControllerState.h>
-#include <trajectory_msgs/JointTrajectory.h>
 
 // ros_controls
 #include <controller_interface/controller.h>
@@ -59,8 +56,6 @@ class JointToCartesianController
     KDL::JntArray              m_velocities;
     std::vector<std::string>   m_joint_names;
     tf::TransformBroadcaster   m_tf_broadcaster;
-    ros::Publisher             m_controller_state_publisher;
-    ros::Subscriber            m_controller_command_subscriber;
 
     JointControllerAdapter     m_controller_adapter;
 
@@ -73,8 +68,6 @@ class JointToCartesianController
     boost::shared_ptr<
       controller_manager::ControllerManager>  m_controller_manager;
 
-
-    void controllerCommandCallback(const trajectory_msgs::JointTrajectory& cmd);
 };
 
 }

@@ -136,13 +136,6 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   // Initialize forward kinematics solver
   m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(robot_chain));
 
-  // Initialize controller topics
-  m_controller_state_publisher =
-    nh.advertise<control_msgs::JointTrajectoryControllerState>("state",10);
-
-  m_controller_command_subscriber =
-    nh.subscribe("command",3,&JointToCartesianController::controllerCommandCallback,this);
-
   return true;
 }
 
@@ -185,47 +178,6 @@ void JointToCartesianController::update(const ros::Time& time, const ros::Durati
         m_robot_base_link,
         m_target_name));
 
-  // Publish controller state
-  control_msgs::JointTrajectoryControllerState state;
-  state.header.stamp = ros::Time::now();
-  for (size_t i = 0; i < m_joint_names.size(); ++i)
-  {
-    state.joint_names.push_back(m_joint_names[i]);
-
-    // Mimic ideal system response
-    state.desired.positions.push_back(m_positions(i));
-    state.actual.positions.push_back(m_positions(i));
-    state.error.positions.push_back(0.0);
-
-    state.desired.velocities.push_back(m_velocities(i));
-    state.actual.velocities.push_back(m_velocities(i));
-    state.error.velocities.push_back(0.0);
-  }
-
-  m_controller_state_publisher.publish(state);
-}
-
-void JointToCartesianController::controllerCommandCallback(
-    const trajectory_msgs::JointTrajectory& cmd)
-{
-  // Only copy target commands of the first point
-  std::map <std::string, double> name_pos_map;
-  for (size_t i = 0; i < cmd.joint_names.size(); ++i)
-  {
-    name_pos_map[cmd.joint_names[i]] = cmd.points[0].positions[i];
-  }
-  std::map <std::string, double> name_vel_map;
-  for (size_t i = 0; i < cmd.joint_names.size(); ++i)
-  {
-    name_vel_map[cmd.joint_names[i]] = cmd.points[0].velocities[i];
-  }
-
-  // Bring joint order in sequence
-  for (size_t i = 0; i < m_joint_names.size(); ++i)
-  {
-    m_positions(i) = name_pos_map[m_joint_names[i]];
-    m_velocities(i) = name_vel_map[m_joint_names[i]];
-  }
 }
 
 }
