@@ -20,12 +20,12 @@ my_cartesian_motion_controller:
     - joint_name_6
 
     pid_gains:
-       rot_x: {p: 50.0, i: 0, d: 0}
-       rot_y: {p: 50.0, i: 0, d: 0}
-       rot_z: {p: 50.0, i: 0, d: 0}
        trans_x: {p: 50.0, i: 0, d: 0}
        trans_y: {p: 50.0, i: 0, d: 0}
        trans_z: {p: 50.0, i: 0, d: 0}
+       rot_x: {p: 10.0, i: 0, d: 0}
+       rot_y: {p: 10.0, i: 0, d: 0}
+       rot_z: {p: 10.0, i: 0, d: 0}
 ```
 
 This configuration must be loaded to the ros parameter server and is accessed by the controller manager when looking for configuration for the loaded controller *my_cartesian_motion_controller*.
