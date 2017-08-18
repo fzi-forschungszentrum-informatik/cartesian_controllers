@@ -16,6 +16,7 @@
 // other
 #include <map>
 #include <sstream>
+#include <boost/algorithm/clamp.hpp>
 
 // DEBUG
 
@@ -47,6 +48,13 @@ namespace cartesian_controller_base{
 
     // Integrate twice, starting with zero motion
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
+
+    // Make sure positions stay in allowed margins
+    for (int i = 0; i < m_number_joints; ++i)
+    {
+      m_current_positions(i) = boost::algorithm::clamp(
+          m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
+    }
 
     // Apply results
     trajectory_msgs::JointTrajectoryPoint control_cmd;
@@ -104,7 +112,10 @@ namespace cartesian_controller_base{
   }
 
 
-  bool ForwardDynamicsSolver::init(const KDL::Chain& chain)
+  bool ForwardDynamicsSolver::init(
+      const KDL::Chain& chain,
+      const KDL::JntArray& upper_pos_limits,
+      const KDL::JntArray& lower_pos_limits)
   {
     if (!buildGenericModel(chain))
     {
@@ -118,6 +129,8 @@ namespace cartesian_controller_base{
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
+    m_upper_pos_limits           = upper_pos_limits;
+    m_lower_pos_limits           = lower_pos_limits;
 
     // Forward kinematics
     m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(chain));

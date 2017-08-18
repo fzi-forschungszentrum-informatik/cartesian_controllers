@@ -19,6 +19,7 @@
 // KDL
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
+#include <kdl/jntarray.hpp>
 
 // URDF
 #include <urdf/model.h>
@@ -95,6 +96,22 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     throw std::runtime_error(error);
   }
 
+  // Parse joint limits
+  KDL::JntArray upper_pos_limits(m_joint_names.size());
+  KDL::JntArray lower_pos_limits(m_joint_names.size());
+  for (size_t i = 0; i < m_joint_names.size(); ++i)
+  {
+    if (!robot_model.getJoint(m_joint_names[i]))
+    {
+      const std::string error = ""
+        "Joint " + m_joint_names[i] + " does not appear in /robot_description";
+      ROS_ERROR_STREAM(error);
+      throw std::runtime_error(error);
+    }
+    upper_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->upper;
+    lower_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->lower;
+  }
+
   // Get the joint handles to use in the control loop
   for (size_t i = 0; i < m_joint_names.size(); ++i)
   {
@@ -102,7 +119,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Initialize solvers
-  m_forward_dynamics_solver.init(robot_chain);
+  m_forward_dynamics_solver.init(robot_chain,upper_pos_limits,lower_pos_limits);
   KDL::Tree tmp("not_relevant");
   tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));

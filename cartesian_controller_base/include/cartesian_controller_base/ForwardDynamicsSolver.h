@@ -93,7 +93,9 @@ class ForwardDynamicsSolver
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
     //! Initialize
-    bool init(const KDL::Chain& chain);
+    bool init(const KDL::Chain& chain,
+              const KDL::JntArray& upper_pos_limits,
+              const KDL::JntArray& lower_pos_limits);
 
     //! Call this function during activation
     void updateKinematics();
@@ -114,6 +116,10 @@ class ForwardDynamicsSolver
     KDL::JntArray m_current_velocities;
     KDL::JntArray m_current_accelerations;
     KDL::JntArray m_last_positions;
+
+    // Joint limits
+    KDL::JntArray m_upper_pos_limits;
+    KDL::JntArray m_lower_pos_limits;
 
     // Forward kinematics
     boost::shared_ptr<
