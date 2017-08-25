@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_interface
   kdl_parser
   trajectory_msgs
+  control_toolbox
 )
 
 ## System dependencies are found with CMake's conventions
