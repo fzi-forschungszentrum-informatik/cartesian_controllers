@@ -107,7 +107,7 @@ update(const ros::Time& time, const ros::Duration& period)
   }
 
   // Write final commands to the hardware interface
-  Base::writeJointControlCmds();
+  Base::writeJointControlCmds(period);
 }
 
 template <class HardwareInterface>

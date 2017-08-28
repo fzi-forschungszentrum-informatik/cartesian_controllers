@@ -49,7 +49,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     virtual void starting(const ros::Time& time);
 
   protected:
-    void writeJointControlCmds();
+    void writeJointControlCmds(const ros::Duration& period);
 
     void computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period);
 
@@ -65,6 +65,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::vector<std::string>                          m_joint_names;
     boost::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
+    trajectory_msgs::JointTrajectoryPoint             m_last_simulated_joint_motion;
     SpatialPIDController                              m_spatial_controller;
     ctrl::Vector6D                                    m_cartesian_input;
 
