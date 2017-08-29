@@ -43,11 +43,13 @@ namespace cartesian_controller_base{
     // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
     m_current_accelerations.data = m_jnt_space_inertia.data.inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
-    // Integrate once, starting with zero motion
-    m_current_velocities.data = 0.5 * m_current_accelerations.data * period.toSec();
+    // Integrate once
+    m_current_velocities.data =
+        m_last_velocities.data + 0.5 * (m_last_accelerations.data + m_current_accelerations.data) * period.toSec();
 
-    // Integrate twice, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
+    // Integrate twice
+    m_current_positions.data =
+        m_last_positions.data + 0.5 * (m_last_velocities.data + m_current_velocities.data) * period.toSec();
 
     // Make sure positions stay in allowed margins
     for (int i = 0; i < m_number_joints; ++i)
@@ -98,9 +100,11 @@ namespace cartesian_controller_base{
     for (int i = 0; i < joint_handles.size(); ++i)
     {
       m_current_positions(i)      = joint_handles[i].getPosition();
-      m_last_positions(i)         = m_current_positions(i);
       m_current_velocities(i)     = 0.0;
       m_current_accelerations(i)  = 0.0;
+      m_last_positions(i)         = m_current_positions(i);
+      m_last_velocities(i)        = 0.0;
+      m_last_accelerations(i)     = 0.0;
 
 
     }
@@ -126,9 +130,11 @@ namespace cartesian_controller_base{
     // Initialize
     m_number_joints              = m_chain.getNrOfJoints();
     m_current_positions.data     = ctrl::VectorND::Zero(m_number_joints);
-    m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
+    m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
+    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
+    m_last_accelerations.data    = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
 
