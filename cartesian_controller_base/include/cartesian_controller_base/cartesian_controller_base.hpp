@@ -138,18 +138,11 @@ starting(const ros::Time& time)
 {
   // Copy joint state to internal simulation
   m_forward_dynamics_solver.setStartState(m_joint_handles);
-
-  // Make sure to start where we are
-  for (size_t i = 0; i < m_joint_handles.size(); ++i)
-  {
-    m_simulated_joint_motion.positions.push_back(m_joint_handles[i].getPosition());
-    m_last_simulated_joint_motion.positions.push_back(m_joint_handles[i].getPosition());
-  }
 }
 
 template <>
 void CartesianControllerBase<hardware_interface::PositionJointInterface>::
-writeJointControlCmds(const ros::Duration&)
+writeJointControlCmds()
 {
   // Take position commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
@@ -160,19 +153,13 @@ writeJointControlCmds(const ros::Duration&)
 
 template <>
 void CartesianControllerBase<hardware_interface::VelocityJointInterface>::
-writeJointControlCmds(const ros::Duration& period)
+writeJointControlCmds()
 {
-  // Compute velocity so that the system would reach the simulated joint
-  // positions in the given period.
+  // Take velocity commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
-    m_joint_handles[i].setCommand(
-        (m_simulated_joint_motion.positions[i] - m_last_simulated_joint_motion.positions[i]) / period.toSec()
-        );
+    m_joint_handles[i].setCommand(m_simulated_joint_motion.velocities[i]);
   }
-
-  // Update for next cycle
-  m_last_simulated_joint_motion = m_simulated_joint_motion;
 }
 
 template <class HardwareInterface>
