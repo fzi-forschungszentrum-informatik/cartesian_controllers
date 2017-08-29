@@ -142,8 +142,8 @@ starting(const ros::Time& time)
   // Make sure to start where we are
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
-    m_simulated_joint_motion.positions[i] = m_joint_handles[i].getPosition();
-    m_last_simulated_joint_motion.positions[i] = m_joint_handles[i].getPosition();
+    m_simulated_joint_motion.positions.push_back(m_joint_handles[i].getPosition());
+    m_last_simulated_joint_motion.positions.push_back(m_joint_handles[i].getPosition());
   }
 }
 
