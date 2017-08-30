@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   trajectory_msgs
   control_toolbox
+  eigen_conversions
 )
 
 ## System dependencies are found with CMake's conventions
