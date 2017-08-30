@@ -34,6 +34,7 @@
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
+#include <kdl/chainfksolvervel_recursive.hpp>
 
 namespace cartesian_controller_base{
 
@@ -83,6 +84,17 @@ class ForwardDynamicsSolver
     const tf::StampedTransform& getEndEffectorPose() const;
 
     /**
+     * @brief Get the current end effector velocity of the simulated robot
+     *
+     * The last link in the chain from the init() function is taken as end
+     * effector.
+     *
+     * @return The end effector vel with respect to the robot base link. The
+     * order is first translation, then rotation.
+     */
+    const ctrl::Vector6D& getEndEffectorVel() const;
+
+    /**
      * @brief Get the current joint positions of the simulated robot
      *
      * @return The current joint positions
@@ -126,7 +138,10 @@ class ForwardDynamicsSolver
     // Forward kinematics
     boost::shared_ptr<
       KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
+    boost::shared_ptr<
+      KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
     tf::StampedTransform                m_end_effector_pose;
+    ctrl::Vector6D                      m_end_effector_vel;
 
     // Forward dynamics
     boost::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
