@@ -139,7 +139,7 @@ namespace cartesian_controller_base{
     m_lower_pos_limits           = lower_pos_limits;
 
     // Forward kinematics
-    m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(chain));
+    m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(chain));
 
     // Forward dynamics
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(chain));
@@ -156,7 +156,7 @@ namespace cartesian_controller_base{
   void ForwardDynamicsSolver::updateKinematics()
   {
     KDL::Frame frame;
-    m_fk_solver->JntToCart(m_current_positions,frame);
+    m_fk_pos_solver->JntToCart(m_current_positions,frame);
     tf::poseKDLToTF(frame,m_end_effector_pose);
   }
 

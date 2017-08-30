@@ -78,7 +78,7 @@ class ForwardDynamicsSolver
      * effector.
      *
      * @return The end effector pose with respect to the robot base link. This
-     * link is the same as the one given in the init() function.
+     * link is the same as the one implicitly given in the init() function.
      */
     const tf::StampedTransform& getEndEffectorPose() const;
 
@@ -125,7 +125,7 @@ class ForwardDynamicsSolver
 
     // Forward kinematics
     boost::shared_ptr<
-      KDL::ChainFkSolverPos_recursive>  m_fk_solver;
+      KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
     tf::StampedTransform                m_end_effector_pose;
 
     // Forward dynamics
