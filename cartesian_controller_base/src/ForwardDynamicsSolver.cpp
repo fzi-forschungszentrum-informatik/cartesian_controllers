@@ -19,10 +19,6 @@
 #include <boost/algorithm/clamp.hpp>
 #include <eigen_conversions/eigen_kdl.h>
 
-// KDL
-#include <kdl/jntarrayvel.hpp>
-#include <kdl/framevel.hpp>
-
 // DEBUG
 
 
@@ -107,8 +103,6 @@ namespace cartesian_controller_base{
       m_current_velocities(i)     = 0.0;
       m_current_accelerations(i)  = 0.0;
       m_last_positions(i)         = m_current_positions(i);
-      m_last_velocities(i)        = 0.0;
-      m_last_accelerations(i)     = 0.0;
 
 
     }
@@ -137,14 +131,11 @@ namespace cartesian_controller_base{
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
-    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
-    m_last_accelerations.data    = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
 
     // Forward kinematics
     m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
-    m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(m_chain));
 
     // Forward dynamics
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
@@ -164,11 +155,6 @@ namespace cartesian_controller_base{
     KDL::Frame frame;
     m_fk_pos_solver->JntToCart(m_current_positions,frame);
     tf::poseKDLToTF(frame,m_end_effector_pose);
-
-    // Absolute velocity w. r. t. base
-    KDL::FrameVel vel;
-    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    tf::twistKDLToEigen(vel.deriv(),m_end_effector_vel);
   }
 
   bool ForwardDynamicsSolver::buildGenericModel(const KDL::Chain& input_chain)
