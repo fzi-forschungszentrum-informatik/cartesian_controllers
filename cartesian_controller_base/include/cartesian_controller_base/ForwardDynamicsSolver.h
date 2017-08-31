@@ -35,6 +35,9 @@
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 
+// Debug
+#include <tf/transform_broadcaster.h>
+
 namespace cartesian_controller_base{
 
 /*! \brief This class computes manipulator joint motion from Cartesian force inputs.
@@ -128,10 +131,9 @@ class ForwardDynamicsSolver
     KDL::JntArray m_last_positions;
 
     // Joint limits
-    KDL::JntArray   m_upper_pos_limits;
-    KDL::JntArray   m_lower_pos_limits;
-    KDL::JntArray   m_abs_vel_limits;
-    ctrl::Vector6D  m_cartesian_vel_limits;
+    KDL::JntArray m_upper_pos_limits;
+    KDL::JntArray m_lower_pos_limits;
+    KDL::JntArray m_damped_velocities;
 
     // Forward kinematics
     boost::shared_ptr<
@@ -144,6 +146,7 @@ class ForwardDynamicsSolver
     KDL::Jacobian                               m_jnt_jacobian;
     KDL::JntSpaceInertiaMatrix                  m_jnt_space_inertia;
 
+    tf::TransformBroadcaster m_tf_broadcaster;
 };
 
 

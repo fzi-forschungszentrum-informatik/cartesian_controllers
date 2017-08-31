@@ -27,6 +27,10 @@ my_controller_name:
         rot_y: 100
         rot_z: 100
 
+    damping:
+        trans: 100
+        rot: 100
+
     pid_gains:
         trans_x: {p: 0.01, i: 0, d: 0}
         trans_y: {p: 0.01, i: 0, d: 0}

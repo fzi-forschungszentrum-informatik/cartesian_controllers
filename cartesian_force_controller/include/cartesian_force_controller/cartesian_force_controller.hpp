@@ -19,6 +19,9 @@
 // Other
 #include <boost/algorithm/clamp.hpp>
 
+// Debug
+#include <debug_toolbox/RosDebugPublish.h>
+
 namespace cartesian_force_controller
 {
 
@@ -41,11 +44,28 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  std::map<std::string, double> damping;
+  if (!nh.getParam("damping",damping))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/damping" << " from parameter server");
+    return false;
+  }
+
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
   m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
 
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
+
+  // Initialize damping
+  ctrl::Vector6D tmp;
+  tmp[0] = damping["trans"];
+  tmp[1] = damping["trans"];
+  tmp[2] = damping["trans"];
+  tmp[3] = damping["rot"];
+  tmp[4] = damping["rot"];
+  tmp[5] = damping["rot"];
+  m_damping = tmp.asDiagonal();
 
   return true;
 }
@@ -92,8 +112,17 @@ ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
   // Target - current in base orientation
-  return Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
+  ctrl::Vector6D result= Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
          - Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_ref_link);
+
+         // Global damping always oposes motion
+         ctrl::Vector6D damping_force = - m_damping * Base::m_forward_dynamics_solver.getEndEffectorVel();
+         result += damping_force;
+
+         // Debug
+         ROS_DEBUG_PUBLISH(damping_force,"damping_force", Base::m_robot_base_link);
+
+         return result;
 }
 
 template <class HardwareInterface>

@@ -6,8 +6,10 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
         - /TF1/Frames1
         - /RobotModel1/Links1
+        - /WrenchStamped1
       Splitter Ratio: 0.5
     Tree Height: 589
   - Class: rviz/Selection
@@ -70,6 +72,8 @@ Visualization Manager:
         testing_ref:
           Value: false
         tool0:
+          Value: false
+        tool0_virtual:
           Value: true
         upper_arm_link:
           Value: false
@@ -101,6 +105,8 @@ Visualization Manager:
                           {}
                         tool0:
                           {}
+            tool0_virtual:
+              {}
           testing_ref:
             my_target:
               {}
@@ -178,6 +184,19 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Alpha: 1
+      Arrow Width: 0.5
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 2
+      Force Color: 204; 51; 51
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /damping_force
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -235,5 +254,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1514
-  X: 394
-  Y: 144
+  X: 2159
+  Y: 414

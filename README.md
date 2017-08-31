@@ -38,3 +38,10 @@ The solutions are found iteratively, whereas the system *leaps* forward in virtu
 This means the controllers from this package *do not exactly reproduce Cartesian paths*.
 They will reach the target, however, with high precision, if the kinematics allows for it.
 The responsiveness of the controllers and with it the path accuracy can be tweaked with the control gains of each controller.
+
+## Still to fix
+- Sometimes initial bump upon starting compliance controller
+- Protective stop on ur10 creates offset with rqt controller plugin
+- P gains for trans and rot have cross correlation phenomena
+- Stability gets lost for p rot <= 0.002
+- Does force control go really in the right direction?

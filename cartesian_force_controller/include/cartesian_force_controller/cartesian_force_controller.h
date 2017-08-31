@@ -50,6 +50,8 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector6D        m_target_wrench;
     ctrl::Vector6D        m_ft_sensor_wrench;
     std::string           m_ft_sensor_ref_link;
+
+    ctrl::Matrix6D        m_damping;
 };
 
 }

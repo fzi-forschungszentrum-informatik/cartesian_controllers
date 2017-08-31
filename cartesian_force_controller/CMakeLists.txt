@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cartesian_controller_base
   tf
   tf_conversions
+  debug_toolbox
 )
 
 ## System dependencies are found with CMake's conventions

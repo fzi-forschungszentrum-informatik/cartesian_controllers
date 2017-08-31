@@ -47,18 +47,6 @@ namespace cartesian_controller_base{
     // Integrate once, starting with zero motion
     m_current_velocities.data = 0.5 * m_current_accelerations.data * period.toSec();
 
-    // Apply damping with velocity cut-off in joint space.
-    // Zero velocity defaults to not damped.
-    if ( !(m_cartesian_vel_limits.norm() == 0.0))
-    {
-      m_abs_vel_limits.data = (m_jnt_jacobian.data.inverse() * m_cartesian_vel_limits).cwiseAbs();
-      for (int i = 0; i < m_number_joints; ++i)
-      {
-        m_current_velocities(i) = boost::algorithm::clamp(
-            m_current_velocities(i),-m_abs_vel_limits(i),m_abs_vel_limits(i));
-      }
-    }
-
     // Integrate twice, starting with zero motion
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
 
@@ -86,7 +74,9 @@ namespace cartesian_controller_base{
     updateKinematics();
 
     // Prepare for next cycle
-    m_last_positions = m_current_positions;
+    m_last_positions     = m_current_positions;
+    m_last_velocities    = m_current_velocities;
+    m_last_accelerations = m_current_accelerations;
 
     return control_cmd;
   }
@@ -97,6 +87,10 @@ namespace cartesian_controller_base{
     return m_end_effector_pose;
   }
 
+  const ctrl::Vector6D& ForwardDynamicsSolver::getEndEffectorVel() const
+  {
+    return m_end_effector_vel;
+  }
 
   const KDL::JntArray& ForwardDynamicsSolver::getPositions() const
   {
@@ -145,8 +139,6 @@ namespace cartesian_controller_base{
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
-    m_abs_vel_limits.data        = ctrl::VectorND::Zero(m_number_joints);
-    m_cartesian_vel_limits       = cartesian_vel_limits.cwiseAbs();
 
     // Forward kinematics
     m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
@@ -169,6 +161,19 @@ namespace cartesian_controller_base{
     KDL::Frame frame;
     m_fk_pos_solver->JntToCart(m_current_positions,frame);
     tf::poseKDLToTF(frame,m_end_effector_pose);
+
+    // Debug
+    //m_tf_broadcaster.sendTransform(
+        //tf::StampedTransform(
+          //m_end_effector_pose,
+          //ros::Time::now(),
+          //"base_link",
+          //"tool0_virtual"));
+
+    // Absolute velocity w. r. t. base
+    KDL::FrameVel vel;
+    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
+    tf::twistKDLToEigen(vel.deriv(),m_end_effector_vel);
   }
 
   bool ForwardDynamicsSolver::buildGenericModel(const KDL::Chain& input_chain)
