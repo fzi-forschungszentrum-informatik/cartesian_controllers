@@ -92,10 +92,20 @@ class ForwardDynamicsSolver
     //! Set initial joint configuration
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
-    //! Initialize
+    /**
+     * @brief Initialize the solver
+     *
+     * @param chain The kinematic chain of the robot
+     * @param upper_pos_limits Tuple with max positive joint angles
+     * @param lower_pos_limits Tuple with max negative joint angles
+     * @param cartesian_vel_limits Cartesian velocity limits for the end-effector
+     *
+     * @return True, if everything went well
+     */
     bool init(const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits);
+              const KDL::JntArray& lower_pos_limits,
+              const ctrl::Vector6D& cartesian_vel_limits);
 
     //! Call this function during activation
     void updateKinematics();
@@ -118,8 +128,10 @@ class ForwardDynamicsSolver
     KDL::JntArray m_last_positions;
 
     // Joint limits
-    KDL::JntArray m_upper_pos_limits;
-    KDL::JntArray m_lower_pos_limits;
+    KDL::JntArray   m_upper_pos_limits;
+    KDL::JntArray   m_lower_pos_limits;
+    KDL::JntArray   m_abs_vel_limits;
+    ctrl::Vector6D  m_cartesian_vel_limits;
 
     // Forward kinematics
     boost::shared_ptr<

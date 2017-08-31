@@ -47,6 +47,17 @@ namespace cartesian_controller_base{
     // Integrate once, starting with zero motion
     m_current_velocities.data = 0.5 * m_current_accelerations.data * period.toSec();
 
+    // Apply damping with velocity cut-off in joint space.
+    // Zero velocity defaults to not damped.
+    if ( !(m_cartesian_vel_limits.norm() == 0.0))
+    {
+      m_abs_vel_limits.data = (m_jnt_jacobian.data.inverse() * m_cartesian_vel_limits).cwiseAbs();
+      for (int i = 0; i < m_number_joints; ++i)
+      {
+        m_current_velocities(i) = boost::algorithm::clamp(
+            m_current_velocities(i),-m_abs_vel_limits(i),m_abs_vel_limits(i));
+      }
+    }
 
     // Integrate twice, starting with zero motion
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
@@ -117,7 +128,8 @@ namespace cartesian_controller_base{
   bool ForwardDynamicsSolver::init(
       const KDL::Chain& chain,
       const KDL::JntArray& upper_pos_limits,
-      const KDL::JntArray& lower_pos_limits)
+      const KDL::JntArray& lower_pos_limits,
+      const ctrl::Vector6D& cartesian_vel_limits)
   {
     if (!buildGenericModel(chain))
     {
@@ -133,6 +145,8 @@ namespace cartesian_controller_base{
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
+    m_abs_vel_limits.data        = ctrl::VectorND::Zero(m_number_joints);
+    m_cartesian_vel_limits       = cartesian_vel_limits.cwiseAbs();
 
     // Forward kinematics
     m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
