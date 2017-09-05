@@ -144,8 +144,6 @@ class ForwardDynamicsSolver
     KDL::JntArray m_current_velocities;
     KDL::JntArray m_current_accelerations;
     KDL::JntArray m_last_positions;
-    KDL::JntArray m_last_velocities;
-    KDL::JntArray m_last_accelerations;
 
     // Joint limits
     KDL::JntArray m_upper_pos_limits;

@@ -79,8 +79,6 @@ namespace cartesian_controller_base{
 
     // Prepare for next cycle
     m_last_positions     = m_current_positions;
-    m_last_velocities    = m_current_velocities;
-    m_last_accelerations = m_current_accelerations;
 
     return control_cmd;
   }
@@ -112,8 +110,6 @@ namespace cartesian_controller_base{
       m_current_velocities(i)     = 0.0;
       m_current_accelerations(i)  = 0.0;
       m_last_positions(i)         = m_current_positions(i);
-      m_last_velocities(i)        = 0.0;
-      m_last_accelerations(i)     = 0.0;
 
 
     }
@@ -143,8 +139,6 @@ namespace cartesian_controller_base{
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
-    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
-    m_last_accelerations.data    = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
 
