@@ -11,9 +11,9 @@ my_cartesian_motion_controller:
     - wrist_2_joint
     - wrist_3_joint
 
-    max_velocity:
-        trans: 0.01
-        rot: 0
+    damping:
+        trans: 10
+        rot: 10
 
     pid_gains:
         trans_x: {p: 5.0, i: 0, d: 0}
@@ -57,9 +57,9 @@ my_cartesian_force_controller:
     - wrist_2_joint
     - wrist_3_joint
 
-    max_velocity:
-        trans: 0.01
-        rot: 0.1
+    damping:
+        trans: 10
+        rot: 10
 
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
@@ -92,9 +92,9 @@ my_cartesian_compliance_controller:
         rot_y: 100
         rot_z: 100
 
-    max_velocity:
-        trans: 0.01
-        rot: 0.1
+    damping:
+        trans: 10
+        rot: 10
 
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
