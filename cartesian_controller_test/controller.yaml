@@ -11,13 +11,17 @@ my_cartesian_motion_controller:
     - wrist_2_joint
     - wrist_3_joint
 
+    damping:
+        trans: 100
+        rot: 100
+
     pid_gains:
-        trans_x: {p: 50.0, i: 0, d: 0}
-        trans_y: {p: 50.0, i: 0, d: 0}
-        trans_z: {p: 50.0, i: 0, d: 0}
-        rot_x: {p: 10.0, i: 0, d: 0}
-        rot_y: {p: 10.0, i: 0, d: 0}
-        rot_z: {p: 10.0, i: 0, d: 0}
+        trans_x: {p: 5.0, i: 0, d: 0}
+        trans_y: {p: 5.0, i: 0, d: 0}
+        trans_z: {p: 5.0, i: 0, d: 0}
+        rot_x: {p: 1.0, i: 0, d: 0}
+        rot_y: {p: 1.0, i: 0, d: 0}
+        rot_z: {p: 1.0, i: 0, d: 0}
 
 my_cartesian_motion_controller_vel:
     type: "velocity_controllers/CartesianMotionController"
@@ -33,12 +37,12 @@ my_cartesian_motion_controller_vel:
     - wrist_3_joint
 
     pid_gains:
-        trans_x: {p: 50.0, i: 0, d: 0}
-        trans_y: {p: 50.0, i: 0, d: 0}
-        trans_z: {p: 50.0, i: 0, d: 0}
-        rot_x: {p: 10.0, i: 0, d: 0}
-        rot_y: {p: 10.0, i: 0, d: 0}
-        rot_z: {p: 10.0, i: 0, d: 0}
+        trans_x: {p: 5.0, i: 0, d: 0}
+        trans_y: {p: 5.0, i: 0, d: 0}
+        trans_z: {p: 5.0, i: 0, d: 0}
+        rot_x: {p: 1.0, i: 0, d: 0}
+        rot_y: {p: 1.0, i: 0, d: 0}
+        rot_z: {p: 1.0, i: 0, d: 0}
 
 my_cartesian_force_controller:
     type: "position_controllers/CartesianForceController"
@@ -58,12 +62,12 @@ my_cartesian_force_controller:
         rot: 100
 
     pid_gains:
-        trans_x: {p: 0.5, i: 0, d: 0}
-        trans_y: {p: 0.5, i: 0, d: 0}
-        trans_z: {p: 0.5, i: 0, d: 0}
-        rot_x: {p: 0.1, i: 0, d: 0}
-        rot_y: {p: 0.1, i: 0, d: 0}
-        rot_z: {p: 0.1, i: 0, d: 0}
+        trans_x: {p: 0.05, i: 0, d: 0}
+        trans_y: {p: 0.05, i: 0, d: 0}
+        trans_z: {p: 0.05, i: 0, d: 0}
+        rot_x: {p: 0.01, i: 0, d: 0}
+        rot_y: {p: 0.01, i: 0, d: 0}
+        rot_z: {p: 0.01, i: 0, d: 0}
 
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
@@ -89,16 +93,16 @@ my_cartesian_compliance_controller:
         rot_z: 100
 
     damping:
-        trans: 500
+        trans: 100
         rot: 10
 
     pid_gains:
-        trans_x: {p: 0.5, i: 0, d: 0}
-        trans_y: {p: 0.5, i: 0, d: 0}
-        trans_z: {p: 0.5, i: 0, d: 0}
-        rot_x: {p: 0.1, i: 0, d: 0}
-        rot_y: {p: 0.1, i: 0, d: 0}
-        rot_z: {p: 0.1, i: 0, d: 0}
+        trans_x: {p: 0.05, i: 0, d: 0}
+        trans_y: {p: 0.05, i: 0, d: 0}
+        trans_z: {p: 0.05, i: 0, d: 0}
+        rot_x: {p: 0.01, i: 0, d: 0}
+        rot_y: {p: 0.01, i: 0, d: 0}
+        rot_z: {p: 0.01, i: 0, d: 0}
 
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
