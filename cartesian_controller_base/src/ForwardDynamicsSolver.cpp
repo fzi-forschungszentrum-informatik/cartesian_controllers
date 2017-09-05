@@ -144,12 +144,12 @@ namespace cartesian_controller_base{
     m_lower_pos_limits           = lower_pos_limits;
 
     // Forward kinematics
-    m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(chain));
-    m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(chain));
+    m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
+    m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(m_chain));
 
     // Forward dynamics
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(chain));
-    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(chain,KDL::Vector::Zero()));
+    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
     m_jnt_jacobian.resize(m_number_joints);
     m_jnt_space_inertia.resize(m_number_joints);
 
