@@ -1,0 +1,10 @@
+<launch>
+        <!-- ================================================================================-->
+        <!-- =              force torque sensor                                             =-->
+        <!-- ================================================================================-->
+        <!-- start control interface (sensor) -->
+        <node ns="my_cartesian_compliance_controller" name="force_control_joystick" pkg="netft_rdt_driver" type="netft_node"
+        args="--address 192.168.0.11 --frame_id my_sensor_frame --rate 125" >
+        <remap from="netft_data" to="ft_sensor_wrench" />
+        </node>
+</launch>
