@@ -46,7 +46,7 @@ my_cartesian_motion_controller_vel:
 
 my_cartesian_force_controller:
     type: "position_controllers/CartesianForceController"
-    end_effector_link: "tool0"
+    end_effector_link: "sensor_link"
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
     joints:
@@ -62,8 +62,8 @@ my_cartesian_force_controller:
         rot: 10
 
     solver:
-        mass: 10
-        inertia: 0.02
+        mass: 18
+        inertia: 0.07
 
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
@@ -97,8 +97,8 @@ my_cartesian_compliance_controller:
         rot_z: 100
 
     solver:
-        mass: 10
-        inertia: 0.02
+        mass: 18
+        inertia: 0.07
 
     damping:
         trans: 10
