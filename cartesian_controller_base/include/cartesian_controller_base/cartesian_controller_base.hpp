@@ -264,6 +264,7 @@ template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 dynamicReconfigureCallback(ControllerConfig& config, uint32_t level)
 {
+  m_forward_dynamics_solver.SetEndEffectorMass(config.mass, config.inertia);
 }
 
 } // namespace

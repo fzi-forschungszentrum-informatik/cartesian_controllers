@@ -216,4 +216,14 @@ namespace cartesian_controller_base{
     return true;
   }
 
+  void ForwardDynamicsSolver::SetEndEffectorMass(const double mass, const double inertia)
+  {
+    m_chain.segments[m_chain.segments.size()-1].setInertia(
+        KDL::RigidBodyInertia(
+          mass,
+          KDL::Vector::Zero(),
+          KDL::RotationalInertia(inertia,inertia,inertia)));
+    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
+  }
+
 } // namespace
