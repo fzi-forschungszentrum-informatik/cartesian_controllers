@@ -48,7 +48,7 @@ my_cartesian_force_controller:
     type: "position_controllers/CartesianForceController"
     end_effector_link: "tool0"
     robot_base_link: "base_link"
-    ft_sensor_ref_link: "tool0"
+    ft_sensor_ref_link: "sensor_link"
     joints:
     - shoulder_pan_joint
     - shoulder_lift_joint
@@ -71,7 +71,7 @@ my_cartesian_force_controller:
 
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
-    end_effector_link: "tool0"
+    end_effector_link: "sensor_link"    # All links above must come before this link
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
     compliance_ref_link: "tool0"
@@ -106,7 +106,7 @@ my_cartesian_compliance_controller:
 
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
-    end_effector_link: "tool0"
+    end_effector_link: "sensor_link"
     robot_base_link: "base_link"
     published_target_name: "my_target"
     joints:
