@@ -144,6 +144,12 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Initialize Cartesian pid controllers
   m_spatial_controller.init(nh);
 
+  // Connect dynamic reconfigure
+  m_callback_type = boost::bind(
+      &CartesianControllerBase<HardwareInterface>::dynamicReconfigureCallback, this, _1, _2);
+  m_dyn_conf_server.reset(new dynamic_reconfigure::Server<ControllerConfig>(nh));
+  m_dyn_conf_server->setCallback(m_callback_type);
+
   m_already_initialized = true;
 
   return true;
@@ -252,6 +258,12 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
   tmp.bottomRightCorner<3,3>() = R * tensor.bottomRightCorner<3,3>() * R.transpose();
 
   return tmp;
+}
+
+template <class HardwareInterface>
+void CartesianControllerBase<HardwareInterface>::
+dynamicReconfigureCallback(ControllerConfig& config, uint32_t level)
+{
 }
 
 } // namespace
