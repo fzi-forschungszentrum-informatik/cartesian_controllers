@@ -85,9 +85,9 @@ my_cartesian_compliance_controller:
     - wrist_3_joint
 
     stiffness:  # w.r.t. compliance_ref_link
-        trans_x: 100
-        trans_y: 100
-        trans_z: 100
+        trans_x: 500
+        trans_y: 500
+        trans_z: 500
         rot_x: 100
         rot_y: 100
         rot_z: 100
