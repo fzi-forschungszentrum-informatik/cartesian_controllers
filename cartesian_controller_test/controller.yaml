@@ -1,6 +1,6 @@
 my_cartesian_motion_controller:
     type: "position_controllers/CartesianMotionController"
-    end_effector_link: "tool0"
+    end_effector_link: "sensor_link"
     robot_base_link: "base_link"
     target_frame: "my_target"
     joints:
@@ -25,7 +25,7 @@ my_cartesian_motion_controller:
 
 my_cartesian_motion_controller_vel:
     type: "velocity_controllers/CartesianMotionController"
-    end_effector_link: "tool0"
+    end_effector_link: "sensor_link"
     robot_base_link: "base_link"
     target_frame: "my_target"
     joints:
