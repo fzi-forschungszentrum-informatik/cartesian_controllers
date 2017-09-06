@@ -124,8 +124,7 @@ namespace cartesian_controller_base{
   bool ForwardDynamicsSolver::init(
       const KDL::Chain& chain,
       const KDL::JntArray& upper_pos_limits,
-      const KDL::JntArray& lower_pos_limits,
-      const ctrl::Vector6D& cartesian_vel_limits)
+      const KDL::JntArray& lower_pos_limits)
   {
     if (!buildGenericModel(chain))
     {
