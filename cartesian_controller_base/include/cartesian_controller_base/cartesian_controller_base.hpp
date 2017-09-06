@@ -144,10 +144,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Initialize Cartesian pid controllers
   m_spatial_controller.init(nh);
 
-  // Connect dynamic reconfigure
+  // Connect dynamic reconfigure and overwrite the default values with values
+  // on the parameter server. This is done automatically if parameters with
+  // the according names exist.
   m_callback_type = boost::bind(
       &CartesianControllerBase<HardwareInterface>::dynamicReconfigureCallback, this, _1, _2);
-  m_dyn_conf_server.reset(new dynamic_reconfigure::Server<ControllerConfig>(nh));
+
+  m_dyn_conf_server.reset(
+      new dynamic_reconfigure::Server<ControllerConfig>(
+        ros::NodeHandle(nh.getNamespace() + "/solver")));
   m_dyn_conf_server->setCallback(m_callback_type);
 
   m_already_initialized = true;

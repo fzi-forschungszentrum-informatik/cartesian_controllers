@@ -61,6 +61,10 @@ my_cartesian_force_controller:
         trans: 10
         rot: 10
 
+    solver:
+        mass: 10
+        inertia: 0.02
+
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
         trans_y: {p: 0.05, i: 0, d: 0}
@@ -91,6 +95,10 @@ my_cartesian_compliance_controller:
         rot_x: 100
         rot_y: 100
         rot_z: 100
+
+    solver:
+        mass: 10
+        inertia: 0.02
 
     damping:
         trans: 10
