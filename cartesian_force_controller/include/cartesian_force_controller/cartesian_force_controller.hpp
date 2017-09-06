@@ -111,18 +111,9 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
-  // Target - current in base orientation
-  ctrl::Vector6D result= Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
-         - Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_ref_link);
-
-         // Global damping always oposes motion
-         ctrl::Vector6D damping_force = - m_damping * Base::m_forward_dynamics_solver.getEndEffectorVel();
-         result += damping_force;
-
-         // Debug
-         ROS_DEBUG_PUBLISH(damping_force,"damping_force", Base::m_robot_base_link);
-
-         return result;
+  // Superimpose target wrench and sensor wrench in base frame
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_ref_link)
+    + Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
 }
 
 template <class HardwareInterface>
