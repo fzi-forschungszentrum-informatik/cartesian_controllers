@@ -206,12 +206,13 @@ namespace cartesian_controller_base{
       }
     }
 
-    // Only give the last segment a generic mass and inertia
+    // Only give the last segment a generic mass and inertia.
+    // Note: This will be adjusted during startup by dynamic reconfigure.
     m_chain.segments[m_chain.segments.size()-1].setInertia(
         KDL::RigidBodyInertia(
-          0.1,
+          5,
           KDL::Vector::Zero(),
-          KDL::RotationalInertia(0.002, 0.002, 0.002)));
+          KDL::RotationalInertia(0.02, 0.02, 0.02)));
 
     return true;
   }
