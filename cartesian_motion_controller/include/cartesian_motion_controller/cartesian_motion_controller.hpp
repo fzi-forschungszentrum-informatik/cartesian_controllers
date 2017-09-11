@@ -103,14 +103,10 @@ computeMotionError()
         );
     */
 
-    // This lookupTransform() version really uses the latest transform and
-    // doesn't limit the lookup to the last common time.
     m_tf_listener.lookupTransform(
         Base::m_robot_base_link,  // I want my pose displayed in this frame
-        ros::Time(0),
         m_target_frame,
         ros::Time(0),
-        Base::m_robot_base_link,  // Const reference
         target_pose);
   }
   catch (tf::TransformException& e)
