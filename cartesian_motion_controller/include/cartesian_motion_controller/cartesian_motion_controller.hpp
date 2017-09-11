@@ -122,7 +122,9 @@ computeMotionError()
   tf::transformTFToKDL(target_pose,target_pose_kdl);
 
   // Transformation from target -> current corresponds to error = target - current
-  KDL::Frame error_kdl = target_pose_kdl * current_pose_kdl.Inverse();
+  KDL::Frame error_kdl;
+  error_kdl.M = target_pose_kdl.M * current_pose_kdl.M.Inverse();
+  error_kdl.p = target_pose_kdl.p - current_pose_kdl.p;
 
   // Use Rodrigues Vector for a compact representation of orientation errors
   // Only for angles within [0,Pi)
