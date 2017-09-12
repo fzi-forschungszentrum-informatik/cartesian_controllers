@@ -48,22 +48,16 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
-  std::map<std::string, double> stiffness;
-  if (!nh.getParam("stiffness",stiffness))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/stiffness" << " from parameter server");
-    return false;
-  }
+  // Connect dynamic reconfigure and overwrite the default values with values
+  // on the parameter server. This is done automatically if parameters with
+  // the according names exist.
+  m_callback_type = boost::bind(
+      &CartesianComplianceController<HardwareInterface>::dynamicReconfigureCallback, this, _1, _2);
 
-  // Initialize stiffness
-  ctrl::Vector6D tmp;
-  tmp[0] = stiffness["trans_x"];
-  tmp[1] = stiffness["trans_y"];
-  tmp[2] = stiffness["trans_z"];
-  tmp[3] = stiffness["rot_x"];
-  tmp[4] = stiffness["rot_y"];
-  tmp[5] = stiffness["rot_z"];
-  m_stiffness = tmp.asDiagonal();
+  m_dyn_conf_server.reset(
+      new dynamic_reconfigure::Server<ComplianceConfig>(
+        ros::NodeHandle(nh.getNamespace() + "/stiffness")));
+  m_dyn_conf_server->setCallback(m_callback_type);
 
   return true;
 }
@@ -125,6 +119,20 @@ computeComplianceError()
   return net_force;
 }
 
+template <class HardwareInterface>
+void CartesianComplianceController<HardwareInterface>::
+dynamicReconfigureCallback(ComplianceConfig& config, uint32_t level)
+{
+  ctrl::Vector6D tmp;
+  tmp[0] = config.trans_x;
+  tmp[1] = config.trans_y;
+  tmp[2] = config.trans_z;
+  tmp[3] = config.rot_x;
+  tmp[4] = config.rot_y;
+  tmp[5] = config.rot_z;
+  m_stiffness = tmp.asDiagonal();
 }
+
+} // namespace
 
 #endif

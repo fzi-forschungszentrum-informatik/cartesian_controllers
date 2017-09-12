@@ -18,6 +18,10 @@
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
 #include <cartesian_force_controller/cartesian_force_controller.h>
 
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_compliance_controller/ComplianceControllerConfig.h>
+
 // tf
 #include <tf/transform_listener.h>
 
@@ -49,6 +53,15 @@ class CartesianComplianceController
 
     ctrl::Matrix6D        m_stiffness;
     std::string           m_compliance_ref_link;
+
+    // Dynamic reconfigure for stiffness
+    typedef cartesian_compliance_controller::ComplianceControllerConfig
+      ComplianceConfig;
+
+    void dynamicReconfigureCallback(ComplianceConfig& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<ComplianceConfig> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<ComplianceConfig>::CallbackType m_callback_type;
 };
 
 }
