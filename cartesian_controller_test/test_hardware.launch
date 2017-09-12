@@ -46,7 +46,7 @@
         <rosparam file="$(find cartesian_controller_test)/controller.yaml" command="load"></rosparam>
 
         <!-- Spawn controllers. The controller manager is loaded separately through the ur_modern_driver -->
-        <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_motion_controller_vel my_cartesian_force_controller my_cartesian_compliance_controller my_joint_to_cartesian_controller" />
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_force_controller my_cartesian_compliance_controller my_joint_to_cartesian_controller" />
 
         <!-- Spawn joint controller for testing my_joint_to_cartesian_controller  -->
         <!-- Note: This controller should be loaded and started -->
