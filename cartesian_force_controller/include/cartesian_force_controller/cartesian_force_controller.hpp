@@ -44,28 +44,11 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
-  std::map<std::string, double> damping;
-  if (!nh.getParam("damping",damping))
-  {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/damping" << " from parameter server");
-    return false;
-  }
-
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
   m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
 
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
-
-  // Initialize damping
-  ctrl::Vector6D tmp;
-  tmp[0] = damping["trans"];
-  tmp[1] = damping["trans"];
-  tmp[2] = damping["trans"];
-  tmp[3] = damping["rot"];
-  tmp[4] = damping["rot"];
-  tmp[5] = damping["rot"];
-  m_damping = tmp.asDiagonal();
 
   return true;
 }

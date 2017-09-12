@@ -17,10 +17,6 @@ my_controller_name:
     - joint_name_5
     - joint_name_6
 
-    damping:
-        trans: 100
-        rot: 100
-
     pid_gains:
         trans_x: {p: 50.0, i: 0, d: 0}
         trans_y: {p: 50.0, i: 0, d: 0}
