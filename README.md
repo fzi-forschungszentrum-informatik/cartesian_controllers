@@ -77,4 +77,3 @@ The *CartesianForceControllers* and the *CartesianComplianceControllers* are des
 
 ## Todos
 - Document Code, especially classes
-- Add dynamic reconfigure for stiffness
