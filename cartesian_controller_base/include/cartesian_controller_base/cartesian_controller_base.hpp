@@ -96,23 +96,6 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     throw std::runtime_error(error);
   }
 
-  // Get max Cartesian velocities
-  std::map<std::string, double> max_velocity;
-  ctrl::Vector6D abs_cartesian_vel = ctrl::Vector6D::Zero();
-  if (!nh.getParam("max_velocity",max_velocity))
-  {
-    ROS_INFO_STREAM("No Cartesian velocities provided under  " << nh.getNamespace() + "/max_velocity. Damping is OFF.");
-  }
-  else
-  {
-    abs_cartesian_vel[0] = max_velocity["trans"];
-    abs_cartesian_vel[1] = max_velocity["trans"];
-    abs_cartesian_vel[2] = max_velocity["trans"];
-    abs_cartesian_vel[3] = max_velocity["rot"];
-    abs_cartesian_vel[4] = max_velocity["rot"];
-    abs_cartesian_vel[5] = max_velocity["rot"];
-  }
-
   // Parse joint limits
   KDL::JntArray upper_pos_limits(m_joint_names.size());
   KDL::JntArray lower_pos_limits(m_joint_names.size());
