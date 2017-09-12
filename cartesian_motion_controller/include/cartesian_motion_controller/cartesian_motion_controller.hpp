@@ -83,6 +83,21 @@ update(const ros::Time& time, const ros::Duration& period)
   Base::writeJointControlCmds();
 }
 
+template <>
+void CartesianMotionController<hardware_interface::VelocityJointInterface>::
+update(const ros::Time& time, const ros::Duration& period)
+{
+  // Simulate only one step forward.
+  // The constant simulation time adds to solver stability.
+  ros::Duration internal_period(0.02);
+
+  ctrl::Vector6D error = computeMotionError();
+
+  Base::computeJointControlCmds(error,internal_period);
+
+  Base::writeJointControlCmds();
+}
+
 template <class HardwareInterface>
 ctrl::Vector6D CartesianMotionController<HardwareInterface>::
 computeMotionError()

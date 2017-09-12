@@ -65,6 +65,31 @@ my_cartesian_force_controller:
         rot_y: {p: 0.01, i: 0, d: 0}
         rot_z: {p: 0.01, i: 0, d: 0}
 
+#my_cartesian_force_controller:
+#   type: "velocity_controllers/CartesianForceController"
+#   end_effector_link: "sensor_link"
+#   robot_base_link: "base_link"
+#   ft_sensor_ref_link: "sensor_link"
+#   joints:
+#   - shoulder_pan_joint
+#   - shoulder_lift_joint
+#   - elbow_joint
+#   - wrist_1_joint
+#   - wrist_2_joint
+#   - wrist_3_joint
+#
+#   solver:
+#       mass: 18
+#       inertia: 0.07
+#
+#   pid_gains:
+#       trans_x: {p: 0.40, i: 0, d: 0}
+#       trans_y: {p: 0.40, i: 0, d: 0}
+#       trans_z: {p: 0.40, i: 0, d: 0}
+#       rot_x: {p: 0.04, i: 0, d: 0}
+#       rot_y: {p: 0.04, i: 0, d: 0}
+#       rot_z: {p: 0.04, i: 0, d: 0}
+
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
     end_effector_link: "sensor_link"    # All links above must come before this link
