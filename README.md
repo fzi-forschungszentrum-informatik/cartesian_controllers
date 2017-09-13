@@ -71,9 +71,7 @@ are sure that your robot can move faster, then also start adjusting the
 The *CartesianForceControllers* and the *CartesianComplianceControllers* are designed for contact-dominated tasks. During these tasks, path accuracy is traded for contact stability, which is increased through increasing *mass* and *inertia*. It might be necessary to increase those parameters quite a bit, if the environments are very stiff.
 
 ## Still to fix/check
-- Sometimes initial bump upon starting compliance controller
 - Protective stop on ur10 creates offset with rqt controller plugin
-- Do velocity interfaces work?
 
 ## Todos
 - Document Code, especially classes
