@@ -74,7 +74,7 @@ my_cartesian_compliance_controller:
     end_effector_link: "sensor_link"    # All links above must come before this link
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
-    compliance_ref_link: "tool0"
+    compliance_ref_link: "sensor_link"
     target_frame: "my_target"
     joints:
     - shoulder_pan_joint
