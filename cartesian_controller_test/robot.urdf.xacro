@@ -2,10 +2,10 @@
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
         <!-- Includes -->
-        <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+        <xacro:include filename="$(find ur_description)/urdf/ur10.urdf.xacro" />
 
         <!-- Create robot instance -->
-        <xacro:ur5_robot prefix="" joint_limited="false"/>
+        <xacro:ur10_robot prefix="" joint_limited="false"/>
 
         <!-- Connect to world -->
         <link name="world" />
@@ -16,11 +16,13 @@
         </joint>
 
         <!-- Testing reference frame for tf_publisher_gui -->
+
+        <!-- Starting frame for tf_publisher_gui -->
         <link name="testing_ref" />
         <joint name="testing_ref_joint" type="fixed">
-                <parent link="world" />
+                <parent link="base_link" />
                 <child link="testing_ref" />
-                <origin xyz="0.386 0.165 0.530" rpy="-3.066 -0.026 -1.426" />
+                <origin xyz="0.543 0.243 0.741" rpy="3.116 -0.077 0.148" />
         </joint>
 
         <!-- Load control plugin -->
