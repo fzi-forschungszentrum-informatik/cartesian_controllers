@@ -20,13 +20,13 @@ my_cartesian_motion_controller:
     - joint_name_6
 
     solver:
-        mass: 5.0
+        mass: 2.0
         inertia: 0.05
 
     pid_gains:
-        trans_x: {p: 5.0, i: 0, d: 0}
-        trans_y: {p: 5.0, i: 0, d: 0}
-        trans_z: {p: 5.0, i: 0, d: 0}
+        trans_x: {p: 10.0, i: 0, d: 0}
+        trans_y: {p: 10.0, i: 0, d: 0}
+        trans_z: {p: 10.0, i: 0, d: 0}
         rot_x: {p: 1.0, i: 0, d: 0}
         rot_y: {p: 1.0, i: 0, d: 0}
         rot_z: {p: 1.0, i: 0, d: 0}
