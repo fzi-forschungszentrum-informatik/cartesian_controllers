@@ -19,9 +19,6 @@
 // Other
 #include <boost/algorithm/clamp.hpp>
 
-// Debug
-#include <debug_toolbox/RosDebugPublish.h>
-
 namespace cartesian_force_controller
 {
 

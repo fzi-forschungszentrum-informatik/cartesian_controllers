@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   cartesian_force_controller
   tf
   tf_conversions
-  debug_toolbox
   dynamic_reconfigure
 )
 
