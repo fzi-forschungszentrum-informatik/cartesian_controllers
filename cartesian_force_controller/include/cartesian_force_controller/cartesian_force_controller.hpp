@@ -124,7 +124,7 @@ compensateGravity()
 
   // Compute actual gravity effects in sensor frame
   ctrl::Vector6D tmp = Base::displayInTipLink(m_weight_force,m_ft_sensor_ref_link);
-  tmp.tail<3>() = m_center_of_gravity.cross(tmp.head<3>()); // M = r x F
+  tmp.tail<3>() = m_center_of_mass.cross(tmp.head<3>()); // M = r x F
 
   // Display in base link
   m_weight_force = Base::displayInBaseLink(tmp,m_ft_sensor_ref_link);
@@ -168,7 +168,7 @@ signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Respons
 {
   // Compute current gravity effects in sensor frame
   ctrl::Vector6D tmp = Base::displayInTipLink(m_weight_force,m_ft_sensor_ref_link);
-  tmp.tail<3>() = m_center_of_gravity.cross(tmp.head<3>()); // M = r x F
+  tmp.tail<3>() = m_center_of_mass.cross(tmp.head<3>()); // M = r x F
 
   // Taring the sensor is like adding a virtual force that exactly compensates
   // the weight force.

@@ -58,7 +58,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector6D        m_ft_sensor_wrench;
     ctrl::Vector6D        m_weight_force;
     ctrl::Vector6D        m_grav_comp_during_taring;
-    ctrl::Vector3D        m_center_of_gravity;
+    ctrl::Vector3D        m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
 };
 
