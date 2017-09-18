@@ -249,6 +249,36 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
 }
 
 template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
+{
+  // Adjust format
+  KDL::Wrench wrench_kdl;
+  for (int i = 0; i < 6; ++i)
+  {
+    wrench_kdl(i) = vector[i];
+  }
+
+  KDL::Frame transform_kdl;
+  m_forward_kinematics_solver->JntToCart(
+      m_forward_dynamics_solver.getPositions(),
+      transform_kdl,
+      to);
+
+  // Rotate into new reference frame
+  wrench_kdl = transform_kdl.M * wrench_kdl;
+
+  // Reassign
+  ctrl::Vector6D out;
+  for (int i = 0; i < 6; ++i)
+  {
+    out[i] = wrench_kdl(i);
+  }
+
+  return out;
+}
+
+template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 dynamicReconfigureCallback(ControllerConfig& config, uint32_t level)
 {

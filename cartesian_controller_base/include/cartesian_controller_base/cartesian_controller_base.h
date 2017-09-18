@@ -59,6 +59,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
     ctrl::Matrix6D displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from);
+    ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
     ForwardDynamicsSolver   m_forward_dynamics_solver;
     std::string             m_end_effector_link;
