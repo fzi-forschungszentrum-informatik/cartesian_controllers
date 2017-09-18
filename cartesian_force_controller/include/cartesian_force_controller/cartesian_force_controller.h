@@ -19,6 +19,9 @@
 // tf
 #include <tf/transform_listener.h>
 
+// ROS
+#include <std_srvs/Trigger.h>
+
 namespace cartesian_force_controller
 {
 
@@ -42,13 +45,20 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector6D        computeForceError();
 
   private:
+    ctrl::Vector6D        compensateGravity();
+
     void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
     void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
+    bool signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 
+    ros::ServiceServer    m_signal_taring_server;
     ros::Subscriber       m_target_wrench_subscriber;
     ros::Subscriber       m_ft_sensor_wrench_subscriber;
     ctrl::Vector6D        m_target_wrench;
     ctrl::Vector6D        m_ft_sensor_wrench;
+    ctrl::Vector6D        m_weight_force;
+    ctrl::Vector6D        m_grav_comp_during_taring;
+    ctrl::Vector3D        m_center_of_gravity;
     std::string           m_ft_sensor_ref_link;
 };
 
