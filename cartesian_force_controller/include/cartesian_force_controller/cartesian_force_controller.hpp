@@ -45,11 +45,29 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
   m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
 
+  // Initialize tool and gravity compensation
+  std::map<std::string, double> gravity;
+  if (!nh.getParam("gravity",gravity))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/gravity" << " from parameter server");
+    return false;
+  }
+  std::map<std::string, double> tool;
+  if (!nh.getParam("tool",tool))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/tool" << " from parameter server");
+    return false;
+  }
+  // In sensor frame
+  m_center_of_mass = ctrl::Vector3D(tool["com_x"],tool["com_y"],tool["com_z"]);
+
+  // In base frame
+  m_weight_force.head<3>() = tool["mass"] * ctrl::Vector3D(gravity["x"],gravity["y"],gravity["z"]);
+  m_weight_force.tail<3>() = ctrl::Vector3D::Zero();  // Update in control cycle
+  m_grav_comp_during_taring = -m_weight_force;
+
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
-  m_weight_force.setZero();
-  m_grav_comp_during_taring.setZero();
-  m_center_of_gravity.setZero();
 
   return true;
 }

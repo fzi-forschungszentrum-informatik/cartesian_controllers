@@ -40,6 +40,12 @@ my_cartesian_force_controller:
         mass: 18
         inertia: 0.07
 
+    # Center of mass w.r.t. ft_sensor_ref_link
+    tool: {mass: 0, cog_x: 0, cog_y: 0, cog_z: 0}
+
+    # w.r.t. robot_base_link
+    gravity: {x: 0, y: 0, z: -9.82}
+
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
         trans_y: {p: 0.05, i: 0, d: 0}
@@ -99,6 +105,12 @@ my_cartesian_compliance_controller:
     solver:
         mass: 18
         inertia: 0.07
+
+    # Center of mass w.r.t. ft_sensor_ref_link
+    tool: {mass: 0, com_x: 0, com_y: 0, com_z: 0}
+
+    # w.r.t. robot_base_link
+    gravity: {x: 0, y: 0, z: -9.82}
 
     pid_gains:
         trans_x: {p: 0.05, i: 0, d: 0}
