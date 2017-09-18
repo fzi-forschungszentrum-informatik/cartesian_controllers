@@ -76,6 +76,10 @@
                 <param name="tf_prefix" type="string" value="" />
         </node>
 
+        <!-- Load robot_description to parameter server -->
+        <param name="/robot_description"
+        command="$(find xacro)/xacro.py '$(find cartesian_controller_test)/robot.urdf.xacro'" />
+
         <!-- Joint state publisher -->
         <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" args="joint_state_controller force_torque_sensor_controller" respawn="false" output="screen"/>
 
