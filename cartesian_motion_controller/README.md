@@ -20,7 +20,7 @@ my_cartesian_motion_controller:
     - joint_name_6
 
     solver:
-        mass: 2.0
+        mass: 0.5
         inertia: 0.05
 
     pid_gains:
