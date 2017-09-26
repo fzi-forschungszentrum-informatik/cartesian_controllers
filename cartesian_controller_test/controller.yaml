@@ -12,7 +12,7 @@ my_cartesian_motion_controller:
     - wrist_3_joint
 
     solver:
-        mass: 2.0
+        mass: 0.5
         inertia: 0.05
 
     pid_gains:
