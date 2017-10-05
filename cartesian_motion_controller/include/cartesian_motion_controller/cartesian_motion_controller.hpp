@@ -48,6 +48,21 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
+  // Lookup the current target position
+  m_tf_listener.waitForTransform(
+    Base::m_end_effector_link,
+    Base::m_end_effector_link,
+    ros::Time(0),
+    ros::Duration(5.1)
+    );
+
+  m_tf_listener.lookupTransform(
+    Base::m_robot_base_link,  // I want my pose displayed in this frame
+    Base::m_end_effector_link,
+    ros::Time(0),
+    m_current_target_pose);
+
+  ROS_INFO_STREAM("Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
   Base::starting(time);
 }
 
@@ -104,7 +119,6 @@ computeMotionError()
 {
   // Compute motion error wrt robot_base_link
   tf::StampedTransform current_pose = Base::m_forward_dynamics_solver.getEndEffectorPose();
-  tf::StampedTransform target_pose;
 
   try
   {
@@ -122,19 +136,32 @@ computeMotionError()
         Base::m_robot_base_link,  // I want my pose displayed in this frame
         m_target_frame,
         ros::Time(0),
-        target_pose);
+        m_current_target_pose);
+    ROS_INFO_STREAM_THROTTLE(3, "Found valid transform from time " << m_current_target_pose.stamp_);
+    if (ros::Time::now() - m_current_target_pose.stamp_ > ros::Duration(0.5))
+    {
+      m_tf_listener.lookupTransform(
+        Base::m_robot_base_link,  // I want my pose displayed in this frame
+        Base::m_end_effector_link,
+        ros::Time(0),
+        m_current_target_pose);
+
+      ROS_INFO_STREAM_THROTTLE(3, "Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
+      m_tf_listener.clear();
+    }
   }
   catch (tf::TransformException& e)
   {
     ROS_WARN_THROTTLE(3,"CartesianMotionController: %s",e.what());
-    return ctrl::Vector6D::Zero();
+    ROS_WARN_STREAM_THROTTLE(3, "Using last used pose: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
   }
+
 
   // Use KDL math
   KDL::Frame current_pose_kdl;
   KDL::Frame target_pose_kdl;
   tf::transformTFToKDL(current_pose,current_pose_kdl);
-  tf::transformTFToKDL(target_pose,target_pose_kdl);
+  tf::transformTFToKDL(m_current_target_pose,target_pose_kdl);
 
   // Transformation from target -> current corresponds to error = target - current
   KDL::Frame error_kdl;

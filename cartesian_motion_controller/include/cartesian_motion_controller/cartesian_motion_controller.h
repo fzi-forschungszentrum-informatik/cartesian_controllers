@@ -43,6 +43,7 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
 
   private:
     tf::TransformListener m_tf_listener;
+    tf::StampedTransform  m_current_target_pose;
     std::string           m_target_frame;
 };
 
