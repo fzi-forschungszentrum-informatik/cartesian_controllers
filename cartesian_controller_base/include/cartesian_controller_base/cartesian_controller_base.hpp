@@ -203,7 +203,7 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
       from);
 
   // Rotate into new reference frame
-  wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;
+  wrench_kdl = transform_kdl.M * wrench_kdl;
 
   // Reassign
   ctrl::Vector6D out;
