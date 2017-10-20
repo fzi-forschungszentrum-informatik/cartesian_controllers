@@ -3,8 +3,6 @@
         <param name="/robot_description"
         command="$(find xacro)/xacro.py '$(find cartesian_controller_test)/robot.urdf.xacro'" />
 
-        <remap from="wrench" to="/my_cartesian_compliance_controller/ft_sensor_wrench" />
-
         <!-- Load empty gazebo -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
                 <arg name="world_name" default="worlds/empty.world"/>
@@ -55,8 +53,6 @@
                 <param name="child_frame" value="my_target" />
                 <param name="rate" value="100.0" />
         </node>
-
-        <include file="$(find weiss_kms40)/launch/kms40.launch" />
 
         <!-- Visualization -->
         <arg name="my_rviz" value="-d $(find cartesian_controller_test)/test.rviz" />
