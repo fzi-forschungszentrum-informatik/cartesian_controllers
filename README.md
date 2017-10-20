@@ -45,6 +45,17 @@ This means the controllers from this package *do not exactly reproduce Cartesian
 They will reach the target, however, with high precision, if the kinematics allows for it.
 The responsiveness of the controllers and with it the path accuracy can be tweaked with a special kind of damping and the control gains of each controller.
 
+## Dependencies
+To run cartestion_controller_test test_simulation.launch you need the following Ubuntu packages:
+ # ros_control
+ sudo apt install ros-kinetic-gazebo-ros-control
+ sudo apt install ros-kinetic-ros-controllers
+
+ # for tf_publisher_gui:
+ sudo apt install python-wxgtk3.0
+ git clone https://github.com/uos/uos_tools.git
+ makeros
+
 ## Controller gains
 The controller gains from each README.md represent sane default values for each controller type. If you don't have good reasons not to, then use those defaults.
 The responsiveness, and with it contact stability, should be adjusted via the solver specific *mass* and *inertia* parameters.
