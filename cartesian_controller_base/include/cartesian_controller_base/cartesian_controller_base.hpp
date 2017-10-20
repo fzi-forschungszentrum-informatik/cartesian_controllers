@@ -266,7 +266,7 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
       to);
 
   // Rotate into new reference frame
-  wrench_kdl = transform_kdl.M * wrench_kdl;
+  wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;
 
   // Reassign
   ctrl::Vector6D out;
