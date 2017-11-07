@@ -29,14 +29,49 @@ MotionControlHandle::~MotionControlHandle()
 
 bool MotionControlHandle::init()
 {
-  m_server.reset(new interactive_markers::InteractiveMarkerServer("test_marker","",false));
+  // Get configuration from parameter server
+  ros::NodeHandle nh;
+  if (!nh.getParam("robot_base_link",m_robot_base_link))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
+    return false;
+  }
+  if (!nh.getParam("end_effector_link",m_end_effector_link))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
+    return false;
+  }
+  if (!nh.getParam("target_frame",m_target_frame))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
+    return false;
+  }
+
+  // Start with the marker at robot end-effector on startup
+  m_tf_listener.waitForTransform(
+    m_robot_base_link,
+    m_end_effector_link,
+    ros::Time(0),
+    ros::Duration(10)
+    );
+
+  tf::StampedTransform tmp;
+  m_tf_listener.lookupTransform(
+    m_robot_base_link,  // I want my pose displayed in this frame
+    m_end_effector_link,
+    ros::Time(0),
+    tmp);
+
+  geometry_msgs::Pose initial_pose;
+  tf::poseTFToMsg(tmp,initial_pose);
+
 
   // Configure the interactive marker for usage in RViz
+  m_server.reset(new interactive_markers::InteractiveMarkerServer("test_marker","",false));
 
   m_marker.header.frame_id = "base_link";
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
   m_marker.name = "my_marker";
-  geometry_msgs::Pose initial_pose;
   m_marker.pose = initial_pose;
   m_marker.description = "6D Cartesian control of the <end_effector_name> end-effector.";
 
@@ -101,7 +136,7 @@ void MotionControlHandle::updateMotionControlCallback(
         pose,
         ros::Time::now(),
         m_robot_base_link,
-        m_end_effector_link));
+        m_target_frame));
 }
 
 

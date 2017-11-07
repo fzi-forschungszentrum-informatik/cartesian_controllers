@@ -18,6 +18,7 @@
 
 // TF
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 // Other
 #include <boost/shared_ptr.hpp>
@@ -63,7 +64,9 @@ class MotionControlHandle
     // Kinematics
     std::string               m_robot_base_link;
     std::string               m_end_effector_link;
+    std::string               m_target_frame;
     tf::TransformBroadcaster  m_tf_broadcaster;
+    tf::TransformListener     m_tf_listener;
 
     // Interactive marker
     boost::shared_ptr<
