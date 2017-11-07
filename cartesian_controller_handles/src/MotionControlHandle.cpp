@@ -51,28 +51,35 @@ bool MotionControlHandle::init()
 
   // Start with the marker at current robot end-effector
   geometry_msgs::Pose initial_pose;
-  try
-  {
-    m_tf_listener.waitForTransform(
-        m_robot_base_link,
-        m_end_effector_link,
-        ros::Time(0),
-        ros::Duration(10)
-        );
 
-    tf::StampedTransform tmp;
-    m_tf_listener.lookupTransform(
-        m_robot_base_link,  // I want my pose displayed in this frame
-        m_end_effector_link,
-        ros::Time(0),
-        tmp);
-
-    tf::poseTFToMsg(tmp,initial_pose);
-  }
-  catch (tf::TransformException& e)
+  // Check Martin Gunthers answer for why this loop is necessary.
+  // https://answers.ros.org/question/38222/tf-extrapolation-exception-using-rostime0/
+  bool success = false;
+  while (!success)
   {
-    e.what();
-    return false;
+    try
+    {
+      m_tf_listener.waitForTransform(
+          m_robot_base_link,
+          m_end_effector_link,
+          ros::Time(0),
+          ros::Duration(1.0)  // Will be ignored when throwing exceptions
+          );
+
+      tf::StampedTransform tmp;
+      m_tf_listener.lookupTransform(
+          m_robot_base_link,  // I want my pose displayed in this frame
+          m_end_effector_link,
+          ros::Time(0),
+          tmp);
+
+      success = true;
+      tf::poseTFToMsg(tmp,initial_pose);
+    }
+    catch (tf::TransformException& e)
+    {
+    }
+    ros::Duration(0.1).sleep();
   }
 
 
