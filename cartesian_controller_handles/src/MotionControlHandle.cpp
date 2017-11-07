@@ -49,23 +49,31 @@ bool MotionControlHandle::init()
     return false;
   }
 
-  // Start with the marker at robot end-effector on startup
-  m_tf_listener.waitForTransform(
-    m_robot_base_link,
-    m_end_effector_link,
-    ros::Time(0),
-    ros::Duration(10)
-    );
-
-  tf::StampedTransform tmp;
-  m_tf_listener.lookupTransform(
-    m_robot_base_link,  // I want my pose displayed in this frame
-    m_end_effector_link,
-    ros::Time(0),
-    tmp);
-
+  // Start with the marker at current robot end-effector
   geometry_msgs::Pose initial_pose;
-  tf::poseTFToMsg(tmp,initial_pose);
+  try
+  {
+    m_tf_listener.waitForTransform(
+        m_robot_base_link,
+        m_end_effector_link,
+        ros::Time(0),
+        ros::Duration(10)
+        );
+
+    tf::StampedTransform tmp;
+    m_tf_listener.lookupTransform(
+        m_robot_base_link,  // I want my pose displayed in this frame
+        m_end_effector_link,
+        ros::Time(0),
+        tmp);
+
+    tf::poseTFToMsg(tmp,initial_pose);
+  }
+  catch (tf::TransformException& e)
+  {
+    e.what();
+    return false;
+  }
 
 
   // Configure the interactive marker for usage in RViz
