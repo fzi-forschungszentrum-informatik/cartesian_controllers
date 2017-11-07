@@ -9,6 +9,9 @@ project(cartesian_controller_handles)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  interactive_markers
+  geometry_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
