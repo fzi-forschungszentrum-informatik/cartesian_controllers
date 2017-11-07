@@ -97,13 +97,13 @@ bool MotionControlHandle::init()
 
 
   // Configure the interactive marker for usage in RViz
-  m_server.reset(new interactive_markers::InteractiveMarkerServer("test_marker","",false));
+  m_server.reset(new interactive_markers::InteractiveMarkerServer("motion_control_handle","",false));
 
-  m_marker.header.frame_id = "base_link";
+  m_marker.header.frame_id = m_robot_base_link;
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
-  m_marker.name = "my_marker";
+  m_marker.name = "motion_control_handle";
   tf::poseTFToMsg(m_current_pose,m_marker.pose);
-  m_marker.description = "6D Cartesian control of the <end_effector_name> end-effector.";
+  m_marker.description = "6D control of link: " + m_end_effector_link;
 
   // Create a sphere as a handle
   visualization_msgs::Marker visual;
