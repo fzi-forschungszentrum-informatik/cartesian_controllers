@@ -18,15 +18,10 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "motion_control_handle_node");
   ros::NodeHandle nh;
 
-  ros::Rate rate(100);
-
   // Enable grafical motion control in RViz
   cartesian_controller_handles::MotionControlHandle motion_handle;
 
-  while (ros::ok())
-  {
-    rate.sleep();
-  }
+  ros::spin();
 
   return 0;
 }
