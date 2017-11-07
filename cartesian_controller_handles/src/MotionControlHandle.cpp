@@ -21,6 +21,8 @@ MotionControlHandle::MotionControlHandle()
   {
     throw std::logic_error("Failed to initialize motion control handle.");
   }
+  ROS_INFO_STREAM("Initialized motion control handle for: "
+      << m_end_effector_link);
 }
 
 MotionControlHandle::~MotionControlHandle()
