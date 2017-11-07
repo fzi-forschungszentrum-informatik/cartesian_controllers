@@ -88,9 +88,9 @@ bool MotionControlHandle::init()
   // Create a sphere as a handle
   visualization_msgs::Marker visual;
   visual.type = visualization_msgs::Marker::SPHERE;
-  visual.scale.x = 0.01;  // bounding box in meter
-  visual.scale.y = 0.01;
-  visual.scale.z = 0.01;
+  visual.scale.x = 0.05;  // bounding box in meter
+  visual.scale.y = 0.05;
+  visual.scale.z = 0.05;
   visual.color.r = 0.6;
   visual.color.g = 0.0;
   visual.color.b = 0.2;
