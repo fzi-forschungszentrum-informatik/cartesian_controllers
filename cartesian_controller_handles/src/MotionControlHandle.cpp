@@ -29,6 +29,18 @@ MotionControlHandle::~MotionControlHandle()
 {
 }
 
+void MotionControlHandle::update()
+{
+  // Broadcast marker pose to TF
+  m_tf_broadcaster.sendTransform(
+      tf::StampedTransform(
+        m_current_pose,
+        ros::Time::now(),
+        m_robot_base_link,
+        m_target_frame));
+}
+
+
 bool MotionControlHandle::init()
 {
   // Get configuration from parameter server
@@ -49,8 +61,6 @@ bool MotionControlHandle::init()
     return false;
   }
 
-  // Start with the marker at current robot end-effector
-  geometry_msgs::Pose initial_pose;
 
   // Check Martin Gunthers answer for why this loop is necessary.
   // https://answers.ros.org/question/38222/tf-extrapolation-exception-using-rostime0/
@@ -74,7 +84,10 @@ bool MotionControlHandle::init()
           tmp);
 
       success = true;
-      tf::poseTFToMsg(tmp,initial_pose);
+
+      // Start with the marker at current robot end-effector
+      m_current_pose.setOrigin(tmp.getOrigin());
+      m_current_pose.setRotation(tmp.getRotation());
     }
     catch (tf::TransformException& e)
     {
@@ -89,7 +102,7 @@ bool MotionControlHandle::init()
   m_marker.header.frame_id = "base_link";
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
   m_marker.name = "my_marker";
-  m_marker.pose = initial_pose;
+  tf::poseTFToMsg(m_current_pose,m_marker.pose);
   m_marker.description = "6D Cartesian control of the <end_effector_name> end-effector.";
 
   // Create a sphere as a handle
@@ -144,16 +157,9 @@ void MotionControlHandle::updateMotionControlCallback(
   m_server->setPose(feedback->marker_name,feedback->pose);
   m_server->applyChanges();
 
-  // Publish pose to TF
-  tf::Transform pose;
-  tf::poseMsgToTF(feedback->pose,pose);
+  // Store for later broadcasting
+  tf::poseMsgToTF(feedback->pose,m_current_pose);
 
-  m_tf_broadcaster.sendTransform(
-      tf::StampedTransform(
-        pose,
-        ros::Time::now(),
-        m_robot_base_link,
-        m_target_frame));
 }
 
 

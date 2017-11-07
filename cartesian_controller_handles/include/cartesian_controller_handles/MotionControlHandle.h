@@ -40,15 +40,22 @@ class MotionControlHandle
     MotionControlHandle();
     ~MotionControlHandle();
 
+    /**
+     * @brief Publish pose of the control handle to TF
+     *
+     * This function must be called periodically from an outside node.
+     * The TF can be used as \a target_frame for \a Cartesian
+     * \a Controllers.
+     */
+    void update();
+
   private:
     bool init();
 
     /**
      * @brief Move visual marker in RViz according to user interaction
      *
-     * This function also broadcasts a TF to where the interactive marker is
-     * supposed to be. This TF can be used as \a target_frame for \a Cartesian
-     * \a Controllers.
+     * This function also stores the marker pose internally.
      *
      * @param feedback The message containing the current pose of the marker
      */
@@ -65,6 +72,7 @@ class MotionControlHandle
     std::string               m_robot_base_link;
     std::string               m_end_effector_link;
     std::string               m_target_frame;
+    tf::Transform             m_current_pose;
     tf::TransformBroadcaster  m_tf_broadcaster;
     tf::TransformListener     m_tf_listener;
 
