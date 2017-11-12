@@ -101,6 +101,7 @@ bool MotionControlHandle::init()
 
   m_marker.header.frame_id = m_robot_base_link;
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
+  m_marker.scale = 0.1;
   m_marker.name = "motion_control_handle";
   tf::poseTFToMsg(m_current_pose,m_marker.pose);
   m_marker.description = "6D control of link: " + m_end_effector_link;
