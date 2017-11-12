@@ -168,4 +168,28 @@ void MotionControlHandle::updateMarkerMenuCallback(
 {
 }
 
+void MotionControlHandle::addAxisControl(
+    visualization_msgs::InteractiveMarker& marker, double x, double y, double z)
+{
+  if (x == y == z == 0)
+  {
+    return;
+  }
+
+  visualization_msgs::InteractiveMarkerControl control;
+
+  double norm = std::sqrt(1 + x*x + y*y + z*z);
+  control.orientation.w = 1/norm;
+  control.orientation.x = x/norm;
+  control.orientation.y = y/norm;
+  control.orientation.z = z/norm;
+
+  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  marker.controls.push_back(control);
+
+  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+  marker.controls.push_back(control);
+
+}
+
 }

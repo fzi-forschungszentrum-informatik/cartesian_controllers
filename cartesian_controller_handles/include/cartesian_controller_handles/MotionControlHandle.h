@@ -68,6 +68,19 @@ class MotionControlHandle
      */
     void updateMarkerMenuCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
 
+    /**
+     * @brief Adds interactive controls (arrows) to a marker.
+     *
+     * Both move and rotate controls are added along the specified
+     * axis. The axis is normalized.
+     *
+     * @param marker The marker to which the controls are added
+     * @param x X-axis component
+     * @param y Y-axis component
+     * @param z Z-axis component
+     */
+    void addAxisControl(visualization_msgs::InteractiveMarker& marker, double x, double y, double z);
+
     // Kinematics
     std::string               m_robot_base_link;
     std::string               m_end_effector_link;
