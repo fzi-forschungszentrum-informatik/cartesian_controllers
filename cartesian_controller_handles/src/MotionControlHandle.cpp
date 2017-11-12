@@ -112,9 +112,9 @@ bool MotionControlHandle::init()
   visual.scale.x = 0.05;  // bounding box in meter
   visual.scale.y = 0.05;
   visual.scale.z = 0.05;
-  visual.color.r = 0.6;
-  visual.color.g = 0.0;
-  visual.color.b = 0.2;
+  visual.color.r = 1.0;
+  visual.color.g = 0.5;
+  visual.color.b = 0.0;
   visual.color.a = 1.0;
 
   // Create a non-interactive control for the appearance
