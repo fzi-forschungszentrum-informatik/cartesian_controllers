@@ -122,12 +122,10 @@ bool MotionControlHandle::init()
   visual_control.markers.push_back(visual);
   m_marker.controls.push_back(visual_control);
 
-  // Create a control which will move the handle
-  visualization_msgs::InteractiveMarkerControl cartesian_control;
-  cartesian_control.name = "move 6D";
-  cartesian_control.interaction_mode =
-    visualization_msgs::InteractiveMarkerControl::MOVE_ROTATE_3D;
-  m_marker.controls.push_back(cartesian_control);
+  // Create move and rotate controls along all axis
+  addAxisControl(m_marker,1,0,0);
+  addAxisControl(m_marker,0,1,0);
+  addAxisControl(m_marker,0,0,1);
 
   // Add the interactive marker to the server
   m_server->insert(m_marker);
