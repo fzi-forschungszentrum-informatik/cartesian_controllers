@@ -47,12 +47,8 @@
                 <node name="controller_spawner" pkg="controller_manager" type="spawner" args="joint_trajectory_controller" />
         </group>
 
-        <!-- Testing tool for tf publishing -->
-        <node pkg="tf_publisher_gui" type="tf_publisher_gui" name="tf_publisher_gui" output="screen">
-                <param name="parent_frame" value="testing_ref" />
-                <param name="child_frame" value="my_target" />
-                <param name="rate" value="100.0" />
-        </node>
+        <!-- Interactive end-effector control in RViz  -->
+        <include file="$(find cartesian_controller_handles)/launch/cartesian_controller_handles.launch"/>
 
         <!-- Visualization -->
         <arg name="my_rviz" value="-d $(find cartesian_controller_test)/test.rviz" />

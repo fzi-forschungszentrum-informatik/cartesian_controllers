@@ -6,11 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1
         - /TF1/Frames1
         - /RobotModel1/Links1
-        - /WrenchStamped1
-      Splitter Ratio: 0.5
+        - /InteractiveMarkers1
+        - /InteractiveMarkers1/Status1
+      Splitter Ratio: 0.511482
     Tree Height: 589
   - Class: rviz/Selection
     Name: Selection
@@ -67,14 +67,14 @@ Visualization Manager:
           Value: false
         my_target:
           Value: true
+        sensor_link:
+          Value: false
         shoulder_link:
           Value: false
         testing_ref:
           Value: false
         tool0:
           Value: false
-        tool0_virtual:
-          Value: true
         upper_arm_link:
           Value: false
         world:
@@ -85,7 +85,7 @@ Visualization Manager:
           Value: false
         wrist_3_link:
           Value: false
-      Marker Scale: 1
+      Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -94,6 +94,8 @@ Visualization Manager:
         world:
           base_link:
             base:
+              {}
+            my_target:
               {}
             shoulder_link:
               upper_arm_link:
@@ -104,11 +106,9 @@ Visualization Manager:
                         ee_link:
                           {}
                         tool0:
-                          {}
-            tool0_virtual:
-              {}
-          testing_ref:
-            my_target:
+                          sensor_link:
+                            {}
+            testing_ref:
               {}
       Update Interval: 0
       Value: true
@@ -141,6 +141,10 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        sensor_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         shoulder_link:
           Alpha: 1
           Show Axes: false
@@ -197,6 +201,15 @@ Visualization Manager:
       Torque Color: 204; 204; 51
       Unreliable: false
       Value: true
+    - Class: rviz/InteractiveMarkers
+      Enable Transparency: false
+      Enabled: true
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: false
+      Show Visual Aids: true
+      Update Topic: /my_cartesian_motion_controller/motion_control_handle/update
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -221,22 +234,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.23655
+      Distance: 1.77148
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -0.0891485
+        Y: -0.356734
+        Z: 0.414951
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.534797
+      Pitch: 0.159797
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.485398
+      Yaw: 0.6854
     Saved: ~
 Window Geometry:
   Displays:
@@ -254,5 +267,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1514
-  X: 2159
-  Y: 414
+  X: 2129
+  Y: 398
