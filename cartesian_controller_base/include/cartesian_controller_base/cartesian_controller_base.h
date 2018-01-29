@@ -52,6 +52,9 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     virtual void starting(const ros::Time& time);
 
+    void pause(const ros::Time& time);
+
+
   protected:
     void writeJointControlCmds();
 
