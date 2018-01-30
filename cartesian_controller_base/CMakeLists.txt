@@ -109,7 +109,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cartesian_controller_base
-#  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp controller_interface kdl_parser trajectory_msgs control_toolbox eigen_conversions dynamic_reconfigure
 #  DEPENDS system_lib
 )
 
