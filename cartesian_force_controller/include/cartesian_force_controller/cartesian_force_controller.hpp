@@ -47,8 +47,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Get static ft sensor transform
   // TODO: Get this from somethwere once!
   m_ft_sensor_transform = KDL::Frame(
-      KDL::Rotation::Quaternion(0,0,0,1), // x,y,z,w
-      KDL::Vector(0,0,0));  // x,y,z
+      KDL::Rotation::Quaternion(0.000, 0.707, 0.707, 0.000), // x,y,z,w
+      KDL::Vector(-0.000, -0.251, -0.018));  // x,y,z
 
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
