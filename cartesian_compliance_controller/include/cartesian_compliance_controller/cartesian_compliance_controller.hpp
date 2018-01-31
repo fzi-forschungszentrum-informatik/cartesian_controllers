@@ -48,6 +48,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  // Compliance control w. r. t. the compliance reference link
+  ForceBase::m_ft_sensor_target_ref_link = m_compliance_ref_link;
+
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
   // the according names exist.

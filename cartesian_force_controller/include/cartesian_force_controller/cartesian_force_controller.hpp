@@ -41,6 +41,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  // Force control w. r. t. the end effector
+  m_ft_sensor_target_ref_link = Base::m_end_effector_link;
+
+  // Get static ft sensor transform
+  // TODO: Get this from somethwere once!
+  m_ft_sensor_transform = KDL::Frame(
+      KDL::Rotation::Quaternion(0,0,0,1), // x,y,z,w
+      KDL::Vector(0,0,0));  // x,y,z
+
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
   m_ft_sensor_wrench_subscriber = nh.subscribe("ft_sensor_wrench",2,&CartesianForceController<HardwareInterface>::ftSensorWrenchCallback,this);
@@ -129,7 +138,7 @@ ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_ref_link)
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_target_ref_link)
     + Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
     + compensateGravity();
 }
@@ -172,12 +181,23 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
 {
-  m_ft_sensor_wrench[0] = wrench.wrench.force.x;
-  m_ft_sensor_wrench[1] = wrench.wrench.force.y;
-  m_ft_sensor_wrench[2] = wrench.wrench.force.z;
-  m_ft_sensor_wrench[3] = wrench.wrench.torque.x;
-  m_ft_sensor_wrench[4] = wrench.wrench.torque.y;
-  m_ft_sensor_wrench[5] = wrench.wrench.torque.z;
+  KDL::Wrench tmp;
+  tmp[0] = wrench.wrench.force.x;
+  tmp[1] = wrench.wrench.force.y;
+  tmp[2] = wrench.wrench.force.z;
+  tmp[3] = wrench.wrench.torque.x;
+  tmp[4] = wrench.wrench.torque.y;
+  tmp[5] = wrench.wrench.torque.z;
+
+  // Compute how the measured wrench appears in the target reference frame.
+  tmp = m_ft_sensor_transform * tmp;
+
+  m_ft_sensor_wrench[0] = tmp[0];
+  m_ft_sensor_wrench[1] = tmp[1];
+  m_ft_sensor_wrench[2] = tmp[2];
+  m_ft_sensor_wrench[3] = tmp[3];
+  m_ft_sensor_wrench[4] = tmp[4];
+  m_ft_sensor_wrench[5] = tmp[5];
 }
 
 template <class HardwareInterface>
