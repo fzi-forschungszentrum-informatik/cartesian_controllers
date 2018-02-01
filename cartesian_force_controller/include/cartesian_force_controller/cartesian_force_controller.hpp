@@ -41,14 +41,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
-  // Force control w. r. t. the end effector
-  m_ft_sensor_target_ref_link = Base::m_end_effector_link;
-
-  // Get static ft sensor transform
-  // TODO: Get this from somethwere once!
-  m_ft_sensor_transform = KDL::Frame(
-      KDL::Rotation::Quaternion(0.000, 0.707, 0.707, 0.000), // x,y,z,w
-      KDL::Vector(-0.000, -0.251, -0.018));  // x,y,z
+  // Make sure sensor wrenches are interpreted correctly
+  setFtSensorReferenceFrame(Base::m_end_effector_link);
 
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
@@ -138,9 +132,36 @@ ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_ft_sensor_target_ref_link)
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref)
     + Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link)
     + compensateGravity();
+}
+
+template <class HardwareInterface>
+void CartesianForceController<HardwareInterface>::
+setFtSensorReferenceFrame(const std::string& new_ref)
+{
+  // Compute static transform from the force torque sensor to the new reference
+  // frame of interest.
+  m_new_ft_sensor_ref = new_ref;
+
+  // Joint positions should cancel out, i.e. it doesn't matter as long as they
+  // are the same for both transformations.
+  KDL::JntArray jnts(Base::m_forward_dynamics_solver.getPositions());
+
+  KDL::Frame sensor_ref;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      sensor_ref,
+      m_ft_sensor_ref_link);
+
+  KDL::Frame new_sensor_ref;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      new_sensor_ref,
+      m_new_ft_sensor_ref);
+
+  m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
 }
 
 template <class HardwareInterface>
@@ -189,7 +210,7 @@ ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
   tmp[4] = wrench.wrench.torque.y;
   tmp[5] = wrench.wrench.torque.z;
 
-  // Compute how the measured wrench appears in the target reference frame.
+  // Compute how the measured wrench appears in the frame of interest.
   tmp = m_ft_sensor_transform * tmp;
 
   m_ft_sensor_wrench[0] = tmp[0];

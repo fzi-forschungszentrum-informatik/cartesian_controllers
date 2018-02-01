@@ -43,7 +43,8 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
 
   protected:
     ctrl::Vector6D        computeForceError();
-    std::string           m_ft_sensor_target_ref_link;
+    std::string           m_new_ft_sensor_ref;
+    void setFtSensorReferenceFrame(const std::string& new_ref);
 
   private:
     ctrl::Vector6D        compensateGravity();
