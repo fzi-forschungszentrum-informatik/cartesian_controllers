@@ -151,13 +151,6 @@ starting(const ros::Time& time)
   m_forward_dynamics_solver.setStartState(m_joint_handles);
 }
 
-template <class HardwareInterface>
-void CartesianControllerBase<HardwareInterface>::
-pause(const ros::Time& time)
-{
-  // Nothing to do here at the moment
-}
-
 template <>
 void CartesianControllerBase<hardware_interface::PositionJointInterface>::
 writeJointControlCmds()
