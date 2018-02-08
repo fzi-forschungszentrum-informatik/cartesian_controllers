@@ -48,19 +48,13 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  // Lookup the current target position
-  m_tf_listener.waitForTransform(
-    Base::m_end_effector_link,
-    Base::m_end_effector_link,
-    ros::Time(0),
-    ros::Duration(5.1)
-    );
-
   m_tf_listener.lookupTransform(
     Base::m_robot_base_link,  // I want my pose displayed in this frame
     Base::m_end_effector_link,
     ros::Time(0),
     m_current_target_pose);
+
+  m_tf_listener.clear();
 
   ROS_INFO_STREAM("Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
   Base::starting(time);
@@ -76,6 +70,8 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
+  ROS_INFO_ONCE("First update call");
+
   // Forward Dynamics turns the search for the according joint motion into a
   // control process. So, we control the internal model until we meet the
   // Cartesian target motion. This internal control needs some simulation time
@@ -146,14 +142,24 @@ computeMotionError()
         ros::Time(0),
         m_current_target_pose);
 
-      ROS_INFO_STREAM_THROTTLE(3, "Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
+      ROS_INFO_STREAM_THROTTLE(
+        3,
+        "Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", "
+                                          << m_current_target_pose.getOrigin().getY()
+                                          << ", "
+                                          << m_current_target_pose.getOrigin().getZ());
       m_tf_listener.clear();
     }
   }
   catch (tf::TransformException& e)
   {
-    ROS_WARN_THROTTLE(3,"CartesianMotionController: %s",e.what());
-    ROS_WARN_STREAM_THROTTLE(3, "Using last used pose: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
+    ROS_WARN_THROTTLE(3, "CartesianMotionController: %s", e.what());
+    ROS_WARN_STREAM_THROTTLE(3,
+                             "Using last used pose: " << m_current_target_pose.getOrigin().getX()
+                                                      << ", "
+                                                      << m_current_target_pose.getOrigin().getY()
+                                                      << ", "
+                                                      << m_current_target_pose.getOrigin().getZ());
   }
 
 
