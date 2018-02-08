@@ -130,8 +130,10 @@ computeMotionError()
 
     m_tf_listener.lookupTransform(
         Base::m_robot_base_link,  // I want my pose displayed in this frame
+        ros::Time(0),
         m_target_frame,
         ros::Time(0),
+        "door_0",
         m_current_target_pose);
     ROS_INFO_STREAM_THROTTLE(3, "Found valid transform from time " << m_current_target_pose.stamp_);
     if (ros::Time::now() - m_current_target_pose.stamp_ > ros::Duration(0.5))
