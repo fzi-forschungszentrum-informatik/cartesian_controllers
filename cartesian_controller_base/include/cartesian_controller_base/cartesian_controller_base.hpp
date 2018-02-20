@@ -162,10 +162,11 @@ pause(const ros::Time& time)
 }
 
 template <class HardwareInterface>
-void CartesianControllerBase<HardwareInterface>::
+bool CartesianControllerBase<HardwareInterface>::
 resume(const ros::Time& time)
 {
   m_paused = false;
+  return true;
 }
 
 template <>
