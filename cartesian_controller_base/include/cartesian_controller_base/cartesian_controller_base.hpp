@@ -140,6 +140,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   m_already_initialized = true;
 
+  // Start with normal ROS control behavior
+  m_paused = false;
+
   return true;
 }
 
@@ -155,6 +158,7 @@ template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 pause(const ros::Time& time)
 {
+  m_paused = true;
   // Nothing to do here at the moment
 }
 
@@ -162,6 +166,15 @@ template <>
 void CartesianControllerBase<hardware_interface::PositionJointInterface>::
 writeJointControlCmds()
 {
+  // Don't update position commands when paused.
+  // Note: CartesianMotionControllers don't take any feedback from the joint
+  // handles. These controllers will drift if the target frame they are
+  // following isn't also paused.
+  if (m_paused)
+  {
+    return;
+  }
+
   // Take position commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
@@ -173,6 +186,15 @@ template <>
 void CartesianControllerBase<hardware_interface::VelocityJointInterface>::
 writeJointControlCmds()
 {
+  // Don't update velocity commands when paused.
+  // Note: CartesianMotionControllers don't take any feedback from the joint
+  // handles. These controllers will drift if the target frame they are
+  // following isn't also paused.
+  if (m_paused)
+  {
+    return;
+  }
+
   // Take velocity commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
