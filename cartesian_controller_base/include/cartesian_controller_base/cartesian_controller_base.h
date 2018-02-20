@@ -54,6 +54,8 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     void pause(const ros::Time& time);
 
+    void resume(const ros::Time& time);
+
 
   protected:
     void writeJointControlCmds();

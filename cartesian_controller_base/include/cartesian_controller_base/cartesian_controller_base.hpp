@@ -159,7 +159,13 @@ void CartesianControllerBase<HardwareInterface>::
 pause(const ros::Time& time)
 {
   m_paused = true;
-  // Nothing to do here at the moment
+}
+
+template <class HardwareInterface>
+void CartesianControllerBase<HardwareInterface>::
+resume(const ros::Time& time)
+{
+  m_paused = false;
 }
 
 template <>
