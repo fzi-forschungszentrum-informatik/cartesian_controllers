@@ -50,10 +50,10 @@ starting(const ros::Time& time)
 {
   try
   {
-    m_tf_listener.waitForTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
-                                 Base::m_end_effector_link,
-                                 ros::Time(0),
-                                 ros::Duration(1.0));
+    // m_tf_listener.waitForTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
+    //                              Base::m_end_effector_link,
+    //                              ros::Time(0),
+    //                              ros::Duration(1.0));
     m_tf_listener.lookupTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
                                   Base::m_end_effector_link,
                                   ros::Time(0),
