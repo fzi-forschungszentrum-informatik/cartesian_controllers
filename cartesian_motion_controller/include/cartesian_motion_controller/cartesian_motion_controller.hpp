@@ -48,11 +48,22 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  m_tf_listener.lookupTransform(
-    Base::m_robot_base_link,  // I want my pose displayed in this frame
-    Base::m_end_effector_link,
-    ros::Time(0),
-    m_current_target_pose);
+  try
+  {
+    m_tf_listener.waitForTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
+                                 Base::m_end_effector_link,
+                                 ros::Time(0),
+                                 ros::Duration(1.0));
+    m_tf_listener.lookupTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
+                                  Base::m_end_effector_link,
+                                  ros::Time(0),
+                                  m_current_target_pose);
+  }
+  catch (tf::TransformException& e)
+  {
+    ROS_WARN_STREAM("Could not make initial lookup when activating cartesian motion controller. Reason: " << e.what());
+    throw controller_interface::ControllerBaseException(e.what());
+  }
 
   m_tf_listener.clear();
 
