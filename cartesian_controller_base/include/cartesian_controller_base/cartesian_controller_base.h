@@ -72,8 +72,9 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::string             m_end_effector_link;
     std::string             m_robot_base_link;
 
-  private:
     bool m_paused;
+
+  private:
     std::vector<hardware_interface::JointHandle>      m_joint_handles;
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;

@@ -213,6 +213,11 @@ template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period)
 {
+  if (m_paused)
+  {
+    return;
+  }
+
   // PID controlled system input
   m_cartesian_input = m_spatial_controller(error,period);
 
