@@ -9,6 +9,7 @@ project(spacenav_to_wrench)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
