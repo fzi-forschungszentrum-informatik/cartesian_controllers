@@ -6,7 +6,7 @@ Adjust the launch file as needed.
 
 ## Usage
 ```bash
-roslaunch spacenav_to_wrench spacenav_to_wrench.launch
+roslaunch spacenav_utils spacenav_to_wrench.launch
 ```
 ## Disable GUI control in Gazebo
 When working with the 3DConnexion as a force control input device, you probably don't want to control gazebo's camera at the same time. Remember your kernel drivers still treat your force control thing as a space mouse, which is used by gazebo by default. To switch this behavior off add the following lines to the *~/.gazebo/gui.ini* file:
