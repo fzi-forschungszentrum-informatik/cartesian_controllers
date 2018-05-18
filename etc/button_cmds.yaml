@@ -1,0 +1,7 @@
+# Define button commands in this file
+
+button_cmds :
+        [
+                "echo \"starting to record ..\"",    # button 0
+                "echo \"stopping to record!\""  # button 1
+        ]

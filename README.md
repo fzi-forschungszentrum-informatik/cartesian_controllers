@@ -1,4 +1,4 @@
-# Spacenav To Wrench
+# Spacenav Utils
 A small helper node to re-publish *geometry_msgs/Twist* messages
 as *geometry_msgs/WrenchStamped* messages.
 It turns the *spacenav_node* from the *joystick_drivers* package into a force control input device.
