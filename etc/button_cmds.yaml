@@ -1,7 +1,19 @@
 # Define button commands in this file
 
+# Define which commands to execute on pressing buttons
 button_cmds :
         [
-                "echo \"starting to record ..\"",    # button 0
-                "echo \"stopping to record!\""  # button 1
+                # button 0
+                "rosbag record /my_topic -o my_bag __name:=my_baggi",
+                # button 1
+                "rosnode kill my_baggi"
+        ]
+
+# Directories where the commands are executed
+cmd_dirs :
+        [
+                # command 0
+                "",
+                # command 1
+                ""
         ]

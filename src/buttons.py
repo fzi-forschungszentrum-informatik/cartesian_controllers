@@ -5,7 +5,7 @@ import rospy
 from sensor_msgs.msg import Joy
 
 # Other
-from subprocess import call
+import subprocess
 
 class buttons:
     """ React to button events """
@@ -17,16 +17,23 @@ class buttons:
         self.sub = rospy.Subscriber(self.joystick_topic, Joy, self.event_callback)
 
         self.button_cmds = rospy.get_param('button_cmds')
+        self.cmd_dirs = rospy.get_param('cmd_dirs')
         self.last_button_cmds = None
-
 
     def event_callback(self,data):
         if data.buttons == self.last_button_cmds:
             return
         for idx, val in enumerate(data.buttons):
             if val == 1:
+                exec_dir = self.cmd_dirs[idx]
+                if not exec_dir:    # Empty string
+                    exec_dir = None
+                subprocess.Popen(
+                    self.button_cmds[idx],
+                    stdin=subprocess.PIPE,
+                    cwd=exec_dir,
+                    shell=True)
                 # Prevent pressing the same buttons in a row
-                call(self.button_cmds[idx],shell=True)
                 self.last_button_cmds = data.buttons
                 return
 
