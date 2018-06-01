@@ -17,10 +17,10 @@ class buttons:
         self.joystick_topic = rospy.get_param('~joystick_topic',default="my_joystick_topic")
         self.sub = rospy.Subscriber(self.joystick_topic, Joy, self.event_callback, queue_size=1)
 
-        self.repeat_same_button = rospy.get_param('repeat_same_button')
-        self.button_sleep = rospy.get_param('button_sleep')
-        self.button_cmds = rospy.get_param('button_cmds')
-        self.cmd_dirs = rospy.get_param('cmd_dirs')
+        self.repeat_same_button = rospy.get_param('~repeat_same_button')
+        self.button_sleep = rospy.get_param('~button_sleep')
+        self.button_cmds = rospy.get_param('~button_cmds')
+        self.cmd_dirs = rospy.get_param('~cmd_dirs')
         self.last_button_cmds = None
 
     def event_callback(self,data):
