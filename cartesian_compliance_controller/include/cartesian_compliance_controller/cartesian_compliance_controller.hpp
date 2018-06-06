@@ -111,11 +111,6 @@ template <>
 void CartesianComplianceController<hardware_interface::VelocityJointInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
-  if (Base::m_paused)
-  {
-    return;
-  }
-
   // Simulate only one step forward.
   // The constant simulation time adds to solver stability.
   ros::Duration internal_period(0.02);

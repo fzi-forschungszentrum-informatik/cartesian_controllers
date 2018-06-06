@@ -92,11 +92,6 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
-  if (Base::m_paused)
-  {
-    return;
-  }
-
   // Control the robot motion in such a way that the resulting net force
   // vanishes. This internal control needs some simulation time steps.
   const int steps = 10;
