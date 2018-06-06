@@ -33,8 +33,8 @@ As a further benefit of using Forward Dynamics all controllers can overcome sing
 They will *never* issue configuration changes.
 
 All controllers interpolate the given target poses. The amount of *how much* they interpolate can be set through the responsiveness. Check the section on *damping* for that.
-As an example, the *CartesianMotionController* can be given target poses via
-TF, that pop up somewhere with a relatively low frequency. Depending on how
+As an example, the *CartesianMotionController* can be given target poses,
+that pop up somewhere with a relatively low frequency. Depending on how
 responsive the system is, this can result in anything in between fast jumps or
 smooth, directed motion.
 

@@ -84,7 +84,7 @@ namespace cartesian_controller_base{
   }
 
 
-  const tf::StampedTransform& ForwardDynamicsSolver::getEndEffectorPose() const
+  const KDL::Frame& ForwardDynamicsSolver::getEndEffectorPose() const
   {
     return m_end_effector_pose;
   }
@@ -160,22 +160,17 @@ namespace cartesian_controller_base{
   void ForwardDynamicsSolver::updateKinematics()
   {
     // Pose w. r. t. base
-    KDL::Frame frame;
-    m_fk_pos_solver->JntToCart(m_current_positions,frame);
-    tf::poseKDLToTF(frame,m_end_effector_pose);
-
-    // Debug
-    //m_tf_broadcaster.sendTransform(
-        //tf::StampedTransform(
-          //m_end_effector_pose,
-          //ros::Time::now(),
-          //"base_link",
-          //"tool0_virtual"));
+    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
 
     // Absolute velocity w. r. t. base
     KDL::FrameVel vel;
     m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    tf::twistKDLToEigen(vel.deriv(),m_end_effector_vel);
+    m_end_effector_vel[0] = vel.deriv().vel.x();
+    m_end_effector_vel[1] = vel.deriv().vel.y();
+    m_end_effector_vel[2] = vel.deriv().vel.z();
+    m_end_effector_vel[3] = vel.deriv().rot.x();
+    m_end_effector_vel[4] = vel.deriv().rot.y();
+    m_end_effector_vel[5] = vel.deriv().rot.z();
   }
 
   bool ForwardDynamicsSolver::buildGenericModel(const KDL::Chain& input_chain)

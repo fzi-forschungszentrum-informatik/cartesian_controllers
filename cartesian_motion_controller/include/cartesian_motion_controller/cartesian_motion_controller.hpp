@@ -35,11 +35,20 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
   Base::init(hw,nh);
 
-  if (!nh.getParam("target_frame",m_target_frame))
+  if (!nh.getParam("target_frame_topic",m_target_frame_topic))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
-    return false;
+    m_target_frame_topic = "target_frame";
+    ROS_WARN_STREAM("Failed to load "
+        << nh.getNamespace() + "/target_frame_topic"
+        << " from parameter server. Will default to: "
+        << nh.getNamespace() + '/' + m_target_frame_topic);
   }
+
+  m_target_frame_subscr = nh.subscribe(
+      m_target_frame_topic,
+      3,  // TODO: What makes sense here?
+      &CartesianMotionController<HardwareInterface>::targetFrameCallback,
+      this);
 
   return true;
 }
@@ -48,27 +57,9 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 starting(const ros::Time& time)
 {
-  try
-  {
-    // m_tf_listener.waitForTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
-    //                              Base::m_end_effector_link,
-    //                              ros::Time(0),
-    //                              ros::Duration(1.0));
-    m_tf_listener.lookupTransform(Base::m_robot_base_link, // I want my pose displayed in this frame
-                                  Base::m_end_effector_link,
-                                  ros::Time(0),
-                                  m_current_target_pose);
-  }
-  catch (tf::TransformException& e)
-  {
-    ROS_WARN_STREAM("Could not make initial lookup when activating cartesian motion controller. Reason: " << e.what());
-    throw controller_interface::ControllerBaseException(e.what());
-  }
-
-  m_tf_listener.clear();
-
-  ROS_INFO_STREAM("Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", " << m_current_target_pose.getOrigin().getY() << ", " << m_current_target_pose.getOrigin().getZ());
+  // Reset simulation with real joint state
   Base::starting(time);
+  m_current_frame = Base::m_forward_dynamics_solver.getEndEffectorPose();
 }
 
 template <class HardwareInterface>
@@ -81,8 +72,6 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
-  ROS_INFO_ONCE("First update call");
-
   // Forward Dynamics turns the search for the according joint motion into a
   // control process. So, we control the internal model until we meet the
   // Cartesian target motion. This internal control needs some simulation time
@@ -125,67 +114,12 @@ ctrl::Vector6D CartesianMotionController<HardwareInterface>::
 computeMotionError()
 {
   // Compute motion error wrt robot_base_link
-  tf::StampedTransform current_pose = Base::m_forward_dynamics_solver.getEndEffectorPose();
-
-  try
-  {
-    /* // This blocks eternally, but why?
-
-    m_tf_listener.waitForTransform( // returns immediately if frames exist
-        m_robot_base_link,
-        m_target_frame,
-        ros::Time(0),   // anyone will be ok
-        ros::Duration(0.1)
-        );
-    */
-
-    m_tf_listener.lookupTransform(
-        Base::m_robot_base_link,  // I want my pose displayed in this frame
-        ros::Time(0),
-        m_target_frame,
-        ros::Time(0),
-        "door_0",
-        m_current_target_pose);
-    ROS_INFO_STREAM_THROTTLE(3, "Found valid transform from time " << m_current_target_pose.stamp_);
-    if (ros::Time::now() - m_current_target_pose.stamp_ > ros::Duration(0.5))
-    {
-      m_tf_listener.lookupTransform(
-        Base::m_robot_base_link,  // I want my pose displayed in this frame
-        Base::m_end_effector_link,
-        ros::Time(0),
-        m_current_target_pose);
-
-      ROS_INFO_STREAM_THROTTLE(
-        3,
-        "Saving current pose as target: " << m_current_target_pose.getOrigin().getX() << ", "
-                                          << m_current_target_pose.getOrigin().getY()
-                                          << ", "
-                                          << m_current_target_pose.getOrigin().getZ());
-      m_tf_listener.clear();
-    }
-  }
-  catch (tf::TransformException& e)
-  {
-    ROS_WARN_THROTTLE(3, "CartesianMotionController: %s", e.what());
-    ROS_WARN_STREAM_THROTTLE(3,
-                             "Using last used pose: " << m_current_target_pose.getOrigin().getX()
-                                                      << ", "
-                                                      << m_current_target_pose.getOrigin().getY()
-                                                      << ", "
-                                                      << m_current_target_pose.getOrigin().getZ());
-  }
-
-
-  // Use KDL math
-  KDL::Frame current_pose_kdl;
-  KDL::Frame target_pose_kdl;
-  tf::transformTFToKDL(current_pose,current_pose_kdl);
-  tf::transformTFToKDL(m_current_target_pose,target_pose_kdl);
+  m_current_frame = Base::m_forward_dynamics_solver.getEndEffectorPose();
 
   // Transformation from target -> current corresponds to error = target - current
   KDL::Frame error_kdl;
-  error_kdl.M = target_pose_kdl.M * current_pose_kdl.M.Inverse();
-  error_kdl.p = target_pose_kdl.p - current_pose_kdl.p;
+  error_kdl.M = m_target_frame.M * m_current_frame.M.Inverse();
+  error_kdl.p = m_target_frame.p - m_current_frame.p;
 
   // Use Rodrigues Vector for a compact representation of orientation errors
   // Only for angles within [0,Pi)
@@ -214,6 +148,22 @@ computeMotionError()
   error(5) = rot_axis(2);
 
   return error;
+}
+
+template <class HardwareInterface>
+void CartesianMotionController<HardwareInterface>::
+targetFrameCallback(const geometry_msgs::PoseStamped& target)
+{
+  m_target_frame = KDL::Frame(
+      KDL::Rotation::Quaternion(
+        target.pose.orientation.x,
+        target.pose.orientation.y,
+        target.pose.orientation.z,
+        target.pose.orientation.w),
+      KDL::Vector(
+        target.pose.position.x,
+        target.pose.position.y,
+        target.pose.position.z));
 }
 
 } // namespace
