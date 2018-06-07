@@ -24,9 +24,6 @@
 // URDF
 #include <urdf/model.h>
 
-// tf
-#include <tf_conversions/tf_kdl.h>
-
 // Other
 #include <map>
 
@@ -82,11 +79,18 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
     return false;
   }
-  if (!nh.getParam("published_target_name",m_target_name))
+  if (!nh.getParam("target_frame_topic",m_target_frame_topic))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/published_target_name" << " from parameter server");
-    return false;
+    m_target_frame_topic = "target_frame";
+    ROS_WARN_STREAM("Failed to load "
+        << nh.getNamespace() + "/target_frame_topic"
+        << " from parameter server. "
+        << "Will default to: "
+        << nh.getNamespace() + m_target_frame_topic);
   }
+
+  // Publishers
+  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>(m_target_frame_topic,10);
 
   // Build a kinematic chain of the robot
   if (!robot_model.initString(robot_description))
@@ -168,16 +172,19 @@ void JointToCartesianController::update(const ros::Time& time, const ros::Durati
   KDL::Frame frame;
   m_fk_solver->JntToCart(m_positions,frame);
 
-  // Publish end-effector pose to tf
-  tf::Transform frame_tf;
-  tf::poseKDLToTF(frame,frame_tf);
-  m_tf_broadcaster.sendTransform(
-      tf::StampedTransform(
-        frame_tf,
-        ros::Time::now(),
-        m_robot_base_link,
-        m_target_name));
-
+  // Publish end-effector pose
+  geometry_msgs::PoseStamped target_pose = geometry_msgs::PoseStamped();
+  target_pose.header.stamp = ros::Time::now();
+  target_pose.header.frame_id = m_robot_base_link;
+  target_pose.pose.position.x = frame.p.x();
+  target_pose.pose.position.y = frame.p.y();
+  target_pose.pose.position.z = frame.p.z();
+  frame.M.GetQuaternion(
+      target_pose.pose.orientation.x,
+      target_pose.pose.orientation.y,
+      target_pose.pose.orientation.z,
+      target_pose.pose.orientation.w);
+  m_pose_publisher.publish(target_pose);
 }
 
 }

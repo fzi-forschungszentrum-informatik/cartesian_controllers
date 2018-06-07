@@ -17,6 +17,7 @@
 #include <joint_to_cartesian_controller/JointControllerAdapter.h>
 
 // ROS
+#include <geometry_msgs/PoseStamped.h>
 
 // ros_controls
 #include <controller_interface/controller.h>
@@ -26,10 +27,6 @@
 // KDL
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
-
-// tf
-#include <tf/tf.h>
-#include <tf/transform_broadcaster.h>
 
 namespace joint_to_cartesian_controller
 {
@@ -51,11 +48,11 @@ class JointToCartesianController
   private:
     std::string                m_end_effector_link;
     std::string                m_robot_base_link;
-    std::string                m_target_name;
+    std::string                m_target_frame_topic;
     KDL::JntArray              m_positions;
     KDL::JntArray              m_velocities;
     std::vector<std::string>   m_joint_names;
-    tf::TransformBroadcaster   m_tf_broadcaster;
+    ros::Publisher             m_pose_publisher;
 
     JointControllerAdapter     m_controller_adapter;
 

@@ -1,6 +1,6 @@
 ## Joint to Cartesian Controller
 This adapter-controller basically transforms the joint trajectory commands from
-a connected joint-based controller to tf-based pose commands for Cartesian
+a connected joint-based controller to target pose commands for Cartesian
 controllers. It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
 
 ## Example ##
@@ -10,7 +10,7 @@ my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
     end_effector_link: "tool0"
     robot_base_link: "base_link"
-    published_target_name: "my_target"
+    target_frame_topic: "target_frame"
     joints:
     - shoulder_pan_joint
     - shoulder_lift_joint
@@ -75,4 +75,4 @@ And for the connected joint-based controller:
                 <node name="controller_spawner" pkg="controller_manager" type="spawner" args="joint_trajectory_controller" />
         </group>
 ```
-Note the usage of the proper namespace! It is useful to start this joint-based controller on loading, so that the adapter starts publishing valid tf poses upon activation.
+Note the usage of the proper namespace! It is useful to start this joint-based controller on loading, so that the adapter starts publishing valid poses upon activation.
