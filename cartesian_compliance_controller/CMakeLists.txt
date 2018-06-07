@@ -13,8 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   cartesian_controller_base
   cartesian_motion_controller
   cartesian_force_controller
-  tf
-  tf_conversions
   dynamic_reconfigure
 )
 

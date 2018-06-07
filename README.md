@@ -13,11 +13,11 @@ It provides:
     - velocity_interface/CartesianForceController
 
 The *motion* and *compliance* controllers from the list above can be connected to a special *adapter* for testing:
-* for tf controlled robots
+* for PoseStamped controlled robots
     - cartesian_controllers/JointControllerAdapter
 
 This adapter-controller basically transforms the joint trajectory commands from
-a connected joint-based controller to tf-based pose commands for Cartesian
+a connected joint-based controller to target pose commands for Cartesian
 controllers. It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
 
 

@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   cartesian_controller_base
   geometry_msgs
-  tf
-  tf_conversions
 )
 
 ## System dependencies are found with CMake's conventions

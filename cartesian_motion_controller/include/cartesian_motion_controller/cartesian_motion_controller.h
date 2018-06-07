@@ -19,8 +19,6 @@
 // ROS
 #include <kdl/frames.hpp>
 #include <geometry_msgs/PoseStamped.h>
-// tf
-#include <tf/transform_listener.h>
 
 namespace cartesian_motion_controller
 {

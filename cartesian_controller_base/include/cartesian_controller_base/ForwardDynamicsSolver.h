@@ -37,12 +37,6 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
 
-// Debug
-#include <tf/transform_broadcaster.h>
-
-// Debug
-#include <tf/transform_broadcaster.h>
-
 namespace cartesian_controller_base{
 
 /*! \brief This class computes manipulator joint motion from Cartesian force inputs.

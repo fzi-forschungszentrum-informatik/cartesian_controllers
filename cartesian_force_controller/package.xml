@@ -43,13 +43,9 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>cartesian_controller_base</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>tf_conversions</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>cartesian_controller_base</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>tf_conversions</run_depend>
   <run_depend>controller_interface</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->

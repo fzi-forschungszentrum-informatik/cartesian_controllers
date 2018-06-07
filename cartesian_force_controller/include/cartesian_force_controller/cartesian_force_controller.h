@@ -16,9 +16,6 @@
 // Project
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
-// tf
-#include <tf/transform_listener.h>
-
 // ROS
 #include <std_srvs/Trigger.h>
 

@@ -22,9 +22,6 @@
 #include <dynamic_reconfigure/server.h>
 #include <cartesian_compliance_controller/ComplianceControllerConfig.h>
 
-// tf
-#include <tf/transform_listener.h>
-
 namespace cartesian_compliance_controller
 {
 

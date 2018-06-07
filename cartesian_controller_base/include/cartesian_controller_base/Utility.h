@@ -13,8 +13,6 @@
 #ifndef UTILITY_H_INCLUDED
 #define UTILITY_H_INCLUDED
 
-#include <tf_conversions/tf_eigen.h>
-#include <tf_conversions/tf_kdl.h>
 #include <Eigen/Dense>
 
   /*! \brief Convenience typedefs
