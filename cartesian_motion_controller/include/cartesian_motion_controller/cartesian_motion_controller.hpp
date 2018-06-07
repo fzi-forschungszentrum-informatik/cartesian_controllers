@@ -60,6 +60,9 @@ starting(const ros::Time& time)
   // Reset simulation with real joint state
   Base::starting(time);
   m_current_frame = Base::m_forward_dynamics_solver.getEndEffectorPose();
+
+  // Start where we are
+  m_target_frame = m_current_frame;
 }
 
 template <class HardwareInterface>
