@@ -7,7 +7,9 @@
                 pkg="cartesian_controller_handles"
                 type="motion_control_handle_node"
                 respawn="false"
-                output="screen"/>
+                output="screen" >
+                <param name="target_frame_topic" value="target_frame"/>
+                </node>
 
         </group>
 

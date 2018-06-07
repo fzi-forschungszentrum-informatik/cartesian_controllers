@@ -31,20 +31,20 @@ MotionControlHandle::~MotionControlHandle()
 
 void MotionControlHandle::update()
 {
-  // Broadcast marker pose to TF
-  m_tf_broadcaster.sendTransform(
-      tf::StampedTransform(
-        m_current_pose,
-        ros::Time::now(),
-        m_robot_base_link,
-        m_target_frame));
+  // Publish marker pose
+  m_current_pose.header.stamp = ros::Time::now();
+  m_current_pose.header.frame_id = m_robot_base_link;
+  m_pose_publisher.publish(m_current_pose);
 }
 
 
 bool MotionControlHandle::init()
 {
-  // Get configuration from parameter server
+  // Publishers
   ros::NodeHandle nh;
+  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("target_frame",10);
+
+  // Get configuration from parameter server
   if (!nh.getParam("robot_base_link",m_robot_base_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
@@ -55,10 +55,14 @@ bool MotionControlHandle::init()
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
     return false;
   }
-  if (!nh.getParam("target_frame",m_target_frame))
+  if (!nh.getParam("target_frame_topic",m_target_frame_topic))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/target_frame" << " from parameter server");
-    return false;
+    m_target_frame_topic = "target_frame";
+    ROS_WARN_STREAM("Failed to load "
+        << nh.getNamespace() + "/target_frame_topic"
+        << " from parameter server. "
+        << "Will default to: "
+        << nh.getNamespace() + m_target_frame_topic);
   }
 
 
@@ -86,8 +90,13 @@ bool MotionControlHandle::init()
       success = true;
 
       // Start with the marker at current robot end-effector
-      m_current_pose.setOrigin(tmp.getOrigin());
-      m_current_pose.setRotation(tmp.getRotation());
+      m_current_pose.pose.position.x = tmp.getOrigin().x();
+      m_current_pose.pose.position.y = tmp.getOrigin().y();
+      m_current_pose.pose.position.z = tmp.getOrigin().z();
+      m_current_pose.pose.orientation.x = tmp.getRotation().getX();
+      m_current_pose.pose.orientation.y = tmp.getRotation().getY();
+      m_current_pose.pose.orientation.z = tmp.getRotation().getZ();
+      m_current_pose.pose.orientation.w = tmp.getRotation().getW();
     }
     catch (tf::TransformException& e)
     {
@@ -103,7 +112,7 @@ bool MotionControlHandle::init()
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
   m_marker.scale = 0.1;
   m_marker.name = "motion_control_handle";
-  tf::poseTFToMsg(m_current_pose,m_marker.pose);
+  m_marker.pose = m_current_pose.pose;
   m_marker.description = "6D control of link: " + m_end_effector_link;
 
   // Create a sphere as a handle
@@ -157,7 +166,8 @@ void MotionControlHandle::updateMotionControlCallback(
   m_server->applyChanges();
 
   // Store for later broadcasting
-  tf::poseMsgToTF(feedback->pose,m_current_pose);
+  m_current_pose.pose = feedback->pose;
+  m_current_pose.header.stamp = ros::Time::now();
 
 }
 

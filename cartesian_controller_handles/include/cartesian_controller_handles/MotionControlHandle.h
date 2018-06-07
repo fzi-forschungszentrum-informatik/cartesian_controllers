@@ -14,14 +14,13 @@
 #define MOTION_CONTROL_HANDLE_H_INCLUDED
 
 // ROS
+#include <ros/ros.h>
 #include <interactive_markers/interactive_marker_server.h>
-
-// TF
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
+#include <geometry_msgs/PoseStamped.h>
 
 // Other
 #include <boost/shared_ptr.hpp>
+#include <tf/transform_listener.h>
 
 namespace cartesian_controller_handles
 {
@@ -84,10 +83,11 @@ class MotionControlHandle
     // Kinematics
     std::string               m_robot_base_link;
     std::string               m_end_effector_link;
-    std::string               m_target_frame;
-    tf::Transform             m_current_pose;
-    tf::TransformBroadcaster  m_tf_broadcaster;
-    tf::TransformListener     m_tf_listener;
+    std::string               m_target_frame_topic;
+
+    geometry_msgs::PoseStamped  m_current_pose;
+    ros::Publisher  m_pose_publisher;
+    tf::TransformListener m_tf_listener;
 
     // Interactive marker
     boost::shared_ptr<

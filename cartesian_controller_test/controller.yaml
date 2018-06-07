@@ -124,7 +124,7 @@ my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
     end_effector_link: "sensor_link"
     robot_base_link: "base_link"
-    published_target_name: "my_target"
+    target_frame_topic: "target_frame"
     joints:
     - shoulder_pan_joint
     - shoulder_lift_joint
