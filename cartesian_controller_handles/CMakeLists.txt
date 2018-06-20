@@ -9,9 +9,10 @@ project(cartesian_controller_handles)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  controller_interface
+  kdl_parser
   interactive_markers
   geometry_msgs
-  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -122,9 +123,11 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/cartesian_controller_handles.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/cartesian_controller_handles.cpp
+  include/cartesian_controller_handles/MotionControlHandle.h
+  include/cartesian_controller_handles/MotionControlHandle.hpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -134,9 +137,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(motion_control_handle_node
-        nodes/motion_control_handle_node.cpp
-        src/MotionControlHandle.cpp)
+#add_executable(motion_control_handle_node
+#        nodes/motion_control_handle_node.cpp
+#        src/MotionControlHandle.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,10 +149,10 @@ add_executable(motion_control_handle_node
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(motion_control_handle_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(motion_control_handle_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(motion_control_handle_node
+target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
 
@@ -168,11 +171,11 @@ target_link_libraries(motion_control_handle_node
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
@@ -182,11 +185,10 @@ target_link_libraries(motion_control_handle_node
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(FILES
+  cartesian_controller_handles_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 #############
 ## Testing ##

@@ -7,7 +7,7 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="scherzin@todo.todo">scherzin</maintainer>
+  <maintainer email="scherzin@fzi.de">scherzin</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -52,22 +52,19 @@
   <build_depend>roscpp</build_depend>
   <build_depend>interactive_markers</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>tf</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>interactive_markers</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
-  <build_export_depend>tf</build_export_depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>interactive_markers</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>tf</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <controller_interface plugin="${prefix}/cartesian_controller_handles_plugin.xml"/>
   </export>
 </package>

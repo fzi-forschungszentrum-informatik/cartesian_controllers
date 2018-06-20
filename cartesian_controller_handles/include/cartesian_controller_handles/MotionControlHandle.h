@@ -18,9 +18,12 @@
 #include <interactive_markers/interactive_marker_server.h>
 #include <geometry_msgs/PoseStamped.h>
 
+// ros_controls
+#include <controller_interface/controller.h>
+#include <hardware_interface/joint_command_interface.h>
+
 // Other
 #include <boost/shared_ptr.hpp>
-#include <tf/transform_listener.h>
 
 namespace cartesian_controller_handles
 {
@@ -30,27 +33,29 @@ namespace cartesian_controller_handles
  *
  * This motion control handle can be used to control the end-effector of a
  * robotic manipulator in Cartesian space with an interactive marker.  The
- * motion of the marker (both orientation and translation) is broadcasted as a
- * \a target_frame to TF, which can be followed by motion-based Cartesian controllers.
+ * motion of the marker (both orientation and translation) is published as a
+ * geometry_msgs/PoseStamped, which can be followed by motion-based Cartesian controllers.
  */
-class MotionControlHandle
+template <class HardwareInterface>
+class MotionControlHandle : public controller_interface::Controller<HardwareInterface>
 {
   public:
     MotionControlHandle();
     ~MotionControlHandle();
 
+    bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+
+    void starting(const ros::Time& time);
+
+    void stopping(const ros::Time& time);
+
     /**
-     * @brief Publish pose of the control handle to TF
+     * @brief Publish pose of the control handle as PoseStamped
      *
-     * This function must be called periodically from an outside node.
-     * The TF can be used as \a target_frame for \a Cartesian
-     * \a Controllers.
      */
-    void update();
+    void update(const ros::Time& time, const ros::Duration& period);
 
   private:
-    bool init();
-
     /**
      * @brief Move visual marker in RViz according to user interaction
      *
@@ -81,13 +86,12 @@ class MotionControlHandle
     void addAxisControl(visualization_msgs::InteractiveMarker& marker, double x, double y, double z);
 
     // Kinematics
-    std::string               m_robot_base_link;
-    std::string               m_end_effector_link;
-    std::string               m_target_frame_topic;
+    std::string   m_robot_base_link;
+    std::string   m_end_effector_link;
+    std::string   m_target_frame_topic;
 
     geometry_msgs::PoseStamped  m_current_pose;
     ros::Publisher  m_pose_publisher;
-    tf::TransformListener m_tf_listener;
 
     // Interactive marker
     boost::shared_ptr<
@@ -98,5 +102,7 @@ class MotionControlHandle
 };
 
 } // cartesian_controller_handles
+
+#include <cartesian_controller_handles/MotionControlHandle.hpp>
 
 #endif

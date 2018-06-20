@@ -2,10 +2,10 @@
 // -- END LICENSE BLOCK -------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-/*!\file    MotionControlHandle.cpp
+/*!\file    MotionControlHandle.hpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2017/11/06
+ * \date    2018/06/20
  *
  */
 //-----------------------------------------------------------------------------
@@ -15,33 +15,46 @@
 namespace cartesian_controller_handles
 {
 
-MotionControlHandle::MotionControlHandle()
-{
-  if (!init())
-  {
-    throw std::logic_error("Failed to initialize motion control handle.");
-  }
-  ROS_INFO_STREAM("Initialized motion control handle for: "
-      << m_end_effector_link);
-}
-
-MotionControlHandle::~MotionControlHandle()
+template <class HardwareInterface>
+MotionControlHandle<HardwareInterface>::
+MotionControlHandle()
 {
 }
 
-void MotionControlHandle::update()
+template <class HardwareInterface>
+MotionControlHandle<HardwareInterface>::
+~MotionControlHandle()
+{
+}
+
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+starting(const ros::Time& time)
+{
+}
+
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+stopping(const ros::Time& time)
+{
+}
+
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+update(const ros::Time& time, const ros::Duration& period)
 {
   // Publish marker pose
-  m_current_pose.header.stamp = ros::Time::now();
+  m_current_pose.header.stamp = time;
   m_current_pose.header.frame_id = m_robot_base_link;
   m_pose_publisher.publish(m_current_pose);
 }
 
 
-bool MotionControlHandle::init()
+template <class HardwareInterface>
+bool MotionControlHandle<HardwareInterface>::
+init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
   // Publishers
-  ros::NodeHandle nh;
   m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("target_frame",10);
 
   // Get configuration from parameter server
@@ -66,44 +79,8 @@ bool MotionControlHandle::init()
   }
 
 
-  // Check Martin Gunthers answer for why this loop is necessary.
-  // https://answers.ros.org/question/38222/tf-extrapolation-exception-using-rostime0/
-  bool success = false;
-  while (!success)
-  {
-    try
-    {
-      m_tf_listener.waitForTransform(
-          m_robot_base_link,
-          m_end_effector_link,
-          ros::Time(0),
-          ros::Duration(1.0)  // Will be ignored when throwing exceptions
-          );
-
-      tf::StampedTransform tmp;
-      m_tf_listener.lookupTransform(
-          m_robot_base_link,  // I want my pose displayed in this frame
-          m_end_effector_link,
-          ros::Time(0),
-          tmp);
-
-      success = true;
-
-      // Start with the marker at current robot end-effector
-      m_current_pose.pose.position.x = tmp.getOrigin().x();
-      m_current_pose.pose.position.y = tmp.getOrigin().y();
-      m_current_pose.pose.position.z = tmp.getOrigin().z();
-      m_current_pose.pose.orientation.x = tmp.getRotation().getX();
-      m_current_pose.pose.orientation.y = tmp.getRotation().getY();
-      m_current_pose.pose.orientation.z = tmp.getRotation().getZ();
-      m_current_pose.pose.orientation.w = tmp.getRotation().getW();
-    }
-    catch (tf::TransformException& e)
-    {
-    }
-    ros::Duration(0.1).sleep();
-  }
-
+  // TODO: Get current pose from robot
+  // m_current_pose
 
   // Configure the interactive marker for usage in RViz
   m_server.reset(new interactive_markers::InteractiveMarkerServer("motion_control_handle","",false));
@@ -158,7 +135,9 @@ bool MotionControlHandle::init()
   return true;
 }
 
-void MotionControlHandle::updateMotionControlCallback(
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+updateMotionControlCallback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
   // Move marker in RViz
@@ -172,12 +151,16 @@ void MotionControlHandle::updateMotionControlCallback(
 }
 
 
-void MotionControlHandle::updateMarkerMenuCallback(
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+updateMarkerMenuCallback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
 }
 
-void MotionControlHandle::addAxisControl(
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+addAxisControl(
     visualization_msgs::InteractiveMarker& marker, double x, double y, double z)
 {
   if (x == y == z == 0)
