@@ -20,10 +20,14 @@
 
 // ros_controls
 #include <controller_interface/controller.h>
-#include <hardware_interface/joint_command_interface.h>
+#include <hardware_interface/joint_state_interface.h>
 
 // Other
 #include <boost/shared_ptr.hpp>
+
+// KDL
+#include <kdl/chain.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
 
 namespace cartesian_controller_handles
 {
@@ -85,10 +89,24 @@ class MotionControlHandle : public controller_interface::Controller<HardwareInte
      */
     void addAxisControl(visualization_msgs::InteractiveMarker& marker, double x, double y, double z);
 
+    /**
+     * @brief Get the current pose of the specified end-effector
+     *
+     * @return The current end-effector pose with respect to the specified base link
+     */
+    geometry_msgs::PoseStamped getEndEffectorPose();
+
+    // Handles to the joints
+    std::vector<
+      hardware_interface::JointStateHandle>   m_joint_handles;
+    std::vector<std::string>  m_joint_names;
+
     // Kinematics
     std::string   m_robot_base_link;
     std::string   m_end_effector_link;
     std::string   m_target_frame_topic;
+    boost::shared_ptr<
+      KDL::ChainFkSolverPos_recursive>  m_fk_solver;
 
     geometry_msgs::PoseStamped  m_current_pose;
     ros::Publisher  m_pose_publisher;

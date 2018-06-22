@@ -10,7 +10,16 @@
  */
 //-----------------------------------------------------------------------------
 
+// Project
 #include <cartesian_controller_handles/MotionControlHandle.h>
+
+// KDL
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+
+// URDF
+#include <urdf/model.h>
+
 
 namespace cartesian_controller_handles
 {
@@ -31,6 +40,7 @@ template <class HardwareInterface>
 void MotionControlHandle<HardwareInterface>::
 starting(const ros::Time& time)
 {
+  m_current_pose = getEndEffectorPose();
 }
 
 template <class HardwareInterface>
@@ -54,10 +64,17 @@ template <class HardwareInterface>
 bool MotionControlHandle<HardwareInterface>::
 init(HardwareInterface* hw, ros::NodeHandle& nh)
 {
-  // Publishers
-  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("target_frame",10);
+  std::string robot_description;
+  urdf::Model robot_model;
+  KDL::Tree   robot_tree;
+  KDL::Chain  robot_chain;
 
   // Get configuration from parameter server
+  if (!nh.getParam("/robot_description",robot_description))
+  {
+    ROS_ERROR("Failed to load '/robot_description' from parameter server");
+    return false;
+  }
   if (!nh.getParam("robot_base_link",m_robot_base_link))
   {
     ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
@@ -78,9 +95,37 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
         << nh.getNamespace() + m_target_frame_topic);
   }
 
+  // Publishers
+  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>(m_target_frame_topic,10);
 
-  // TODO: Get current pose from robot
-  // m_current_pose
+  // Build a kinematic chain of the robot
+  if (!robot_model.initString(robot_description))
+  {
+    ROS_ERROR("Failed to parse urdf model from 'robot_description'");
+    return false;
+  }
+  if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
+  {
+    ROS_ERROR("Failed to parse KDL tree from urdf model");
+    return false;
+  }
+
+  // Get names of controllable joints from the parameter server
+  if (!nh.getParam("joints",m_joint_names))
+  {
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() << "/joints from parameter server";);
+    return false;
+  }
+
+  // Get the joint handles to use in the control loop
+  for (size_t i = 0; i < m_joint_names.size(); ++i)
+  {
+    m_joint_handles.push_back(hw->getHandle(m_joint_names[i]));
+  }
+
+  // Initialize kinematics
+  m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(robot_chain));
+  m_current_pose = getEndEffectorPose();
 
   // Configure the interactive marker for usage in RViz
   m_server.reset(new interactive_markers::InteractiveMarkerServer("motion_control_handle","",false));
@@ -182,6 +227,32 @@ addAxisControl(
   control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
   marker.controls.push_back(control);
 
+}
+
+template <class HardwareInterface>
+geometry_msgs::PoseStamped MotionControlHandle<HardwareInterface>::
+getEndEffectorPose()
+{
+  KDL::JntArray positions(m_joint_handles.size());
+  for (size_t i = 0; i < m_joint_handles.size(); ++i)
+  {
+    positions(i) = m_joint_handles[i].getPosition();
+  }
+
+  KDL::Frame tmp;
+  m_fk_solver->JntToCart(positions, tmp);
+
+  geometry_msgs::PoseStamped current;
+  current.pose.position.x = tmp.p.x();
+  current.pose.position.y = tmp.p.y();
+  current.pose.position.z = tmp.p.z();
+  tmp.M.GetQuaternion(
+      current.pose.orientation.x,
+      current.pose.orientation.y,
+      current.pose.orientation.z,
+      current.pose.orientation.w);
+
+  return current;
 }
 
 }

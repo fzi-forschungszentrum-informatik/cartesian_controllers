@@ -20,10 +20,12 @@ namespace position_controllers
 {
   /**
    * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
+   *
+   * Can be specified as a controller of type position_controllers/MotionControlHandle.
    */
   typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::PositionJointInterface> MotionControlHandle;
+    hardware_interface::JointStateInterface> MotionControlHandle;
 }
 
 
-PLUGINLIB_EXPORT_CLASS(position_controllers::MotionControlHandle, position_controllers::MotionControlHandle)
+PLUGINLIB_EXPORT_CLASS(position_controllers::MotionControlHandle, controller_interface::ControllerBase)
