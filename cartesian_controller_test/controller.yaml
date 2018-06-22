@@ -120,6 +120,19 @@ my_cartesian_compliance_controller:
         rot_y: {p: 0.01, i: 0, d: 0}
         rot_z: {p: 0.01, i: 0, d: 0}
 
+my_motion_control_handle:
+   type: "cartesian_controllers/MotionControlHandle"
+   end_effector_link: "sensor_link"
+   robot_base_link: "base_link"
+   target_frame_topic: "/my_cartesian_motion_controller/target_frame"
+   joints:
+   - shoulder_pan_joint
+   - shoulder_lift_joint
+   - elbow_joint
+   - wrist_1_joint
+   - wrist_2_joint
+   - wrist_3_joint
+
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
     end_effector_link: "sensor_link"
