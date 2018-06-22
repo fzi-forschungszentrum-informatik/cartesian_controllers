@@ -1,8 +1,8 @@
 <library path="lib/libcartesian_controller_handles">
 
-  <class name="position_controllers/MotionControlHandle"
-         type="position_controllers::MotionControlHandle"
-         base_class_type="controller_interface::Controller<hardware_interface::HardwareInterface>">
+  <class name="cartesian_controllers/MotionControlHandle"
+         type="cartesian_controllers::MotionControlHandle"
+         base_class_type="controller_interface::ControllerBase">
     <description>
       The CartesianControllerHandle exposes an interactive marker for end-effector control in Rviz.
       This variant sends commands to a position interface.

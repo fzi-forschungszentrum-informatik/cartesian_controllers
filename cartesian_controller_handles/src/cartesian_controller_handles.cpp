@@ -16,7 +16,7 @@
 // Project
 #include <cartesian_controller_handles/MotionControlHandle.h>
 
-namespace position_controllers
+namespace cartesian_controllers
 {
   /**
    * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
@@ -28,4 +28,4 @@ namespace position_controllers
 }
 
 
-PLUGINLIB_EXPORT_CLASS(position_controllers::MotionControlHandle, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)
