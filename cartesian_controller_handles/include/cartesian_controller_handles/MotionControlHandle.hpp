@@ -41,6 +41,8 @@ void MotionControlHandle<HardwareInterface>::
 starting(const ros::Time& time)
 {
   m_current_pose = getEndEffectorPose();
+  m_server->setPose(m_marker.name,m_current_pose.pose);
+  m_server->applyChanges();
 }
 
 template <class HardwareInterface>
@@ -107,6 +109,11 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
   {
     ROS_ERROR("Failed to parse KDL tree from urdf model");
+    return false;
+  }
+  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  {
+    ROS_ERROR_STREAM("Failed to parse robot chain from urdf model.");
     return false;
   }
 
