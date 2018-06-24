@@ -42,6 +42,9 @@ starting(const ros::Time& time)
 {
   m_current_pose = getEndEffectorPose();
   m_server->setPose(m_marker.name,m_current_pose.pose);
+
+  prepareMarkerControls(m_marker);
+  m_server->insert(m_marker); // update existing marker
   m_server->applyChanges();
 }
 
@@ -49,6 +52,10 @@ template <class HardwareInterface>
 void MotionControlHandle<HardwareInterface>::
 stopping(const ros::Time& time)
 {
+  // Remove visual appearance from RViz
+  m_marker.controls.clear();
+  m_server->insert(m_marker); // update existing marker
+  m_server->applyChanges();
 }
 
 template <class HardwareInterface>
@@ -59,6 +66,7 @@ update(const ros::Time& time, const ros::Duration& period)
   m_current_pose.header.stamp = time;
   m_current_pose.header.frame_id = m_robot_base_link;
   m_pose_publisher.publish(m_current_pose);
+  m_server->applyChanges();
 }
 
 
@@ -136,35 +144,12 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   // Configure the interactive marker for usage in RViz
   m_server.reset(new interactive_markers::InteractiveMarkerServer("motion_control_handle","",false));
-
   m_marker.header.frame_id = m_robot_base_link;
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
   m_marker.scale = 0.1;
   m_marker.name = "motion_control_handle";
   m_marker.pose = m_current_pose.pose;
   m_marker.description = "6D control of link: " + m_end_effector_link;
-
-  // Create a sphere as a handle
-  visualization_msgs::Marker visual;
-  visual.type = visualization_msgs::Marker::SPHERE;
-  visual.scale.x = 0.05;  // bounding box in meter
-  visual.scale.y = 0.05;
-  visual.scale.z = 0.05;
-  visual.color.r = 1.0;
-  visual.color.g = 0.5;
-  visual.color.b = 0.0;
-  visual.color.a = 1.0;
-
-  // Create a non-interactive control for the appearance
-  visualization_msgs::InteractiveMarkerControl visual_control;
-  visual_control.always_visible = true;
-  visual_control.markers.push_back(visual);
-  m_marker.controls.push_back(visual_control);
-
-  // Create move and rotate controls along all axis
-  addAxisControl(m_marker,1,0,0);
-  addAxisControl(m_marker,0,1,0);
-  addAxisControl(m_marker,0,0,1);
 
   // Add the interactive marker to the server
   m_server->insert(m_marker);
@@ -208,6 +193,41 @@ void MotionControlHandle<HardwareInterface>::
 updateMarkerMenuCallback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
+}
+
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+prepareMarkerControls(visualization_msgs::InteractiveMarker& marker)
+{
+  // Add colored sphere as visualization
+  addMarkerVisualization(marker, 0.05);
+
+  // Create move and rotate controls along all axis
+  addAxisControl(marker,1,0,0);
+  addAxisControl(marker,0,1,0);
+  addAxisControl(marker,0,0,1);
+}
+
+template <class HardwareInterface>
+void MotionControlHandle<HardwareInterface>::
+addMarkerVisualization(visualization_msgs::InteractiveMarker& marker, double scale)
+{
+  // Create a sphere as a handle
+  visualization_msgs::Marker visual;
+  visual.type = visualization_msgs::Marker::SPHERE;
+  visual.scale.x = scale;  // bounding box in meter
+  visual.scale.y = scale;
+  visual.scale.z = scale;
+  visual.color.r = 1.0;
+  visual.color.g = 0.5;
+  visual.color.b = 0.0;
+  visual.color.a = 1.0;
+
+  // Create a non-interactive control for the appearance
+  visualization_msgs::InteractiveMarkerControl visual_control;
+  visual_control.always_visible = true;
+  visual_control.markers.push_back(visual);
+  marker.controls.push_back(visual_control);
 }
 
 template <class HardwareInterface>

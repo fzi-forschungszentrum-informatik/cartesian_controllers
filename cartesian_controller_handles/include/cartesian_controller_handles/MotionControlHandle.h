@@ -77,6 +77,16 @@ class MotionControlHandle : public controller_interface::Controller<HardwareInte
     void updateMarkerMenuCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
 
     /**
+     * @brief Add all relevant marker controls for interaction in RViz
+     *
+     * You must call \a applyChanges() on the marker server for the controls to
+     * take effect.
+     *
+     * @param marker The marker to add the controls to
+     */
+    void prepareMarkerControls(visualization_msgs::InteractiveMarker& marker);
+
+    /**
      * @brief Adds interactive controls (arrows) to a marker.
      *
      * Both move and rotate controls are added along the specified
@@ -88,6 +98,14 @@ class MotionControlHandle : public controller_interface::Controller<HardwareInte
      * @param z Z-axis component
      */
     void addAxisControl(visualization_msgs::InteractiveMarker& marker, double x, double y, double z);
+
+    /**
+     * @brief Add a sphere visualization to the interactive marker
+     *
+     * @param marker The marker to add the visualization to
+     * @param scale The scale of the visualization. Bounding box in meter.
+     */
+    void addMarkerVisualization(visualization_msgs::InteractiveMarker& marker, double scale);
 
     /**
      * @brief Get the current pose of the specified end-effector
