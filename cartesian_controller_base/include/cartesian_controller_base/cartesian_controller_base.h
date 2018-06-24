@@ -52,6 +52,10 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     virtual void starting(const ros::Time& time);
 
+    void pause(const ros::Time& time);
+
+    bool resume(const ros::Time& time);
+
 
   protected:
     void writeJointControlCmds();
@@ -67,6 +71,8 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     ForwardDynamicsSolver   m_forward_dynamics_solver;
     std::string             m_end_effector_link;
     std::string             m_robot_base_link;
+
+    bool m_paused;
 
   private:
     std::vector<hardware_interface::JointHandle>      m_joint_handles;

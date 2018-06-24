@@ -29,18 +29,13 @@
 #include <boost/shared_ptr.hpp>
 
 // KDL
+#include <kdl/frames.hpp>
 #include <kdl/chain.hpp>
 #include <kdl/jacobian.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
-
-// Debug
-#include <tf/transform_broadcaster.h>
-
-// Debug
-#include <tf/transform_broadcaster.h>
 
 namespace cartesian_controller_base{
 
@@ -82,12 +77,13 @@ class ForwardDynamicsSolver
      * @brief Get the current end effector pose of the simulated robot
      *
      * The last link in the chain from the init() function is taken as end
-     * effector.
+     * effector. If \ref setStartState() has been called immediately before,
+     * then the returned pose represents the real robots end effector pose.
      *
      * @return The end effector pose with respect to the robot base link. This
      * link is the same as the one implicitly given in the init() function.
      */
-    const tf::StampedTransform& getEndEffectorPose() const;
+    const KDL::Frame& getEndEffectorPose() const;
 
     /**
      * @brief Get the current end effector velocity of the simulated robot
@@ -161,7 +157,7 @@ class ForwardDynamicsSolver
       KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
     boost::shared_ptr<
       KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
-    tf::StampedTransform                m_end_effector_pose;
+    KDL::Frame                          m_end_effector_pose;
     ctrl::Vector6D                      m_end_effector_vel;
 
     // Forward dynamics
@@ -169,8 +165,6 @@ class ForwardDynamicsSolver
     boost::shared_ptr<KDL::ChainDynParam>       m_jnt_space_inertia_solver;
     KDL::Jacobian                               m_jnt_jacobian;
     KDL::JntSpaceInertiaMatrix                  m_jnt_space_inertia;
-
-    tf::TransformBroadcaster m_tf_broadcaster;
 };
 
 

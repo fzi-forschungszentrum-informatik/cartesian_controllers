@@ -1,7 +1,7 @@
 ## Cartesian Motion Controller ##
 
 This package provides a controller for mapping Cartesian end-effector motion to joint control commands of a set of joints.
-The controller tracks a given tf target frame. The responsiveness should be adjusted with the solver specific *mass* and *inertia*, and *not* with the controller gains.
+The controller tracks a given target frame (PoseStamped). The responsiveness should be adjusted with the solver specific *mass* and *inertia*, and *not* with the controller gains.
 
 ## Example ##
 Below is an example entry for a controller specific configuration.

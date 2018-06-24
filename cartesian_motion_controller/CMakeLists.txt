@@ -11,8 +11,7 @@ find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   cartesian_controller_base
-  tf
-  tf_conversions
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions

@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   cartesian_controller_base
   controller_interface
   kdl_parser
-  tf
   controller_manager
 )
 

@@ -16,8 +16,9 @@
 // Project
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
-// tf
-#include <tf/transform_listener.h>
+// ROS
+#include <kdl/frames.hpp>
+#include <geometry_msgs/PoseStamped.h>
 
 namespace cartesian_motion_controller
 {
@@ -42,9 +43,12 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
     ctrl::Vector6D        computeMotionError();
 
   private:
-    tf::TransformListener m_tf_listener;
-    tf::StampedTransform  m_current_target_pose;
-    std::string           m_target_frame;
+    void targetFrameCallback(const geometry_msgs::PoseStamped& pose);
+
+    ros::Subscriber m_target_frame_subscr;
+    std::string     m_target_frame_topic;
+    KDL::Frame      m_target_frame;
+    KDL::Frame      m_current_frame;
 };
 
 }
