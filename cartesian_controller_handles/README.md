@@ -26,7 +26,11 @@ my_motion_control_handle:
 ```
 And spawn the handle accordingly:
 ```xml
-        <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_motion_control_handle" />
+<node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_motion_control_handle" />
 ```
 Explicitly start it whenever you want to interactively move your robot with RViz.
 Note: Make sure that no other controllers are publishing a *target* to your *CartesianMotionController* while using the motion control handle.
+
+## RViz
+You must create a visualization in RViz to see and interact with the colored handles. Add *InteractiveMarkers* to your *Displays* menu and point it to the right *Update Topic*.
+The interactive handle only gets visualized if your **MotionControlHandle** is running. If you still see no handles, try toggling the *Interactive Markers*'s checkbox.
