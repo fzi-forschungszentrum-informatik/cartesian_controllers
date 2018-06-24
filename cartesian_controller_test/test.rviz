@@ -187,15 +187,6 @@ Visualization Manager:
       Torque Color: 204; 204; 51
       Unreliable: false
       Value: true
-    - Class: rviz/InteractiveMarkers
-      Enable Transparency: false
-      Enabled: true
-      Name: InteractiveMarkers
-      Show Axes: false
-      Show Descriptions: false
-      Show Visual Aids: true
-      Update Topic: /my_cartesian_motion_controller/motion_control_handle/update
-      Value: true
     - Alpha: 1
       Axes Length: 0.0700000003
       Axes Radius: 0.00999999978
@@ -210,6 +201,15 @@ Visualization Manager:
       Shape: Axes
       Topic: /my_cartesian_motion_controller/target_frame
       Unreliable: false
+      Value: true
+    - Class: rviz/InteractiveMarkers
+      Enable Transparency: false
+      Enabled: true
+      Name: InteractiveMarkers
+      Show Axes: true
+      Show Descriptions: false
+      Show Visual Aids: false
+      Update Topic: /motion_control_handle/update
       Value: true
   Enabled: true
   Global Options:
@@ -272,5 +272,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1514
-  X: 2129
-  Y: 398
+  X: 175
+  Y: 182
