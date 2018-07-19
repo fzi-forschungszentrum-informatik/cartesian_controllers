@@ -12,13 +12,20 @@ It provides:
     - velocity_interface/CartesianComplianceController
     - velocity_interface/CartesianForceController
 
-The *motion* and *compliance* controllers from the list above can be connected to a special *adapter* for testing:
+For the *motion* and *compliance* controllers from the list above there are two special controllers for an easy generation of the required target poses:
 * for PoseStamped controlled robots
     - cartesian_controllers/JointControllerAdapter
+    - cartesian_controllers/MotionControlHandle
 
-This adapter-controller basically transforms the joint trajectory commands from
-a connected joint-based controller to target pose commands for Cartesian
-controllers. It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
+The first one is an adapter-controller and basically transforms the joint
+trajectory commands from a connected joint-based controller to target pose
+commands. This means you could execute joint-based trajectories with the
+cartesian_controllers. The target poses are generated on-the-fly.
+It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
+
+The second controller is a click-and-drop handle for RViz that publishes the current pose of the according interactive marker as a target pose.
+
+**Please check the according README.md for each controller type**
 
 
 ## Features
@@ -69,9 +76,3 @@ are sure that your robot can move faster, then also start adjusting the
 *proportional gains* of the controller.
 
 The *CartesianForceControllers* and the *CartesianComplianceControllers* are designed for contact-dominated tasks. During these tasks, path accuracy is traded for contact stability, which is increased through increasing *mass* and *inertia*. It might be necessary to increase those parameters quite a bit, if the environments are very stiff.
-
-## Still to fix/check
-- Protective stop on ur10 creates offset with rqt controller plugin
-
-## Todos
-- Document Code, especially classes
