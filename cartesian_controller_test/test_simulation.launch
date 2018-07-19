@@ -1,7 +1,7 @@
 <launch>
         <!-- Load robot_description to parameter server -->
         <param name="/robot_description"
-        command="$(find xacro)/xacro.py '$(find cartesian_controller_test)/robot.urdf.xacro'" />
+        command="$(find xacro)/xacro --inorder '$(find cartesian_controller_test)/robot.urdf.xacro'" />
 
         <!-- Load empty gazebo -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
