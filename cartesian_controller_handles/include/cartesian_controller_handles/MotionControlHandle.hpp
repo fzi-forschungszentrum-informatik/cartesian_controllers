@@ -42,9 +42,6 @@ starting(const ros::Time& time)
 {
   m_current_pose = getEndEffectorPose();
   m_server->setPose(m_marker.name,m_current_pose.pose);
-
-  prepareMarkerControls(m_marker);
-  m_server->insert(m_marker); // update existing marker
   m_server->applyChanges();
 }
 
@@ -52,10 +49,6 @@ template <class HardwareInterface>
 void MotionControlHandle<HardwareInterface>::
 stopping(const ros::Time& time)
 {
-  // Remove visual appearance from RViz
-  m_marker.controls.clear();
-  m_server->insert(m_marker); // update existing marker
-  m_server->applyChanges();
 }
 
 template <class HardwareInterface>
@@ -150,6 +143,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   m_marker.name = "motion_control_handle";
   m_marker.pose = m_current_pose.pose;
   m_marker.description = "6D control of link: " + m_end_effector_link;
+
+  prepareMarkerControls(m_marker);
 
   // Add the interactive marker to the server
   m_server->insert(m_marker);
