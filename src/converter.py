@@ -34,7 +34,8 @@ class converter:
 
 
     def publish(self):
-        self.pub.publish(self.buffer)
+        if not rospy.is_shutdown():
+            self.pub.publish(self.buffer)
 
 
 if __name__ == '__main__':
