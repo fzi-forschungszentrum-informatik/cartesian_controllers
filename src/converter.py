@@ -35,7 +35,12 @@ class converter:
 
     def publish(self):
         if not rospy.is_shutdown():
-            self.pub.publish(self.buffer)
+            try:
+                self.pub.publish(self.buffer)
+            except rospy.ROSException:
+                # Swallow 'publish() to closed topic' error.
+                # This rarely happens on killing this node.
+                pass
 
 
 if __name__ == '__main__':
