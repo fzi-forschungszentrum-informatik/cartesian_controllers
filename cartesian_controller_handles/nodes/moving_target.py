@@ -16,6 +16,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
+from std_srvs.srv import Trigger
 
 # Other
 import numpy as np
@@ -52,8 +53,17 @@ class MovingTarget(object):
         self.server.insert(self.marker, self.process_marker_feedback)
         self.server.applyChanges()
 
+        # Topics and services
+        self.reset_service = rospy.Service("~reset", Trigger, self.reset_callback)
+
     def process_marker_feedback(self, feedback):
         pass
+
+    def reset_callback(self, req):
+        pose = self.get_end_effector_pose()
+        self.server.setPose(self.marker.name, pose)
+        self.server.applyChanges()
+        return {'success': True, 'message': "Reset to {}".format(self.end_effector)}
 
     def add_marker_visualization(self, marker, scale):
         # Create a sphere as a handle
