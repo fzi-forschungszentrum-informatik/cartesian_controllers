@@ -45,10 +45,12 @@ class MovingTarget(object):
         self.end_effector = rospy.get_param('~end_effector_link')
         self.moving_tf_frame = rospy.get_param('~moving_tf_frame')
         self.target_frame_topic = rospy.get_param('~target_frame_topic')
+        self.publish_rate = rospy.Rate(rospy.get_param('~publish_rate'))
 
         # TF, topics and services
         self.tf_listener = tf.TransformListener()
         self.reset_service = rospy.Service("~reset", Trigger, self.reset_callback)
+        self.target_pose_pub = rospy.Publisher(self.target_frame_topic, PoseStamped, queue_size=3)
 
         # Startup
         starting_pose = self.get_end_effector_pose()
@@ -61,7 +63,33 @@ class MovingTarget(object):
         self.server.applyChanges()
 
     def process_marker_feedback(self, feedback):
-        pass
+        if feedback.event_type == InteractiveMarkerFeedback.POSE_UPDATE:
+            self.marker.pose = feedback.pose
+
+    def publish_target_pose(self):
+        # Marker w.r.t. the moving tf reference
+        pose = PoseStamped()
+        pose.header.frame_id = self.moving_tf_frame
+        pose.header.stamp = rospy.Time(0)
+        pose.pose = self.marker.pose
+
+        # Marker w.r.t. the robot base
+        try:
+            self.tf_listener.waitForTransform(  # Returns at once if transform exists
+                    self.robot_base,
+                    self.moving_tf_frame,
+                    rospy.Time(0),
+                    timeout=rospy.Duration(1)
+                    )
+            pose_in_base = self.tf_listener.transformPose(
+                    self.robot_base,
+                    pose)
+        except tf.Exception as e:
+            rospy.logwarn("{}".format(e))
+            return
+
+        self.target_pose_pub.publish(pose_in_base)
+        self.publish_rate.sleep()
 
     def reset_callback(self, req):
         pose = self.get_end_effector_pose()
@@ -155,8 +183,9 @@ class MovingTarget(object):
         return marker
 
 if __name__ == '__main__':
-    _ = MovingTarget()
+    moving_target = MovingTarget()
     try:
-        rospy.spin()
+        while not rospy.is_shutdown():
+            moving_target.publish_target_pose()
     except rospy.ROSInterruptException:
         pass
