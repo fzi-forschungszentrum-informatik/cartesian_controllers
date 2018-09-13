@@ -17,6 +17,7 @@ from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
 from std_srvs.srv import Trigger
+import tf
 
 # Other
 import numpy as np
@@ -45,25 +46,31 @@ class MovingTarget(object):
         self.moving_tf_frame = rospy.get_param('~moving_tf_frame')
         self.target_frame_topic = rospy.get_param('~target_frame_topic')
 
+        # TF, topics and services
+        self.tf_listener = tf.TransformListener()
+        self.reset_service = rospy.Service("~reset", Trigger, self.reset_callback)
+
         # Startup
         starting_pose = self.get_end_effector_pose()
+        if starting_pose is None:
+            rospy.signal_shutdown("Initial starting pose invalid")
         self.marker = self.make_interactive_marker(self.moving_tf_frame, starting_pose)
 
         self.server = InteractiveMarkerServer("moving_target")
         self.server.insert(self.marker, self.process_marker_feedback)
         self.server.applyChanges()
 
-        # Topics and services
-        self.reset_service = rospy.Service("~reset", Trigger, self.reset_callback)
-
     def process_marker_feedback(self, feedback):
         pass
 
     def reset_callback(self, req):
         pose = self.get_end_effector_pose()
-        self.server.setPose(self.marker.name, pose)
-        self.server.applyChanges()
-        return {'success': True, 'message': "Reset to {}".format(self.end_effector)}
+        if pose is None:
+            return {'success': False, 'message': "Reset pose is invalid"}
+        else:
+            self.server.setPose(self.marker.name, pose)
+            self.server.applyChanges()
+            return {'success': True, 'message': "Reset to {}".format(self.end_effector)}
 
     def add_marker_visualization(self, marker, scale):
         # Create a sphere as a handle
@@ -108,7 +115,30 @@ class MovingTarget(object):
         self.add_axis_control(marker, [0, 0, 1]);
 
     def get_end_effector_pose(self):
+        try:
+            self.tf_listener.waitForTransform(
+                    self.moving_tf_frame,
+                    self.end_effector,
+                    rospy.Time(0),
+                    timeout=rospy.Duration(1),
+                    polling_sleep_duration=rospy.Duration(0.1)
+                    )
+            pos, rot = self.tf_listener.lookupTransform(
+                    self.moving_tf_frame,
+                    self.end_effector,
+                    rospy.Time(0))
+        except tf.Exception as e:
+            rospy.logwarn("{}".format(e))
+            return None
+
         pose = Pose()
+        pose.position.x = pos[0]
+        pose.position.y = pos[1]
+        pose.position.z = pos[2]
+        pose.orientation.x = rot[0]
+        pose.orientation.y = rot[1]
+        pose.orientation.z = rot[2]
+        pose.orientation.w = rot[3]
         return pose
 
     def make_interactive_marker(self, tf_reference_frame, starting_pose):
