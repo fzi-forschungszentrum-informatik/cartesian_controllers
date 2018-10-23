@@ -1,0 +1,1 @@
+include: 'http://ids-services.fzi.de:8079/master/gitlab-ci-yml/catkin_pipeline.yml'
