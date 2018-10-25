@@ -8,11 +8,17 @@ project(joint_to_cartesian_controller)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
   cartesian_controller_base
   controller_interface
-  kdl_parser
   controller_manager
+  geometry_msgs
+  hardware_interface
+  joint_limits_interface
+  kdl_parser
+  pluginlib
+  roscpp
+  sensor_msgs
+  urdf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,9 +111,23 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES joint_to_cartesian_controller
-#  CATKIN_DEPENDS roscpp
+  INCLUDE_DIRS
+    include
+  LIBRARIES
+    joint_to_cartesian_controller
+  CATKIN_DEPENDS
+    cartesian_controller_base
+    controller_interface
+    controller_manager
+    geometry_msgs
+    hardware_interface
+    joint_limits_interface
+    kdl_parser
+    pluginlib
+    roscpp
+    sensor_msgs
+    urdf
+
 #  DEPENDS system_lib
 )
 
@@ -175,11 +195,11 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+ install(DIRECTORY include/${PROJECT_NAME}/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+   PATTERN ".svn" EXCLUDE
+ )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(FILES

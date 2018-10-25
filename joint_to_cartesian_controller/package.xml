@@ -40,16 +40,31 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>cartesian_controller_base</build_depend>
-  <build_depend>controller_manager</build_depend>
-  <build_depend>controller_interface</build_depend>
-  <build_depend>kdl_parser</build_depend>
 
-  <run_depend>roscpp</run_depend>
+  <build_depend>cartesian_controller_base</build_depend>
+  <build_depend>controller_interface</build_depend>
+  <build_depend>controller_manager</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>hardware_interface</build_depend>
+  <build_depend>joint_limits_interface</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>urdf</build_depend>
+
   <run_depend>cartesian_controller_base</run_depend>
   <run_depend>controller_interface</run_depend>
+  <run_depend>controller_manager</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>hardware_interface</run_depend>
+  <run_depend>joint_limits_interface</run_depend>
   <run_depend>kdl_parser</run_depend>
+  <run_depend>pluginlib</run_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>urdf</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
