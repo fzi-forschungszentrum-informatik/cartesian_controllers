@@ -53,6 +53,7 @@
   <build_depend>interactive_markers</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>controller_interface</build_depend>
+  <build_depend>kdl_parser</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>interactive_markers</build_export_depend>
