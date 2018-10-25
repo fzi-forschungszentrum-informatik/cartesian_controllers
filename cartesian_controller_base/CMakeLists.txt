@@ -185,7 +185,7 @@ install(TARGETS ${PROJECT_NAME}
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING REGEX ".*\.h(pp)?"
+  FILES_MATCHING REGEX ".*\\.h(pp)?"
   PATTERN ".svn" EXCLUDE
 )
 
