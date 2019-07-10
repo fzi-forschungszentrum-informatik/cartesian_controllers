@@ -136,7 +136,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   m_current_pose = getEndEffectorPose();
 
   // Configure the interactive marker for usage in RViz
-  m_server.reset(new interactive_markers::InteractiveMarkerServer("motion_control_handle","",false));
+  m_server.reset(new interactive_markers::InteractiveMarkerServer(
+    nh.getNamespace(), "", false));
   m_marker.header.frame_id = m_robot_base_link;
   m_marker.header.stamp = ros::Time(0);   // makes frame_id const
   m_marker.scale = 0.1;
