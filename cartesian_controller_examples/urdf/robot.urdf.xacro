@@ -23,11 +23,5 @@
                 <child link="sensor_link"/>
         </joint>
 
-        <!-- Load control plugin -->
-        <!-- This exposes a controller_manager to manage controllers for gazebo -->
-        <gazebo>
-                <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-                </plugin>
-        </gazebo>
 </robot>
 

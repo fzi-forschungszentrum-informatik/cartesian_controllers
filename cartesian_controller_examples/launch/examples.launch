@@ -3,28 +3,12 @@
         <param name="/robot_description"
         command="$(find xacro)/xacro --inorder '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
 
-        <!-- Load empty gazebo -->
-        <include file="$(find gazebo_ros)/launch/empty_world.launch">
-                <arg name="world_name" default="worlds/empty.world"/>
-                <arg name="paused" value="true"/>
-                <arg name="gui" value="false"/>
-        </include>
+        <!-- Load hardware configuration -->
+        <rosparam file="$(find cartesian_controller_examples)/config/example_hw_config.yaml" command="load"></rosparam>
 
-        <!-- Spawn robot in gazebo in good testing pose -->
-        <node name="spawn_gazebo_model"
-                pkg="gazebo_ros"
-                type="spawn_model"
-                respawn="false"
-                output="screen"
-                args="-urdf -param robot_description -model robot -z 0.1
-                -J shoulder_pan_joint 0.15
-                -J shoulder_lift_joint -1.75
-                -J elbow_joint 1.5
-                -J wrist_1_joint -1.4
-                -J wrist_2_joint -1.6
-                -J wrist_3_joint 0.0
-                -unpause"
-                />
+        <!-- Load hardware interface -->
+        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main"
+        output="screen" />
 
         <!-- Robot state publisher -->
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
@@ -38,8 +22,16 @@
         <!-- Load controller configuration -->
         <rosparam file="$(find cartesian_controller_examples)/config/example_controllers.yaml" command="load"></rosparam>
 
-        <!-- Spawn controllers. The controller manager is loaded separately through a gazebo plugin -->
-        <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_force_controller my_cartesian_compliance_controller my_motion_control_handle my_joint_to_cartesian_controller joint_trajectory_controller" />
+        <!-- Spawn controllers -->
+        <node name="controller_spawner" pkg="controller_manager" type="spawner"
+                args="--stopped
+                my_cartesian_motion_controller
+                my_cartesian_force_controller
+                my_cartesian_compliance_controller
+                my_motion_control_handle
+                my_joint_to_cartesian_controller
+                joint_trajectory_controller"
+        />
 
         <!-- Spawn joint controller for testing my_joint_to_cartesian_controller  -->
         <!-- Note: This controller should be loaded and started -->
