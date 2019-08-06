@@ -7,8 +7,8 @@
         -->
 
         <!-- joint properties -->
-        <xacro:property name="joint_radius" value="0.03" />
-        <xacro:property name="joint_length" value="0.02" />
+        <xacro:property name="joint_radius" value="0.02" />
+        <xacro:property name="joint_length" value="0.03" />
 
         <!-- link properties -->
         <xacro:property name="link_radius" value="0.01" />
@@ -19,15 +19,18 @@
         <xacro:property name="link5_length" value="0.10" />
         <xacro:property name="link6_length" value="0.1" />
 
+        <!-- colors -->
+        <material name="grey">
+                <color rgba="0.3 0.3 0.3 1.0"/>
+        </material>
+
         <link name="base_link" >
                 <visual name="joint">
                         <origin xyz="0 0 ${joint_length / 2.0}" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -45,27 +48,21 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 0 ${link1_length / 2.0}" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${link1_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="joint2">
                         <origin xyz="0 0 ${link1_length}" rpy="${pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -83,27 +80,21 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 0 ${link2_length / 2.0}" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${link2_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="joint3">
                         <origin xyz="0 0 ${link2_length}" rpy="${pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -121,27 +112,21 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 0 ${link3_length / 2.0}" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${link3_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="joint4">
                         <origin xyz="0 0 ${link3_length}" rpy="${pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -159,27 +144,21 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 ${link4_length / 2.0} 0" rpy="${pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${link4_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="joint5">
                         <origin xyz="0 ${link4_length} 0" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -197,27 +176,21 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 0 ${link5_length / 2.0}" rpy="0 0 0" />
                         <geometry>
                                 <cylinder length="${link5_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="joint6">
                         <origin xyz="0 0 ${link5_length}" rpy="${pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -235,18 +208,14 @@
                         <geometry>
                                 <cylinder length="${joint_length}" radius="${joint_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
                 <visual name="link">
                         <origin xyz="0 ${link6_length / 2.0} 0" rpy="${-pi / 2.0} 0 0" />
                         <geometry>
                                 <cylinder length="${link6_length}" radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 
@@ -259,11 +228,9 @@
                 <visual>
                         <origin xyz="0 0 0" rpy="0 0 0" />
                         <geometry>
-                                <sphere radius="${joint_radius}"/>
+                                <sphere radius="${link_radius}"/>
                         </geometry>
-                        <material name="LightGrey">
-                                <color rgba="0.7 0.7 0.7 1.0"/>
-                        </material>
+                        <material name="grey"/>
                 </visual>
         </link>
 

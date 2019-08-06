@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
         - /TF1/Frames1
         - /RobotModel1/Links1
       Splitter Ratio: 0.511482
@@ -58,7 +59,7 @@ Visualization Manager:
       Frames:
         All Enabled: false
         base_link:
-          Value: false
+          Value: true
         link1:
           Value: true
         link2:
@@ -76,10 +77,10 @@ Visualization Manager:
         tool0:
           Value: true
         world:
-          Value: false
-      Marker Scale: 0.5
+          Value: true
+      Marker Scale: 0.300000012
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: false
       Tree:
@@ -199,7 +200,7 @@ Visualization Manager:
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 116; 116; 116
     Default Light: true
     Fixed Frame: world
     Frame Rate: 30
@@ -222,7 +223,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.0611012
+      Distance: 3.14516926
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -237,10 +238,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.149797067
+      Pitch: 0.104797058
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.550396681
+      Yaw: 1.27540994
     Saved: ~
 Window Geometry:
   Displays:
@@ -259,4 +260,4 @@ Window Geometry:
     collapsed: false
   Width: 1863
   X: 57
-  Y: 96
+  Y: 24
