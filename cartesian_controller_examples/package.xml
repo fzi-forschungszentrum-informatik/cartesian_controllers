@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>cartesian_controller_test</name>
+  <name>cartesian_controller_examples</name>
   <version>0.0.0</version>
-  <description>The cartesian_controller_test package</description>
+  <description>The cartesian_controller_examples package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/cartesian_controller_test</url> -->
+  <!-- <url type="website">http://wiki.ros.org/cartesian_controller_examples</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -37,7 +37,6 @@
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use run_depend for packages you need at runtime: -->
   <!--   <run_depend>message_runtime</run_depend> -->
-  <run_depend>ur_description</run_depend>
 
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->

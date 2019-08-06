@@ -1,7 +1,7 @@
 <launch>
         <!-- Load robot_description to parameter server -->
         <param name="/robot_description"
-        command="$(find xacro)/xacro --inorder '$(find cartesian_controller_test)/robot.urdf.xacro'" />
+        command="$(find xacro)/xacro --inorder '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
 
         <!-- Load empty gazebo -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -36,7 +36,7 @@
         <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" args="joint_state_controller" respawn="false" output="screen"/>
 
         <!-- Load controller configuration -->
-        <rosparam file="$(find cartesian_controller_test)/controller.yaml" command="load"></rosparam>
+        <rosparam file="$(find cartesian_controller_examples)/config/example_controllers.yaml" command="load"></rosparam>
 
         <!-- Spawn controllers. The controller manager is loaded separately through a gazebo plugin -->
         <node name="controller_spawner" pkg="controller_manager" type="spawner" args="--stopped my_cartesian_motion_controller my_cartesian_force_controller my_cartesian_compliance_controller my_motion_control_handle my_joint_to_cartesian_controller joint_trajectory_controller" />
@@ -48,7 +48,7 @@
         </group>
 
         <!-- Visualization -->
-        <arg name="my_rviz" value="-d $(find cartesian_controller_test)/test.rviz" />
+        <arg name="my_rviz" value="-d $(find cartesian_controller_examples)/etc/examples.rviz" />
         <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="$(arg my_rviz)" output="screen" >
         </node>
 </launch>
