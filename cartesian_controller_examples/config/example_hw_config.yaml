@@ -6,9 +6,9 @@ generic_hw_control_loop:
 hardware_interface:
   sim_control_mode: 0
   joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6

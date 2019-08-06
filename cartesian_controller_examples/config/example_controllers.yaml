@@ -4,12 +4,12 @@ my_cartesian_motion_controller:
     robot_base_link: "base_link"
     target_frame_topic: "target_frame"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
     solver:
         mass: 0.5
@@ -29,12 +29,12 @@ my_cartesian_force_controller:
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
     solver:
         mass: 18
@@ -54,31 +54,6 @@ my_cartesian_force_controller:
         rot_y: {p: 0.01, i: 0, d: 0}
         rot_z: {p: 0.01, i: 0, d: 0}
 
-#my_cartesian_force_controller:
-#   type: "velocity_controllers/CartesianForceController"
-#   end_effector_link: "sensor_link"
-#   robot_base_link: "base_link"
-#   ft_sensor_ref_link: "sensor_link"
-#   joints:
-#   - shoulder_pan_joint
-#   - shoulder_lift_joint
-#   - elbow_joint
-#   - wrist_1_joint
-#   - wrist_2_joint
-#   - wrist_3_joint
-#
-#   solver:
-#       mass: 18
-#       inertia: 0.07
-#
-#   pid_gains:
-#       trans_x: {p: 0.40, i: 0, d: 0}
-#       trans_y: {p: 0.40, i: 0, d: 0}
-#       trans_z: {p: 0.40, i: 0, d: 0}
-#       rot_x: {p: 0.04, i: 0, d: 0}
-#       rot_y: {p: 0.04, i: 0, d: 0}
-#       rot_z: {p: 0.04, i: 0, d: 0}
-
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
     end_effector_link: "sensor_link"    # All links above must come before this link
@@ -87,12 +62,12 @@ my_cartesian_compliance_controller:
     compliance_ref_link: "sensor_link"
     target_frame_topic: "target_frame"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
     stiffness:  # w.r.t. compliance_ref_link
         trans_x: 500
@@ -126,12 +101,12 @@ my_motion_control_handle:
    robot_base_link: "base_link"
    target_frame_topic: "/my_cartesian_motion_controller/target_frame"
    joints:
-   - shoulder_pan_joint
-   - shoulder_lift_joint
-   - elbow_joint
-   - wrist_1_joint
-   - wrist_2_joint
-   - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
@@ -139,40 +114,40 @@ my_joint_to_cartesian_controller:
     robot_base_link: "base_link"
     target_frame_topic: "/my_cartesian_motion_controller/target_frame"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
     joint_limits:
-      shoulder_pan_joint:
+      joint1:
         has_velocity_limits: true
         max_velocity: 3.15
         has_acceleration_limits: true
         max_acceleration: 10.0
-      shoulder_lift_joint:
+      joint2:
         has_velocity_limits: true
         max_velocity: 3.15
         has_acceleration_limits: true
         max_acceleration: 10.0
-      elbow_joint:
+      joint3:
         has_velocity_limits: true
         max_velocity: 3.15
         has_acceleration_limits: true
         max_acceleration: 10.0
-      wrist_1_joint:
+      joint4:
         has_velocity_limits: true
         max_velocity: 3.2
         has_acceleration_limits: true
         max_acceleration: 10.0
-      wrist_2_joint:
+      joint5:
         has_velocity_limits: true
         max_velocity: 3.2
         has_acceleration_limits: true
         max_acceleration: 10.0
-      wrist_3_joint:
+      joint6:
         has_velocity_limits: true
         max_velocity: 3.2
         has_acceleration_limits: true
@@ -181,22 +156,22 @@ my_joint_to_cartesian_controller:
 my_joint_to_cartesian_controller/joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
 joint_trajectory_controller:
     type: "position_controllers/JointTrajectoryController"
     joints:
-    - shoulder_pan_joint
-    - shoulder_lift_joint
-    - elbow_joint
-    - wrist_1_joint
-    - wrist_2_joint
-    - wrist_3_joint
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
 
 joint_state_controller:
     type: joint_state_controller/JointStateController
