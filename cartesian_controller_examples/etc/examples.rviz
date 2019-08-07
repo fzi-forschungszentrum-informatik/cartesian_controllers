@@ -92,9 +92,10 @@ Visualization Manager:
                   link4:
                     link5:
                       link6:
+                        sensor_link:
+                          {}
                         tool0:
-                          sensor_link:
-                            {}
+                          {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -191,13 +192,13 @@ Visualization Manager:
       Value: true
     - Class: rviz/InteractiveMarkers
       Enable Transparency: false
-      Enabled: true
+      Enabled: false
       Name: InteractiveMarkers
       Show Axes: true
       Show Descriptions: false
       Show Visual Aids: false
-      Update Topic: /motion_control_handle/update
-      Value: true
+      Update Topic: /my_motion_control_handle/update
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 116; 116; 116
@@ -223,7 +224,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.14516926
+      Distance: 2.64989567
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -238,10 +239,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.104797058
+      Pitch: 0.294797003
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.27540994
+      Yaw: 0.870410562
     Saved: ~
 Window Geometry:
   Displays:
