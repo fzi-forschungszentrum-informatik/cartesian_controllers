@@ -1,6 +1,6 @@
 my_cartesian_motion_controller:
     type: "position_controllers/CartesianMotionController"
-    end_effector_link: "sensor_link"
+    end_effector_link: "tool0"
     robot_base_link: "base_link"
     target_frame_topic: "target_frame"
     joints:
@@ -25,7 +25,7 @@ my_cartesian_motion_controller:
 
 my_cartesian_force_controller:
     type: "position_controllers/CartesianForceController"
-    end_effector_link: "sensor_link"
+    end_effector_link: "tool0"
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
     joints:
@@ -56,10 +56,10 @@ my_cartesian_force_controller:
 
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
-    end_effector_link: "sensor_link"    # All links above must come before this link
+    end_effector_link: "tool0"    # All links below must come before this link
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
-    compliance_ref_link: "sensor_link"
+    compliance_ref_link: "tool0"
     target_frame_topic: "target_frame"
     joints:
     - joint1
@@ -97,7 +97,7 @@ my_cartesian_compliance_controller:
 
 my_motion_control_handle:
    type: "cartesian_controllers/MotionControlHandle"
-   end_effector_link: "sensor_link"
+   end_effector_link: "tool0"
    robot_base_link: "base_link"
    target_frame_topic: "/my_cartesian_motion_controller/target_frame"
    joints:
@@ -110,7 +110,7 @@ my_motion_control_handle:
 
 my_joint_to_cartesian_controller:
     type: "cartesian_controllers/JointControllerAdapter"
-    end_effector_link: "sensor_link"
+    end_effector_link: "tool0"
     robot_base_link: "base_link"
     target_frame_topic: "/my_cartesian_motion_controller/target_frame"
     joints:
