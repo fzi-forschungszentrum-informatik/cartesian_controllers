@@ -11,10 +11,6 @@ my_cartesian_motion_controller:
     - joint5
     - joint6
 
-    solver:
-        mass: 0.5
-        inertia: 0.05
-
     pid_gains:
         trans_x: {p: 10.0, i: 0, d: 0}
         trans_y: {p: 10.0, i: 0, d: 0}
@@ -35,10 +31,6 @@ my_cartesian_force_controller:
     - joint4
     - joint5
     - joint6
-
-    solver:
-        mass: 18
-        inertia: 0.07
 
     # Center of mass w.r.t. ft_sensor_ref_link
     tool: {mass: 0.0, cog_x: 0, cog_y: 0, cog_z: 0.01}
@@ -76,10 +68,6 @@ my_cartesian_compliance_controller:
         rot_x: 100
         rot_y: 100
         rot_z: 100
-
-    solver:
-        mass: 18
-        inertia: 0.07
 
     # Center of mass w.r.t. ft_sensor_ref_link
     tool: {mass: 0, com_x: 0, com_y: 0, com_z: 0}

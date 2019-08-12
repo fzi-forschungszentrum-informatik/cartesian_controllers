@@ -107,15 +107,6 @@ class ForwardDynamicsSolver
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
     /**
-     * @brief Adjust the end-effector mass and inertia of the virtual robot
-     *
-     * @param mass The new mass of the end-effector in [kg]
-     * @param inertia The rotational inertia in [kgms^2]. This value is taken
-     * for all ixx, iyy, izz. Deviation moments are set to zero.
-     */
-    void SetEndEffectorMass(const double mass, const double inertia);
-
-    /**
      * @brief Initialize the solver
      *
      * @param chain The kinematic chain of the robot
