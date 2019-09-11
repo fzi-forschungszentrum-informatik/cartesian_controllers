@@ -5,7 +5,7 @@
 
   <maintainer email="scherzin@fzi.de">Stefan Scherzinger</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <url type="repository">git@ids-git.fzi.de:scherzin/cartesian_controllers.git</url>
 
