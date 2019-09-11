@@ -8,6 +8,8 @@ project(cartesian_controller_base)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(Eigen3 REQUIRED)
+add_definitions(-DEIGEN_MPL2_ONLY)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   controller_interface
