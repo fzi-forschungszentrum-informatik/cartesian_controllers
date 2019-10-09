@@ -101,12 +101,6 @@ namespace cartesian_controller_base{
     }
     control_cmd.time_from_start = period; // valid for this duration
 
-    // Update forwards kinematics
-    updateKinematics();
-
-    // Prepare for next cycle
-    m_last_positions     = m_current_positions;
-
     return control_cmd;
   }
 
@@ -134,16 +128,10 @@ namespace cartesian_controller_base{
     for (int i = 0; i < joint_handles.size(); ++i)
     {
       m_current_positions(i)      = joint_handles[i].getPosition();
-      m_current_velocities(i)     = 0.0;
+      m_current_velocities(i)     = joint_handles[i].getVelocity();
       m_current_accelerations(i)  = 0.0;
       m_last_positions(i)         = m_current_positions(i);
-
-
     }
-
-    // Update end effector pose with simulated positions
-    updateKinematics();
-
     return true;
   }
 
@@ -182,22 +170,6 @@ namespace cartesian_controller_base{
     ROS_INFO("Forward dynamics solver has control over %i joints", m_number_joints);
 
     return true;
-  }
-
-  void ForwardDynamicsSolver::updateKinematics()
-  {
-    // Pose w. r. t. base
-    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
-
-    // Absolute velocity w. r. t. base
-    KDL::FrameVel vel;
-    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    m_end_effector_vel[0] = vel.deriv().vel.x();
-    m_end_effector_vel[1] = vel.deriv().vel.y();
-    m_end_effector_vel[2] = vel.deriv().vel.z();
-    m_end_effector_vel[3] = vel.deriv().rot.x();
-    m_end_effector_vel[4] = vel.deriv().rot.y();
-    m_end_effector_vel[5] = vel.deriv().rot.z();
   }
 
   bool ForwardDynamicsSolver::buildGenericModel(const KDL::Chain& input_chain)

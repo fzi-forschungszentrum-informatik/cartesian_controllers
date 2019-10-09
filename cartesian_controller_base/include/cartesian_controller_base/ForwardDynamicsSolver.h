@@ -146,8 +146,25 @@ class ForwardDynamicsSolver
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 
-    //! Call this function during activation
-    void updateKinematics();
+    /**
+     * @brief Update the robot kinematics of the solver
+     *
+     * This template has two specializations for two distinct controller
+     * policies, depending on the hardware interface used:
+     *
+     * 1) PositionJointInterface: The solver's internal simulation is continued
+     * on each call without taking the real robot state into account.
+     *
+     * 2) VelocityJointInterface: The internal simulation is updated with the
+     * real robot state. On each call, the solver starts with its internal
+     * simulation in sync with the real robot.
+     *
+     * @tparam HardwareInterface
+     * @param joint_handles
+     */
+    template <class HardwareInterface>
+    void updateKinematics(
+        const std::vector<hardware_interface::JointHandle>& joint_handles);
 
   private:
 
@@ -188,5 +205,6 @@ class ForwardDynamicsSolver
 
 } // namespace
 
-#endif
+#include <cartesian_controller_base/ForwardDynamicsSolver.hpp>
 
+#endif

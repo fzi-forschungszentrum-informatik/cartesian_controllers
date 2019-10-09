@@ -168,6 +168,7 @@ starting(const ros::Time& time)
 {
   // Copy joint state to internal simulation
   m_forward_dynamics_solver.setStartState(m_joint_handles);
+  m_forward_dynamics_solver.updateKinematics<HardwareInterface>(m_joint_handles);
 }
 
 template <class HardwareInterface>
@@ -237,9 +238,13 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
   // PID controlled system input
   m_cartesian_input = m_spatial_controller(error,period);
 
+  // Simulate one step forward
   m_simulated_joint_motion = m_forward_dynamics_solver.getJointControlCmds(
       period,
       m_cartesian_input);
+
+  // Update according to control policy for next cycle
+  m_forward_dynamics_solver.updateKinematics<HardwareInterface>(m_joint_handles);
 }
 
 template <class HardwareInterface>
