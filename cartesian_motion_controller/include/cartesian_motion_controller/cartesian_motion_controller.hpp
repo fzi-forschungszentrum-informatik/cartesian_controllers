@@ -106,8 +106,7 @@ update(const ros::Time& time, const ros::Duration& period)
   // control process. So, we control the internal model until we meet the
   // Cartesian target motion. This internal control needs some simulation time
   // steps.
-  const int steps = 10;
-  for (int i = 0; i < steps; ++i)
+  for (int i = 0; i < Base::m_iterations; ++i)
   {
     // The internal 'simulation time' is deliberately independent of the outer
     // control cycle.

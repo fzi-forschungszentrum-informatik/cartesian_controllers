@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   control_toolbox
   eigen_conversions
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -94,9 +95,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-#generate_dynamic_reconfigure_options(
-#        cfg/CartesianController.cfg
-#)
+generate_dynamic_reconfigure_options(
+        cfg/CartesianController.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -110,7 +111,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cartesian_controller_base
-  CATKIN_DEPENDS roscpp controller_interface kdl_parser trajectory_msgs control_toolbox eigen_conversions 
+  CATKIN_DEPENDS roscpp controller_interface kdl_parser trajectory_msgs control_toolbox eigen_conversions dynamic_reconfigure
 #  DEPENDS system_lib
 )
 

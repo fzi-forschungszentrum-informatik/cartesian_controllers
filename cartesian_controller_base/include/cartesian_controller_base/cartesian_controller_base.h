@@ -57,6 +57,10 @@
 #include <cartesian_controller_base/SpatialPIDController.h>
 #include <cartesian_controller_base/Utility.h>
 
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_controller_base/CartesianControllerConfig.h>
+
 // Other
 #include <vector>
 #include <string>
@@ -96,6 +100,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::string             m_robot_base_link;
 
     bool m_paused;
+    int m_iterations;
 
   private:
     std::vector<hardware_interface::JointHandle>      m_joint_handles;
@@ -103,10 +108,18 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
     SpatialPIDController                              m_spatial_controller;
     ctrl::Vector6D                                    m_cartesian_input;
+    double m_error_scale;
 
     // Against multi initialization in multi inheritance scenarios
     bool m_already_initialized;;
 
+    // Dynamic reconfigure
+    typedef cartesian_controller_base::CartesianControllerConfig ControllerConfig;
+
+    void dynamicReconfigureCallback(ControllerConfig& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<ControllerConfig> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<ControllerConfig>::CallbackType m_callback_type;
 };
 
 }

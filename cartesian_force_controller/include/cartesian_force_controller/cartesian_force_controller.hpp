@@ -121,8 +121,7 @@ update(const ros::Time& time, const ros::Duration& period)
 {
   // Control the robot motion in such a way that the resulting net force
   // vanishes. This internal control needs some simulation time steps.
-  const int steps = 10;
-  for (int i = 0; i < steps; ++i)
+  for (int i = 0; i < Base::m_iterations; ++i)
   {
     // The internal 'simulation time' is deliberately independent of the outer
     // control cycle.
