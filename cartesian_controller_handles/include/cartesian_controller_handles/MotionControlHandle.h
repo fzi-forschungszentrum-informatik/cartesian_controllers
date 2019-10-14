@@ -62,10 +62,15 @@ namespace cartesian_controller_handles
 /**
  * @brief Implements a drag-and-drop control handle in RViz
  *
- * This motion control handle can be used to control the end-effector of a
- * robotic manipulator in Cartesian space with an interactive marker.  The
- * motion of the marker (both orientation and translation) is published as a
- * geometry_msgs/PoseStamped, which can be followed by motion-based Cartesian controllers.
+ * This motion control handle can be used to control the end effector of a
+ * robotic manipulator in Cartesian space with an interactive marker.
+ * A common use case is quick teaching of Cartesian motion.
+ * The motion of the marker (both orientation and translation) is published as a
+ * geometry_msgs/PoseStamped, which can be followed by motion-based Cartesian
+ * controllers, such as the \ref CartesianMotionController or the \ref
+ * CartesianComplianceController.
+ *
+ * @tparam HardwareInterface Currently only JointStateInterface is supported
  */
 template <class HardwareInterface>
 class MotionControlHandle : public controller_interface::Controller<HardwareInterface>

@@ -48,7 +48,7 @@ namespace cartesian_controllers
   /**
    * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
    *
-   * Can be specified as a controller of type position_controllers/MotionControlHandle.
+   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
    */
   typedef cartesian_controller_handles::MotionControlHandle<
     hardware_interface::JointStateInterface> MotionControlHandle;
