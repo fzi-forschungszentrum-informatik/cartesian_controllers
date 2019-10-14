@@ -49,6 +49,29 @@
 namespace cartesian_force_controller
 {
 
+/**
+ * @brief A ROS-control controller for Cartesian force control
+ *
+ * This controller implements 6-dimensional end effector force control for
+ * robots with a wrist force-torque sensor.  Users command
+ * geometry_msgs::WrenchStamped targets to steer the robot in task space.  The
+ * controller additionally listens to the specified force-torque sensor signals
+ * and computes the superposition with the target wrench.
+ *
+ * The underlying solver maps this remaining wrench to joint motion.
+ * Users can steer their robot with this control in free space. The speed of
+ * the end effector motion is set with PD gains on each Cartesian axes.
+ * In contact, the controller regulates the net force of the two wrenches to zero.
+ *
+ * Note that during free motion, users can generally set higher control gains
+ * for faster motion.  In contact with the environment, however, normally lower
+ * gains are required to maintain stability.  The ranges to operate in mainly
+ * depend on the stiffness of the environment and the controller cycle of the
+ * real hardware, such that some experiments might be required for each use
+ * case.
+ *
+ * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
+ */
 template <class HardwareInterface>
 class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
 {
@@ -66,6 +89,11 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
 
   protected:
+    /**
+     * @brief Compute the net force out of target wrench and measured sensor wrench
+     *
+     * @return The remaining error wrench, given in robot base frame
+     */
     ctrl::Vector6D        computeForceError();
     std::string           m_new_ft_sensor_ref;
     void setFtSensorReferenceFrame(const std::string& new_ref);
