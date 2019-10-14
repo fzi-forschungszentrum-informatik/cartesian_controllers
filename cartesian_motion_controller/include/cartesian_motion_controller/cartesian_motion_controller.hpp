@@ -183,6 +183,14 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 targetFrameCallback(const geometry_msgs::PoseStamped& target)
 {
+  if (target.header.frame_id != Base::m_robot_base_link)
+  {
+    ROS_WARN_STREAM_THROTTLE(3, "Got target pose in wrong reference frame. Expected: "
+        << Base::m_robot_base_link << " but got "
+        << target.header.frame_id);
+    return;
+  }
+
   m_target_frame = KDL::Frame(
       KDL::Rotation::Quaternion(
         target.pose.orientation.x,
