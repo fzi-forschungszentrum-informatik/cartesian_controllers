@@ -79,14 +79,18 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   std::map<std::string, double> gravity;
   if (!nh.getParam("gravity",gravity))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/gravity" << " from parameter server");
-    return false;
+    ROS_INFO_STREAM("Failed to load " << nh.getNamespace() + "/gravity" << " from parameter server");
+    gravity["x"] = 0;
+    gravity["y"] = 0;
+    gravity["z"] = 0;
   }
   std::map<std::string, double> tool;
   if (!nh.getParam("tool",tool))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/tool" << " from parameter server");
-    return false;
+    ROS_INFO_STREAM("Failed to load " << nh.getNamespace() + "/tool" << " from parameter server");
+    tool["com_x"] = 0;
+    tool["com_y"] = 0;
+    tool["com_z"] = 0;
   }
   // In sensor frame
   m_center_of_mass = ctrl::Vector3D(tool["com_x"],tool["com_y"],tool["com_z"]);
