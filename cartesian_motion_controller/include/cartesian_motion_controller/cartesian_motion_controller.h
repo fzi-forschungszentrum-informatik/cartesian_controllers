@@ -50,6 +50,30 @@
 namespace cartesian_motion_controller
 {
 
+/**
+ * @brief A ROS-control controller for Cartesian motion tracking
+ *
+ * This controller is meant for tracking Cartesian motion that is not known in
+ * advance.  Common use cases are teleoperation or Cartesian end effector
+ * teaching, in which the Cartesian motion is commanded with discrete target
+ * poses.
+ *
+ * The controller receives the targets as \a geometry_msgs::PoseStamped
+ * messages and tries to reach those as best as possible.  Users can adjust the
+ * controller's responsiveness to those targets with setting individual PD
+ * gains for each Cartesian dimension.
+ *
+ * One benefit is that the controller automatically interpolates to obtain
+ * smooth joint commands for distant, discretely sampled targets.
+ * Users achieve this with setting qualitatively low P gains.
+ *
+ * For uses cases where a more precise tracking is needed, users may configure
+ * this controller to a fast Inverse Kinematics solver, with setting
+ * qualitatively high P gains. Note, however, that this requires
+ * high-frequently published targets to avoid jumps on joint level.
+ *
+ * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
+ */
 template <class HardwareInterface>
 class CartesianMotionController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
 {
@@ -67,6 +91,18 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
 
   protected:
+    /**
+     * @brief Compute the offset between a target pose and the current end effector pose
+     *
+     * The pose offset is formulated with a translational component and a rotational
+     * component, using Rodrigues vector notation.
+     *
+     * The robot's current pose is computed with forward kinematics, using either
+     * virtually simulated joint positions (for PositionJointInterface), or
+     * real joint positions (for VelocityJointInterface).
+     *
+     * @return The error as a 6-dim vector (linear, angular) w.r.t to the robot base link
+     */
     ctrl::Vector6D        computeMotionError();
 
   private:
