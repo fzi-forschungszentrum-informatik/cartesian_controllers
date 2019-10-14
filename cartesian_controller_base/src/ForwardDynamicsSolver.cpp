@@ -203,7 +203,7 @@ namespace cartesian_controller_base{
     }
 
     // Only give the last segment a generic mass and inertia.
-    // TODO: Reference (arxiv) of ICAR2019 paper evaluation on this matter.
+    // See https://arxiv.org/pdf/1908.06252.pdf for a motivation for this setting.
     double m = 1;
     double ip = 1;
     m_chain.segments[m_chain.segments.size()-1].setInertia(

@@ -73,7 +73,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   m_target_frame_subscr = nh.subscribe(
       m_target_frame_topic,
-      3,  // TODO: What makes sense here?
+      3,
       &CartesianMotionController<HardwareInterface>::targetFrameCallback,
       this);
 
