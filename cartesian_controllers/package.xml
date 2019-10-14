@@ -7,9 +7,9 @@
 
   <license>BSD</license>
 
-  <url type="repository">git@ids-git.fzi.de:scherzin/cartesian_controllers.git</url>
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 
 
-  <author>Stefan Scherzinger</author>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
 
 
   <buildtool_depend>catkin</buildtool_depend>
