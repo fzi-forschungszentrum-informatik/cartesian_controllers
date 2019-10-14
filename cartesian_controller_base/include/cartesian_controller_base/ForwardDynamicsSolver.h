@@ -74,10 +74,12 @@ namespace cartesian_controller_base{
  *  achieve a nearly linear behavior in all joint configurations.
  *  The resulting joint accelerations are computed according to
  *  \f$ \ddot{q} = H^{-1} ( J^T f) \f$
- *  Where \f$ H \f$ denotes the joint space inertia matrix, \f$ J \f$ denotes
- *  the joint Jacobian and \f$ f \f$ is the applied force to the end effector.
- *  The joint accelerations are integrated twice to obtain joint velocities and
- *  joint positions respectively.
+ *  Where \f$ H \f$ denotes the joint space inertia matrix of the virtually
+ *  conditioned system, \f$ J \f$ denotes the joint Jacobian and \f$ f \f$ is
+ *  the applied force to the end effector.  The joint accelerations are
+ *  integrated twice to obtain joint velocities and joint positions
+ *  respectively.
+ *  Check more details behind the solver here: https://arxiv.org/pdf/1908.06252.pdf
  */
 class ForwardDynamicsSolver
 {

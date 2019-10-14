@@ -68,6 +68,17 @@
 namespace cartesian_controller_base
 {
 
+/**
+ * @brief Base class for each cartesian controller
+ *
+ * This class implements a common forward dynamics based solver for Cartesian
+ * end effector error control, using the ROS-control framework.  Different
+ * child class controllers will define what this error represents and should
+ * call \ref computeJointControlCmds with that error.  The control commands are
+ * sent to the hardware with \ref writeJointControlCmds.
+ *
+ * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
+ */
 template <class HardwareInterface>
 class CartesianControllerBase : public controller_interface::Controller<HardwareInterface>
 {
@@ -85,12 +96,54 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
 
   protected:
+    /**
+     * @brief Write joint control commands to the real hardware
+     *
+     * Depending on the hardware interface used, this is either joint positions
+     * or velocities.
+     */
     void writeJointControlCmds();
 
+    /**
+     * @brief Compute one control step using forward dynamics simulation
+     *
+     * Check \ref ForwardDynamicsSolver for details.
+     *
+     * @param error The error to minimize
+     * @param period The period for this control cycle
+     */
     void computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period);
 
+    /**
+     * @brief Display the given vector in the given robot base link
+     *
+     * @param vector The quantity to transform
+     * @param from The reference frame where the quantity was formulated
+     *
+     * @return The quantity in the robot base frame
+     */
     ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
+
+    /**
+     * @brief Display the given tensor in the robot base frame
+     *
+     * @param tensor The quantity to transform
+     * @param from The reference frame where the quantity was formulated
+     *
+     * @return The quantity in the robot base frame
+     */
     ctrl::Matrix6D displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from);
+
+    /**
+     * @brief Display a given vector in a new reference frame
+     *
+     * The vector is assumed to be given in the robot base frame.
+     *
+     * @param vector The quantity to transform
+     * @param to The reference frame in which to formulate the quantity
+     *
+     * @return The quantity in the new frame
+     */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
     boost::shared_ptr<KDL::TreeFkSolverPos_recursive>

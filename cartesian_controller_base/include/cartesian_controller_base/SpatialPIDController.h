@@ -52,6 +52,14 @@
 namespace cartesian_controller_base
 {
 
+/**
+ * @brief A 6-dimensional PID controller class
+ *
+ * This class implements separate PID controllers for each of the Cartesian
+ * axes, i.e. three translational controllers and three rotational controllers.
+ * In each dimension, an independent instance of the Pid class from the
+ * control_toolbox is used.
+ */
 class SpatialPIDController
 {
   public:
@@ -59,6 +67,14 @@ class SpatialPIDController
 
     bool init(ros::NodeHandle& nh);
 
+    /**
+     * @brief Call operator for one control cycle
+     *
+     * @param error The control error to reduce. Target - current.
+     * @param period The period for this control step.
+     *
+     * @return The controlled 6-dim vector (translational, rotational).
+     */
     ctrl::Vector6D operator()(const ctrl::Vector6D& error, const ros::Duration& period);
 
   private:
