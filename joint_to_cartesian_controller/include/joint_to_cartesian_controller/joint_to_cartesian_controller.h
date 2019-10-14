@@ -58,6 +58,23 @@
 namespace joint_to_cartesian_controller
 {
 
+/**
+ * @brief A controller to turn joint trajectories into a moving Cartesian target pose
+ *
+ * Use this controller, if you have (for some reason) only joint-based
+ * trajectories and want to use Cartesian controllers from the
+ * cartesian_controller package.
+ *
+ * This controller handles an internal controller manager, which can load
+ * standard ros_controllers. The control commands from these controllers are
+ * turned into Cartesian poses with forward kinematics, and can be used by
+ * the Cartesian_controllers. An application of this controller is to
+ * provide an easy interface to the rqt_joint_trajectory_controller plugin and
+ * MoveIt!.
+ *
+ * Note, however, that transforming joint motion into Cartesian motion for
+ * target following loses explicit control over the joints and collision checking.
+ */
 class JointToCartesianController
   : public controller_interface::Controller<hardware_interface::JointStateInterface>
 {

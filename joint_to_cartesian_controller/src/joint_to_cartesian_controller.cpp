@@ -63,7 +63,7 @@ namespace cartesian_controllers
    * standard ros_controllers. The control commands from these controllers are
    * turned into Cartesian poses with forward kinematics, and can be used by
    * the Cartesian_controllers. An application of this controller is to
-   * provide an easy interface to the rqt_joint_trajectory_controller plugin an
+   * provide an easy interface to the rqt_joint_trajectory_controller plugin and
    * MoveIt!.
    */
   typedef joint_to_cartesian_controller::JointToCartesianController JointControllerAdapter;

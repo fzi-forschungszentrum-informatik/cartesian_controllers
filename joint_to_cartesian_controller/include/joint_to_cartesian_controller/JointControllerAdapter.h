@@ -59,6 +59,9 @@
 namespace joint_to_cartesian_controller
 {
 
+/**
+ * @brief A controller adapter in form of a ROS-control hardware interface
+ */
 class JointControllerAdapter : public hardware_interface::RobotHW
 {
   public:
