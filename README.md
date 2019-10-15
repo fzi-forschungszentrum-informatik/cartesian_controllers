@@ -27,6 +27,22 @@ Cartesian error as possible, and as best as the robot kinematics allows for it.
 With robot chains containing more than *6* joints, the controllers will move
 the additional elbows in an energy optimized manner.
 
+## The Control Loop
+![The control loop][control_loop]
+
+The above image depicts the general pipeline of the controllers.
+Users set specific targets, depending on their use case and the controller used.
+Each controller computes an error with respect to the current state.
+Users configure the responsiveness of the controller to that error with a set of gains.
+The error_scale is a convenient option to post-multiply the error on all dimensions uniformly.
+This is handy for testing parameter ranges with the slider in dynamic reconfigure.
+All controllers use the same virtual model to map this Cartesian error to joint accelerations, which is then double time integrated.
+There are two different mechanisms how those joint values get send to the robot.
+The joint position interface works in an open-loop manner, and allows for internal iterations, using feedback from the virtual robot model.
+The joint velocity interface takes the current robot state into account, and does not provide internal iterations.
+
+[control_loop]: etc/Control_Loop.png "The common control loop"
+
 ## Configuration
 ### Controller gains
 Forward dynamics turns the search for a feasible mapping of Cartesian input to joint space into a control problem.
@@ -34,7 +50,6 @@ The solutions are found iteratively, whereby the system *leaps* forward in virtu
 What this error is depends on the controller type used.
 For all controllers, a set of six PID gains (one for each Cartesian dimension)
 allows to tweak the responsiveness of the system with respect to this error.
-A good practice is to set the p gains of rotation approximately one order of magnitude lower than the translational p gains.
 The derivative gains are usually not required.
 Also don't use the integral gain. The control plant has an integral part already due to mapping Cartesian input to joint accelerations.
 
@@ -53,3 +68,10 @@ The common solver has two parameters:
   6-dimensional PD controlled error (both translation and rotation alike).
   Use this parameter to find the right range
   for your PD gains. It's handy to use the slider in dynamic reconfigure for this.
+
+## Further reading
+If you are interested in more details, check out [the paper][paper1] on the initial idea of the compliance controller,
+and [the paper][paper2] on the recent implementation of the IK solver for motion control.
+
+[paper1]: https://ieeexplore.ieee.org/document/8206325 "Forward Dynamics Compliance Control (FDCC)"
+[paper2]: https://arxiv.org/pdf/1908.06252.pdf "Inverse Kinematics with Forward Dynamics for Sampled Motion Tracking"
