@@ -52,32 +52,31 @@ SpatialPIDController::SpatialPIDController()
 
 ctrl::Vector6D SpatialPIDController::operator()(const ctrl::Vector6D& error, const ros::Duration& period)
 {
-  // Perform pid control separately on each Cartesian dimension
+  // Perform pd control separately on each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
   {
-    m_cmd(i) = m_pid_controllers[i].computeCommand(error[i],period);
+    m_cmd(i) = m_pd_controllers[i](error[i],period);
   }
   return m_cmd;
 }
 
 bool SpatialPIDController::init(ros::NodeHandle& nh)
 {
-  // Initialize pid controllers for each Cartesian dimension
+  // Initialize pd controllers for each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
   {
-    m_pid_controllers.push_back(
-        control_toolbox::Pid());
+    m_pd_controllers.push_back(PDController());
   }
 
   // Load default controller gains
-  std::string solver_config = nh.getNamespace() + "/pid_gains";
+  std::string solver_config = nh.getNamespace() + "/pd_gains";
 
-  m_pid_controllers[0].initParam(solver_config + "/trans_x");
-  m_pid_controllers[1].initParam(solver_config + "/trans_y");
-  m_pid_controllers[2].initParam(solver_config + "/trans_z");
-  m_pid_controllers[3].initParam(solver_config + "/rot_x");
-  m_pid_controllers[4].initParam(solver_config + "/rot_y");
-  m_pid_controllers[5].initParam(solver_config + "/rot_z");
+  m_pd_controllers[0].init(solver_config + "/trans_x");
+  m_pd_controllers[1].init(solver_config + "/trans_y");
+  m_pd_controllers[2].init(solver_config + "/trans_z");
+  m_pd_controllers[3].init(solver_config + "/rot_x");
+  m_pd_controllers[4].init(solver_config + "/rot_y");
+  m_pd_controllers[5].init(solver_config + "/rot_z");
 
   return true;
 }

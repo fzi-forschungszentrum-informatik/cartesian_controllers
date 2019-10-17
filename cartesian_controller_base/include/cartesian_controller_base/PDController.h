@@ -28,57 +28,87 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+
 //-----------------------------------------------------------------------------
-/*!\file    SpatialPIDController.h
+/*!\file    PDController.h
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2017/07/28
+ * \date    2019/10/16
  *
  */
 //-----------------------------------------------------------------------------
 
-#ifndef SPATIAL_PID_CONTROLLER_H_INCLUDED
-#define SPATIAL_PID_CONTROLLER_H_INCLUDED
-
-// Project
-#include <cartesian_controller_base/Utility.h>
-#include <cartesian_controller_base/PDController.h>
+#ifndef PD_CONTROLLER_H_INCLUDED
+#define PD_CONTROLLER_H_INCLUDED
 
 // ROS
 #include <ros/ros.h>
+
+// ros_control
+#include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_box.h>
+
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_controller_base/PDGainsConfig.h>
 
 namespace cartesian_controller_base
 {
 
 /**
- * @brief A 6-dimensional PD controller class
+ * @brief A proportional, derivative controller
  *
- * This class implements separate PD controllers for each of the Cartesian
- * axes, i.e. three translational controllers and three rotational controllers.
+ * Motivation for this custom implementation:
+ *
+ *  - Restriction to meaningful parameter ranges.
+ *  Users should be able to use the sliders in dynamic
+ *  reconfigure to find suitable parameters for their setup.
+ *
+ *  - No integral gain.
+ *  The \ref cartesian_controllers package builds upon a control plant that
+ *  already has an integrating part to eliminate steady state errors.
+ *  Additionally exposing I-related parameters in dynamic reconfigure distracts
+ *  users with unused complexity.
  */
-class SpatialPIDController
+class PDController
 {
   public:
-    SpatialPIDController();
+    PDController();
+    PDController(const PDController& other); ///< RealtimeBuffer needs special treatment
+    ~PDController();
 
-    bool init(ros::NodeHandle& nh);
+    void init(const std::string& name_space);
 
-    /**
-     * @brief Call operator for one control cycle
-     *
-     * @param error The control error to reduce. Target - current.
-     * @param period The period for this control step.
-     *
-     * @return The controlled 6-dim vector (translational, rotational).
-     */
-    ctrl::Vector6D operator()(const ctrl::Vector6D& error, const ros::Duration& period);
+    double operator()(const double& error, const ros::Duration& period);
 
   private:
-    ctrl::Vector6D m_cmd;
-    std::vector<PDController> m_pd_controllers;
+    struct PDGains
+    {
+      PDGains()
+        : m_p(0), m_d(0)
+      {};
+
+      PDGains(double p, double d)
+        : m_p(p), m_d(d)
+      {};
+
+      double m_p; ///< proportional gain
+      double m_d; ///< derivative gain
+    };
+
+    realtime_tools::RealtimeBuffer<PDGains> m_gains;
+
+    double m_last_p_error;
+
+    // Dynamic reconfigure
+    typedef cartesian_controller_base::PDGainsConfig PDGainsConfig;
+    void dynamicReconfigureCallback(PDGainsConfig& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<PDGainsConfig> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<PDGainsConfig>::CallbackType m_callback_type;
 
 };
 
-} // namespace
+}
 
 #endif

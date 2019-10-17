@@ -97,6 +97,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
         cfg/CartesianController.cfg
+        cfg/PDGains.cfg
 )
 
 ###################################
@@ -131,10 +132,12 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/ForwardDynamicsSolver.cpp
   src/SpatialPIDController.cpp
+  src/PDController.cpp
   include/cartesian_controller_base/cartesian_controller_base.h
   include/cartesian_controller_base/cartesian_controller_base.hpp
   include/cartesian_controller_base/ForwardDynamicsSolver.h
   include/cartesian_controller_base/SpatialPIDController.h
+  include/cartesian_controller_base/PDController.h
   include/cartesian_controller_base/Utility.h
 )
 
