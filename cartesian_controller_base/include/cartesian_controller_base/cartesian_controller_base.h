@@ -54,7 +54,7 @@
 
 // Project
 #include <cartesian_controller_base/ForwardDynamicsSolver.h>
-#include <cartesian_controller_base/SpatialPIDController.h>
+#include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
 
 // Dynamic reconfigure
@@ -159,7 +159,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::vector<hardware_interface::JointHandle>      m_joint_handles;
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
-    SpatialPIDController                              m_spatial_controller;
+    SpatialPDController                              m_spatial_controller;
     ctrl::Vector6D                                    m_cartesian_input;
     double m_error_scale;
 

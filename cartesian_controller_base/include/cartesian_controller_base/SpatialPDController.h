@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    SpatialPIDController.h
+/*!\file    SpatialPDController.h
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
  * \date    2017/07/28
@@ -37,8 +37,8 @@
  */
 //-----------------------------------------------------------------------------
 
-#ifndef SPATIAL_PID_CONTROLLER_H_INCLUDED
-#define SPATIAL_PID_CONTROLLER_H_INCLUDED
+#ifndef SPATIAL_PD_CONTROLLER_H_INCLUDED
+#define SPATIAL_PD_CONTROLLER_H_INCLUDED
 
 // Project
 #include <cartesian_controller_base/Utility.h>
@@ -56,10 +56,10 @@ namespace cartesian_controller_base
  * This class implements separate PD controllers for each of the Cartesian
  * axes, i.e. three translational controllers and three rotational controllers.
  */
-class SpatialPIDController
+class SpatialPDController
 {
   public:
-    SpatialPIDController();
+    SpatialPDController();
 
     bool init(ros::NodeHandle& nh);
 

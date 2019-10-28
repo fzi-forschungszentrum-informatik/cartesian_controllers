@@ -151,7 +151,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
 
-  // Initialize Cartesian pid controllers
+  // Initialize Cartesian pd controllers
   m_spatial_controller.init(nh);
 
   // Connect dynamic reconfigure and overwrite the default values with values
@@ -248,7 +248,7 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
     return;
   }
 
-  // PID controlled system input
+  // PD controlled system input
   m_cartesian_input = m_error_scale * m_spatial_controller(error,period);
 
   // Simulate one step forward

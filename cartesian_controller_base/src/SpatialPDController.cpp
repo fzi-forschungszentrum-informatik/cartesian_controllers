@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    SpatialPIDController.cpp
+/*!\file    SpatialPDController.cpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
  * \date    2017/07/28
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 
 // Project
-#include <cartesian_controller_base/SpatialPIDController.h>
+#include <cartesian_controller_base/SpatialPDController.h>
 
 // Other
 #include <string>
@@ -46,11 +46,11 @@
 namespace cartesian_controller_base
 {
 
-SpatialPIDController::SpatialPIDController()
+SpatialPDController::SpatialPDController()
 {
 }
 
-ctrl::Vector6D SpatialPIDController::operator()(const ctrl::Vector6D& error, const ros::Duration& period)
+ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, const ros::Duration& period)
 {
   // Perform pd control separately on each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
@@ -60,7 +60,7 @@ ctrl::Vector6D SpatialPIDController::operator()(const ctrl::Vector6D& error, con
   return m_cmd;
 }
 
-bool SpatialPIDController::init(ros::NodeHandle& nh)
+bool SpatialPDController::init(ros::NodeHandle& nh)
 {
   // Initialize pd controllers for each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation

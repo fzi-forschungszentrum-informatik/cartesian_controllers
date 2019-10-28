@@ -131,12 +131,12 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/ForwardDynamicsSolver.cpp
-  src/SpatialPIDController.cpp
+  src/SpatialPDController.cpp
   src/PDController.cpp
   include/cartesian_controller_base/cartesian_controller_base.h
   include/cartesian_controller_base/cartesian_controller_base.hpp
   include/cartesian_controller_base/ForwardDynamicsSolver.h
-  include/cartesian_controller_base/SpatialPIDController.h
+  include/cartesian_controller_base/SpatialPDController.h
   include/cartesian_controller_base/PDController.h
   include/cartesian_controller_base/Utility.h
 )
