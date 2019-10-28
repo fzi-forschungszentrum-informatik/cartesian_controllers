@@ -43,7 +43,7 @@ my_cartesian_motion_controller:
     - joint5
     - joint6
 
-    pid_gains:
+    pd_gains:
         trans_x: {p: 10.0}
         trans_y: {p: 10.0}
         trans_z: {p: 10.0}

@@ -48,7 +48,7 @@ The joint velocity interface takes the current robot state into account, and doe
 Forward dynamics turns the search for a feasible mapping of Cartesian input to joint space into a control problem.
 The solutions are found iteratively, whereby the system *leaps* forward in virtual time steps to reduce the Cartesian error.
 What this error is depends on the controller type used.
-For all controllers, a set of six PID gains (one for each Cartesian dimension)
+For all controllers, a set of six PD gains (one for each Cartesian dimension)
 allows to tweak the responsiveness of the system with respect to this error.
 The derivative gains are usually not required.
 Also don't use the integral gain. The control plant has an integral part already due to mapping Cartesian input to joint accelerations.

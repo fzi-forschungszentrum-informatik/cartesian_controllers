@@ -42,7 +42,7 @@ my_cartesian_compliance_controller:
         rot_y: 100
         rot_z: 100
 
-    pid_gains:
+    pd_gains:
         trans_x: {p: 0.05}
         trans_y: {p: 0.05}
         trans_z: {p: 0.05}

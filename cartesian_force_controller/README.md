@@ -32,7 +32,7 @@ my_cartesian_force_controller:
     - joint5
     - joint6
 
-    pid_gains:
+    pd_gains:
         trans_x: {p: 0.05}
         trans_y: {p: 0.05}
         trans_z: {p: 0.05}
