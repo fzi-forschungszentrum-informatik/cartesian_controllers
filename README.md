@@ -50,11 +50,12 @@ The solutions are found iteratively, whereby the system *leaps* forward in virtu
 What this error is depends on the controller type used.
 For all controllers, a set of six PD gains (one for each Cartesian dimension)
 allows to tweak the responsiveness of the system with respect to this error.
-The derivative gains are usually not required.
-Also don't use the integral gain. The control plant has an integral part already due to mapping Cartesian input to joint accelerations.
 
 Each controller README.md provides a set of meaningful default gains.
 Try starting with these values and continuously adapt those to your special use case.
+
+Unfortunately, there won't exist ideal parameters for every use case and robot.
+So, for your specific application, you will be tweaking the PD gains at some point.
 
 ### Solver parameters
 The common solver has two parameters:
@@ -68,6 +69,19 @@ The common solver has two parameters:
   6-dimensional PD controlled error (both translation and rotation alike).
   Use this parameter to find the right range
   for your PD gains. It's handy to use the slider in dynamic reconfigure for this.
+
+## Performance
+As a default, please build the cartesian_controllers in release mode:
+
+```bash
+catkin_make -DCMAKE_BUILD_TYPE=Release
+```
+The forward dynamics implementation heavily relies on
+orocos_kinematics_dynamics (KDL), which use Eigen for linear algebra.
+Building in Release mode can give you a 10-times speed-up, and makes sure that
+the implementation of the control loop is not the performance bottle neck.
+If you use a higher number of iterations,
+then this in fact becomes a requirement.
 
 ## Further reading
 If you are interested in more details, check out [the paper][paper1] on the initial idea of the compliance controller,
