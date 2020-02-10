@@ -27,32 +27,3 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-
-//-----------------------------------------------------------------------------
-/*!\file    cartesian_controller_handles.cpp
- *
- * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2018/06/20
- *
- */
-//-----------------------------------------------------------------------------
-
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
-
-// Project
-#include <cartesian_controller_handles/MotionControlHandle.h>
-
-namespace cartesian_controllers
-{
-  /**
-   * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
-   *
-   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
-   */
-  typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::JointStateInterface> MotionControlHandle;
-}
-
-
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)

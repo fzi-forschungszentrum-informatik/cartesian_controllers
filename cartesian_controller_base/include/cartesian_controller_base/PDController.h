@@ -28,31 +28,87 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+
 //-----------------------------------------------------------------------------
-/*!\file    cartesian_controller_handles.cpp
+/*!\file    PDController.h
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2018/06/20
+ * \date    2019/10/16
  *
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
+#ifndef PD_CONTROLLER_H_INCLUDED
+#define PD_CONTROLLER_H_INCLUDED
 
-// Project
-#include <cartesian_controller_handles/MotionControlHandle.h>
+// ROS
+#include <ros/ros.h>
 
-namespace cartesian_controllers
+// ros_control
+#include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_box.h>
+
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_controller_base/PDGainsConfig.h>
+
+namespace cartesian_controller_base
 {
-  /**
-   * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
-   *
-   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
-   */
-  typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::JointStateInterface> MotionControlHandle;
+
+/**
+ * @brief A proportional, derivative controller
+ *
+ * Motivation for this custom implementation:
+ *
+ *  - Restriction to meaningful parameter ranges.
+ *  Users should be able to use the sliders in dynamic
+ *  reconfigure to find suitable parameters for their setup.
+ *
+ *  - No integral gain.
+ *  The \ref cartesian_controllers package builds upon a control plant that
+ *  already has an integrating part to eliminate steady state errors.
+ *  Additionally exposing I-related parameters in dynamic reconfigure distracts
+ *  users with unused complexity.
+ */
+class PDController
+{
+  public:
+    PDController();
+    PDController(const PDController& other); ///< RealtimeBuffer needs special treatment
+    ~PDController();
+
+    void init(const std::string& name_space);
+
+    double operator()(const double& error, const ros::Duration& period);
+
+  private:
+    struct PDGains
+    {
+      PDGains()
+        : m_p(0), m_d(0)
+      {};
+
+      PDGains(double p, double d)
+        : m_p(p), m_d(d)
+      {};
+
+      double m_p; ///< proportional gain
+      double m_d; ///< derivative gain
+    };
+
+    realtime_tools::RealtimeBuffer<PDGains> m_gains;
+
+    double m_last_p_error;
+
+    // Dynamic reconfigure
+    typedef cartesian_controller_base::PDGainsConfig PDGainsConfig;
+    void dynamicReconfigureCallback(PDGainsConfig& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<PDGainsConfig> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<PDGainsConfig>::CallbackType m_callback_type;
+
+};
+
 }
 
-
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)
+#endif

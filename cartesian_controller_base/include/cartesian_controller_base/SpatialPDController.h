@@ -29,30 +29,56 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    cartesian_controller_handles.cpp
+/*!\file    SpatialPDController.h
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2018/06/20
+ * \date    2017/07/28
  *
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
+#ifndef SPATIAL_PD_CONTROLLER_H_INCLUDED
+#define SPATIAL_PD_CONTROLLER_H_INCLUDED
 
 // Project
-#include <cartesian_controller_handles/MotionControlHandle.h>
+#include <cartesian_controller_base/Utility.h>
+#include <cartesian_controller_base/PDController.h>
 
-namespace cartesian_controllers
+// ROS
+#include <ros/ros.h>
+
+namespace cartesian_controller_base
 {
-  /**
-   * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
-   *
-   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
-   */
-  typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::JointStateInterface> MotionControlHandle;
-}
 
+/**
+ * @brief A 6-dimensional PD controller class
+ *
+ * This class implements separate PD controllers for each of the Cartesian
+ * axes, i.e. three translational controllers and three rotational controllers.
+ */
+class SpatialPDController
+{
+  public:
+    SpatialPDController();
 
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)
+    bool init(ros::NodeHandle& nh);
+
+    /**
+     * @brief Call operator for one control cycle
+     *
+     * @param error The control error to reduce. Target - current.
+     * @param period The period for this control step.
+     *
+     * @return The controlled 6-dim vector (translational, rotational).
+     */
+    ctrl::Vector6D operator()(const ctrl::Vector6D& error, const ros::Duration& period);
+
+  private:
+    ctrl::Vector6D m_cmd;
+    std::vector<PDController> m_pd_controllers;
+
+};
+
+} // namespace
+
+#endif

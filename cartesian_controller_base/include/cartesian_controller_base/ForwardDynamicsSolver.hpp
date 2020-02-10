@@ -29,30 +29,52 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    cartesian_controller_handles.cpp
+/*!\file    ForwardDynamicsSolver.hpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2018/06/20
+ * \date    2019/10/09
  *
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
 
-// Project
-#include <cartesian_controller_handles/MotionControlHandle.h>
+// this package
+#include <cartesian_controller_base/ForwardDynamicsSolver.h>
 
-namespace cartesian_controllers
+// ROS control
+#include <hardware_interface/joint_command_interface.h>
+
+namespace cartesian_controller_base{
+
+template <>
+void ForwardDynamicsSolver::updateKinematics<hardware_interface::PositionJointInterface>(
+    const std::vector<hardware_interface::JointHandle>&)
 {
-  /**
-   * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
-   *
-   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
-   */
-  typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::JointStateInterface> MotionControlHandle;
+  // Keep feed forward simulation running
+  m_last_positions = m_current_positions;
+
+  // Pose w. r. t. base
+  m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
+
+  // Absolute velocity w. r. t. base
+  KDL::FrameVel vel;
+  m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
+  m_end_effector_vel[0] = vel.deriv().vel.x();
+  m_end_effector_vel[1] = vel.deriv().vel.y();
+  m_end_effector_vel[2] = vel.deriv().vel.z();
+  m_end_effector_vel[3] = vel.deriv().rot.x();
+  m_end_effector_vel[4] = vel.deriv().rot.y();
+  m_end_effector_vel[5] = vel.deriv().rot.z();
 }
 
+template <>
+void ForwardDynamicsSolver::updateKinematics<hardware_interface::VelocityJointInterface>(
+    const std::vector<hardware_interface::JointHandle>& joint_handles)
+{
+  // Reset internal simulation with real robot state
+  setStartState(joint_handles);
 
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)
+  updateKinematics<hardware_interface::PositionJointInterface>(joint_handles);
+}
+
+}

@@ -1,5 +1,32 @@
-// -- BEGIN LICENSE BLOCK -----------------------------------------------------
-// -- END LICENSE BLOCK -------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 FZI Research Center for Information Technology
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+// contributors may be used to endorse or promote products derived from this
+// software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 /*!\file    cartesian_force_controller.hpp
@@ -52,14 +79,18 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   std::map<std::string, double> gravity;
   if (!nh.getParam("gravity",gravity))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/gravity" << " from parameter server");
-    return false;
+    ROS_INFO_STREAM("Failed to load " << nh.getNamespace() + "/gravity" << " from parameter server");
+    gravity["x"] = 0;
+    gravity["y"] = 0;
+    gravity["z"] = 0;
   }
   std::map<std::string, double> tool;
   if (!nh.getParam("tool",tool))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/tool" << " from parameter server");
-    return false;
+    ROS_INFO_STREAM("Failed to load " << nh.getNamespace() + "/tool" << " from parameter server");
+    tool["com_x"] = 0;
+    tool["com_y"] = 0;
+    tool["com_z"] = 0;
   }
   // In sensor frame
   m_center_of_mass = ctrl::Vector3D(tool["com_x"],tool["com_y"],tool["com_z"]);
@@ -94,8 +125,7 @@ update(const ros::Time& time, const ros::Duration& period)
 {
   // Control the robot motion in such a way that the resulting net force
   // vanishes. This internal control needs some simulation time steps.
-  const int steps = 10;
-  for (int i = 0; i < steps; ++i)
+  for (int i = 0; i < Base::m_iterations; ++i)
   {
     // The internal 'simulation time' is deliberately independent of the outer
     // control cycle.

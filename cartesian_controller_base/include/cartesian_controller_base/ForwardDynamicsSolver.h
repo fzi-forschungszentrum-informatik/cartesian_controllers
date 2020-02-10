@@ -1,5 +1,32 @@
-// -- BEGIN LICENSE BLOCK -----------------------------------------------------
-// -- END LICENSE BLOCK -------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 FZI Research Center for Information Technology
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+// contributors may be used to endorse or promote products derived from this
+// software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 /*!\file    ForwardDynamicsSolver.h
@@ -47,10 +74,12 @@ namespace cartesian_controller_base{
  *  achieve a nearly linear behavior in all joint configurations.
  *  The resulting joint accelerations are computed according to
  *  \f$ \ddot{q} = H^{-1} ( J^T f) \f$
- *  Where \f$ H \f$ denotes the joint space inertia matrix, \f$ J \f$ denotes
- *  the joint Jacobian and \f$ f \f$ is the applied force to the end effector.
- *  The joint accelerations are integrated twice to obtain joint velocities and
- *  joint positions respectively.
+ *  Where \f$ H \f$ denotes the joint space inertia matrix of the virtually
+ *  conditioned system, \f$ J \f$ denotes the joint Jacobian and \f$ f \f$ is
+ *  the applied force to the end effector.  The joint accelerations are
+ *  integrated twice to obtain joint velocities and joint positions
+ *  respectively.
+ *  Check more details behind the solver here: https://arxiv.org/pdf/1908.06252.pdf
  */
 class ForwardDynamicsSolver
 {
@@ -107,15 +136,6 @@ class ForwardDynamicsSolver
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
     /**
-     * @brief Adjust the end-effector mass and inertia of the virtual robot
-     *
-     * @param mass The new mass of the end-effector in [kg]
-     * @param inertia The rotational inertia in [kgms^2]. This value is taken
-     * for all ixx, iyy, izz. Deviation moments are set to zero.
-     */
-    void SetEndEffectorMass(const double mass, const double inertia);
-
-    /**
      * @brief Initialize the solver
      *
      * @param chain The kinematic chain of the robot
@@ -128,8 +148,25 @@ class ForwardDynamicsSolver
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 
-    //! Call this function during activation
-    void updateKinematics();
+    /**
+     * @brief Update the robot kinematics of the solver
+     *
+     * This template has two specializations for two distinct controller
+     * policies, depending on the hardware interface used:
+     *
+     * 1) PositionJointInterface: The solver's internal simulation is continued
+     * on each call without taking the real robot state into account.
+     *
+     * 2) VelocityJointInterface: The internal simulation is updated with the
+     * real robot state. On each call, the solver starts with its internal
+     * simulation in sync with the real robot.
+     *
+     * @tparam HardwareInterface
+     * @param joint_handles
+     */
+    template <class HardwareInterface>
+    void updateKinematics(
+        const std::vector<hardware_interface::JointHandle>& joint_handles);
 
   private:
 
@@ -170,5 +207,6 @@ class ForwardDynamicsSolver
 
 } // namespace
 
-#endif
+#include <cartesian_controller_base/ForwardDynamicsSolver.hpp>
 
+#endif

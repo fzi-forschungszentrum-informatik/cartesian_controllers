@@ -1,5 +1,32 @@
-// -- BEGIN LICENSE BLOCK -----------------------------------------------------
-// -- END LICENSE BLOCK -------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 FZI Research Center for Information Technology
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+// contributors may be used to endorse or promote products derived from this
+// software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 /*!\file    cartesian_motion_controller.hpp
@@ -46,7 +73,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   m_target_frame_subscr = nh.subscribe(
       m_target_frame_topic,
-      3,  // TODO: What makes sense here?
+      3,
       &CartesianMotionController<HardwareInterface>::targetFrameCallback,
       this);
 
@@ -79,8 +106,7 @@ update(const ros::Time& time, const ros::Duration& period)
   // control process. So, we control the internal model until we meet the
   // Cartesian target motion. This internal control needs some simulation time
   // steps.
-  const int steps = 10;
-  for (int i = 0; i < steps; ++i)
+  for (int i = 0; i < Base::m_iterations; ++i)
   {
     // The internal 'simulation time' is deliberately independent of the outer
     // control cycle.
@@ -101,8 +127,7 @@ template <>
 void CartesianMotionController<hardware_interface::VelocityJointInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
-  // Simulate only one step forward.
-  // The constant simulation time adds to solver stability.
+  // Simulate only one step forward to avoid drift.
   ros::Duration internal_period(0.02);
 
   ctrl::Vector6D error = computeMotionError();
@@ -157,6 +182,14 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 targetFrameCallback(const geometry_msgs::PoseStamped& target)
 {
+  if (target.header.frame_id != Base::m_robot_base_link)
+  {
+    ROS_WARN_STREAM_THROTTLE(3, "Got target pose in wrong reference frame. Expected: "
+        << Base::m_robot_base_link << " but got "
+        << target.header.frame_id);
+    return;
+  }
+
   m_target_frame = KDL::Frame(
       KDL::Rotation::Quaternion(
         target.pose.orientation.x,

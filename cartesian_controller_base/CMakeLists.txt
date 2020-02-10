@@ -8,6 +8,8 @@ project(cartesian_controller_base)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(Eigen3 REQUIRED)
+add_definitions(-DEIGEN_MPL2_ONLY)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   controller_interface
@@ -95,6 +97,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
         cfg/CartesianController.cfg
+        cfg/PDGains.cfg
 )
 
 ###################################
@@ -128,11 +131,13 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/ForwardDynamicsSolver.cpp
-  src/SpatialPIDController.cpp
+  src/SpatialPDController.cpp
+  src/PDController.cpp
   include/cartesian_controller_base/cartesian_controller_base.h
   include/cartesian_controller_base/cartesian_controller_base.hpp
   include/cartesian_controller_base/ForwardDynamicsSolver.h
-  include/cartesian_controller_base/SpatialPIDController.h
+  include/cartesian_controller_base/SpatialPDController.h
+  include/cartesian_controller_base/PDController.h
   include/cartesian_controller_base/Utility.h
 )
 

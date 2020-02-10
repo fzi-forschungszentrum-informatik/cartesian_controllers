@@ -29,30 +29,56 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    cartesian_controller_handles.cpp
+/*!\file    SpatialPDController.cpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2018/06/20
+ * \date    2017/07/28
  *
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
-
 // Project
-#include <cartesian_controller_handles/MotionControlHandle.h>
+#include <cartesian_controller_base/SpatialPDController.h>
 
-namespace cartesian_controllers
+// Other
+#include <string>
+
+namespace cartesian_controller_base
 {
-  /**
-   * @brief Cartesian motion controller handle to expose an interactive marker for end-effector control in RViz.
-   *
-   * Can be specified as a controller of type cartesian_controllers/MotionControlHandle.
-   */
-  typedef cartesian_controller_handles::MotionControlHandle<
-    hardware_interface::JointStateInterface> MotionControlHandle;
+
+SpatialPDController::SpatialPDController()
+{
 }
 
+ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, const ros::Duration& period)
+{
+  // Perform pd control separately on each Cartesian dimension
+  for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
+  {
+    m_cmd(i) = m_pd_controllers[i](error[i],period);
+  }
+  return m_cmd;
+}
 
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::MotionControlHandle, controller_interface::ControllerBase)
+bool SpatialPDController::init(ros::NodeHandle& nh)
+{
+  // Initialize pd controllers for each Cartesian dimension
+  for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
+  {
+    m_pd_controllers.push_back(PDController());
+  }
+
+  // Load default controller gains
+  std::string solver_config = nh.getNamespace() + "/pd_gains";
+
+  m_pd_controllers[0].init(solver_config + "/trans_x");
+  m_pd_controllers[1].init(solver_config + "/trans_y");
+  m_pd_controllers[2].init(solver_config + "/trans_z");
+  m_pd_controllers[3].init(solver_config + "/rot_x");
+  m_pd_controllers[4].init(solver_config + "/rot_y");
+  m_pd_controllers[5].init(solver_config + "/rot_z");
+
+  return true;
+}
+
+} // namespace

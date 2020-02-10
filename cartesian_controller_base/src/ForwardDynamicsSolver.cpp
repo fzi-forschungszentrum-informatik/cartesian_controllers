@@ -1,5 +1,32 @@
-// -- BEGIN LICENSE BLOCK -----------------------------------------------------
-// -- END LICENSE BLOCK -------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 FZI Research Center for Information Technology
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+// contributors may be used to endorse or promote products derived from this
+// software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 /*!\file    ForwardDynamicsSolver.cpp
@@ -74,12 +101,6 @@ namespace cartesian_controller_base{
     }
     control_cmd.time_from_start = period; // valid for this duration
 
-    // Update forwards kinematics
-    updateKinematics();
-
-    // Prepare for next cycle
-    m_last_positions     = m_current_positions;
-
     return control_cmd;
   }
 
@@ -107,16 +128,10 @@ namespace cartesian_controller_base{
     for (int i = 0; i < joint_handles.size(); ++i)
     {
       m_current_positions(i)      = joint_handles[i].getPosition();
-      m_current_velocities(i)     = 0.0;
+      m_current_velocities(i)     = joint_handles[i].getVelocity();
       m_current_accelerations(i)  = 0.0;
       m_last_positions(i)         = m_current_positions(i);
-
-
     }
-
-    // Update end effector pose with simulated positions
-    updateKinematics();
-
     return true;
   }
 
@@ -157,27 +172,13 @@ namespace cartesian_controller_base{
     return true;
   }
 
-  void ForwardDynamicsSolver::updateKinematics()
-  {
-    // Pose w. r. t. base
-    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
-
-    // Absolute velocity w. r. t. base
-    KDL::FrameVel vel;
-    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    m_end_effector_vel[0] = vel.deriv().vel.x();
-    m_end_effector_vel[1] = vel.deriv().vel.y();
-    m_end_effector_vel[2] = vel.deriv().vel.z();
-    m_end_effector_vel[3] = vel.deriv().rot.x();
-    m_end_effector_vel[4] = vel.deriv().rot.y();
-    m_end_effector_vel[5] = vel.deriv().rot.z();
-  }
-
   bool ForwardDynamicsSolver::buildGenericModel(const KDL::Chain& input_chain)
   {
     m_chain = input_chain;
 
     // Set all masses and inertias to minimal (yet stable) values.
+    double m_min = 0.001;
+    double ip_min = 0.000001;
     for (size_t i = 0; i < m_chain.segments.size(); ++i)
     {
       // Fixed joint segment
@@ -190,36 +191,28 @@ namespace cartesian_controller_base{
       {
         m_chain.segments[i].setInertia(
             KDL::RigidBodyInertia(
-              0.01,                 // mass
+              m_min,                // mass
               KDL::Vector::Zero(),  // center of gravity
               KDL::RotationalInertia(
-                0.0001,             // ixx
-                0.0001,             // iyy
-                0.0001              // izz
+                ip_min,             // ixx
+                ip_min,             // iyy
+                ip_min              // izz
                 // ixy, ixy, iyz default to 0.0
                 )));
       }
     }
 
     // Only give the last segment a generic mass and inertia.
-    // Note: This will be adjusted during startup by dynamic reconfigure.
+    // See https://arxiv.org/pdf/1908.06252.pdf for a motivation for this setting.
+    double m = 1;
+    double ip = 1;
     m_chain.segments[m_chain.segments.size()-1].setInertia(
         KDL::RigidBodyInertia(
-          5,
+          m,
           KDL::Vector::Zero(),
-          KDL::RotationalInertia(0.02, 0.02, 0.02)));
+          KDL::RotationalInertia(ip, ip, ip)));
 
     return true;
-  }
-
-  void ForwardDynamicsSolver::SetEndEffectorMass(const double mass, const double inertia)
-  {
-    m_chain.segments[m_chain.segments.size()-1].setInertia(
-        KDL::RigidBodyInertia(
-          mass,
-          KDL::Vector::Zero(),
-          KDL::RotationalInertia(inertia,inertia,inertia)));
-    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
   }
 
 } // namespace
