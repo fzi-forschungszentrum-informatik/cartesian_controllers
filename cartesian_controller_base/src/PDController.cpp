@@ -44,6 +44,7 @@ namespace cartesian_controller_base
 {
 
 PDController::PDController()
+  : m_last_p_error(0.0)
 {
 }
 
