@@ -38,11 +38,12 @@
 //-----------------------------------------------------------------------------
 
 
-#ifndef FORWARD_DYNAMICS_CONTROLLER_H_INCLUDED
-#define FORWARD_DYNAMICS_CONTROLLER_H_INCLUDED
+#ifndef FORWARD_DYNAMICS_SOLVER_H_INCLUDED
+#define FORWARD_DYNAMICS_SOLVER_H_INCLUDED
 
 // Project
 #include <cartesian_controller_base/Utility.h>
+#include <cartesian_controller_base/IKSolver.h>
 
 // ros_controls
 #include <hardware_interface/joint_command_interface.h>
@@ -66,8 +67,9 @@
 
 namespace cartesian_controller_base{
 
-/*! \brief This class computes manipulator joint motion from Cartesian force inputs.
+/*! \brief The default IK solver for Cartesian controllers
  *
+ *  This class computes manipulator joint motion from Cartesian force inputs.
  *  As inputs, both forces and torques are applied to the mechanical system,
  *  representing the manipulator. The system is modeled as a chain of rigid
  *  bodies. All bodies except for the last one are massless. This is to
@@ -81,7 +83,7 @@ namespace cartesian_controller_base{
  *  respectively.
  *  Check more details behind the solver here: https://arxiv.org/pdf/1908.06252.pdf
  */
-class ForwardDynamicsSolver
+class ForwardDynamicsSolver : public IKSolver
 {
   public:
     ForwardDynamicsSolver();
@@ -103,39 +105,6 @@ class ForwardDynamicsSolver
         const ctrl::Vector6D& net_force);
 
     /**
-     * @brief Get the current end effector pose of the simulated robot
-     *
-     * The last link in the chain from the init() function is taken as end
-     * effector. If \ref setStartState() has been called immediately before,
-     * then the returned pose represents the real robots end effector pose.
-     *
-     * @return The end effector pose with respect to the robot base link. This
-     * link is the same as the one implicitly given in the init() function.
-     */
-    const KDL::Frame& getEndEffectorPose() const;
-
-    /**
-     * @brief Get the current end effector velocity of the simulated robot
-     *
-     * The last link in the chain from the init() function is taken as end
-     * effector.
-     *
-     * @return The end effector vel with respect to the robot base link. The
-     * order is first translation, then rotation.
-     */
-    const ctrl::Vector6D& getEndEffectorVel() const;
-
-    /**
-     * @brief Get the current joint positions of the simulated robot
-     *
-     * @return The current joint positions
-     */
-    const KDL::JntArray& getPositions() const;
-
-    //! Set initial joint configuration
-    bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
-
-    /**
      * @brief Initialize the solver
      *
      * @param chain The kinematic chain of the robot
@@ -148,54 +117,10 @@ class ForwardDynamicsSolver
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 
-    /**
-     * @brief Update the robot kinematics of the solver
-     *
-     * This template has two specializations for two distinct controller
-     * policies, depending on the hardware interface used:
-     *
-     * 1) PositionJointInterface: The solver's internal simulation is continued
-     * on each call without taking the real robot state into account.
-     *
-     * 2) VelocityJointInterface: The internal simulation is updated with the
-     * real robot state. On each call, the solver starts with its internal
-     * simulation in sync with the real robot.
-     *
-     * @tparam HardwareInterface
-     * @param joint_handles
-     */
-    template <class HardwareInterface>
-    void updateKinematics(
-        const std::vector<hardware_interface::JointHandle>& joint_handles);
-
   private:
 
     //! Build a generic robot model for control
-    bool buildGenericModel(const KDL::Chain& input_chain);
-
-    //! The underlying physical system
-    KDL::Chain m_chain;
-
-    //! Number of controllable joint
-    int m_number_joints;
-
-    // Internal buffers
-    KDL::JntArray m_current_positions;
-    KDL::JntArray m_current_velocities;
-    KDL::JntArray m_current_accelerations;
-    KDL::JntArray m_last_positions;
-
-    // Joint limits
-    KDL::JntArray m_upper_pos_limits;
-    KDL::JntArray m_lower_pos_limits;
-
-    // Forward kinematics
-    boost::shared_ptr<
-      KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
-    boost::shared_ptr<
-      KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
-    KDL::Frame                          m_end_effector_pose;
-    ctrl::Vector6D                      m_end_effector_vel;
+    bool buildGenericModel();
 
     // Forward dynamics
     boost::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
@@ -206,7 +131,5 @@ class ForwardDynamicsSolver
 
 
 } // namespace
-
-#include <cartesian_controller_base/ForwardDynamicsSolver.hpp>
 
 #endif

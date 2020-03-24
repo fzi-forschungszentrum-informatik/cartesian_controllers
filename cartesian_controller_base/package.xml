@@ -47,6 +47,7 @@
   <build_depend>control_toolbox</build_depend>
   <build_depend>eigen_conversions</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>pluginlib</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>controller_interface</run_depend>
@@ -55,9 +56,11 @@
   <run_depend>control_toolbox</run_depend>
   <run_depend>eigen_conversions</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>pluginlib</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
+    <cartesian_controller_base plugin="${prefix}/ik_solver_plugin.xml"/>
   </export>
 </package>

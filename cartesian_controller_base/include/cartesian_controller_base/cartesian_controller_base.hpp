@@ -70,6 +70,22 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return true;
   }
 
+  // Load user specified inverse kinematics solver
+  std::string ik_solver = "forward_dynamics"; // Default
+  nh.getParam("ik_solver", ik_solver);
+
+  m_solver_loader.reset(new pluginlib::ClassLoader<IKSolver>(
+    "cartesian_controller_base", "cartesian_controller_base::IKSolver"));
+  try
+  {
+    m_ik_solver = m_solver_loader->createInstance(ik_solver);
+  }
+  catch (pluginlib::PluginlibException& ex)
+  {
+    ROS_ERROR_STREAM(ex.what());
+    return false;
+  }
+
   std::string robot_description;
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
@@ -151,7 +167,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Initialize solvers
-  m_forward_dynamics_solver.init(robot_chain,upper_pos_limits,lower_pos_limits);
+  m_ik_solver->init(robot_chain,upper_pos_limits,lower_pos_limits);
   KDL::Tree tmp("not_relevant");
   tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
@@ -185,8 +201,8 @@ void CartesianControllerBase<HardwareInterface>::
 starting(const ros::Time& time)
 {
   // Copy joint state to internal simulation
-  m_forward_dynamics_solver.setStartState(m_joint_handles);
-  m_forward_dynamics_solver.updateKinematics<HardwareInterface>(m_joint_handles);
+  m_ik_solver->setStartState(m_joint_handles);
+  m_ik_solver->updateKinematics<HardwareInterface>(m_joint_handles);
 }
 
 template <class HardwareInterface>
@@ -257,12 +273,12 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
   m_cartesian_input = m_error_scale * m_spatial_controller(error,period);
 
   // Simulate one step forward
-  m_simulated_joint_motion = m_forward_dynamics_solver.getJointControlCmds(
+  m_simulated_joint_motion = m_ik_solver->getJointControlCmds(
       period,
       m_cartesian_input);
 
   // Update according to control policy for next cycle
-  m_forward_dynamics_solver.updateKinematics<HardwareInterface>(m_joint_handles);
+  m_ik_solver->updateKinematics<HardwareInterface>(m_joint_handles);
 }
 
 template <class HardwareInterface>
@@ -278,7 +294,7 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
 
   KDL::Frame transform_kdl;
   m_forward_kinematics_solver->JntToCart(
-      m_forward_dynamics_solver.getPositions(),
+      m_ik_solver->getPositions(),
       transform_kdl,
       from);
 
@@ -302,7 +318,7 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
   // Get rotation to base
   KDL::Frame R_kdl;
   m_forward_kinematics_solver->JntToCart(
-      m_forward_dynamics_solver.getPositions(),
+      m_ik_solver->getPositions(),
       R_kdl,
       from);
 
@@ -341,7 +357,7 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
 
   KDL::Frame transform_kdl;
   m_forward_kinematics_solver->JntToCart(
-      m_forward_dynamics_solver.getPositions(),
+      m_ik_solver->getPositions(),
       transform_kdl,
       to);
 

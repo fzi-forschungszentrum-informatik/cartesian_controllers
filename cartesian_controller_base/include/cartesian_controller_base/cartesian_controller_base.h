@@ -53,13 +53,16 @@
 #include <kdl/treefksolverpos_recursive.hpp>
 
 // Project
-#include <cartesian_controller_base/ForwardDynamicsSolver.h>
+#include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include <cartesian_controller_base/CartesianControllerConfig.h>
+
+// Pluginlib
+#include <pluginlib/class_loader.h>
 
 // Other
 #include <vector>
@@ -146,11 +149,16 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
-    boost::shared_ptr<KDL::TreeFkSolverPos_recursive>
-                            m_forward_kinematics_solver;
-    ForwardDynamicsSolver   m_forward_dynamics_solver;
-    std::string             m_end_effector_link;
-    std::string             m_robot_base_link;
+    boost::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
+
+    /**
+     * @brief Allow users to choose the IK solver type on startup
+     */
+    boost::shared_ptr<pluginlib::ClassLoader<IKSolver> > m_solver_loader;
+    boost::shared_ptr<IKSolver> m_ik_solver;
+
+    std::string m_end_effector_link;
+    std::string m_robot_base_link;
 
     bool m_paused;
     int m_iterations;

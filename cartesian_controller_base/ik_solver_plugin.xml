@@ -1,0 +1,11 @@
+<library path="lib/libik_solvers">
+
+  <class name="forward_dynamics"
+         type="cartesian_controller_base::ForwardDynamicsSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A forward dynamics-based IK solver
+    </description>
+  </class>
+
+</library>

@@ -186,7 +186,7 @@ setFtSensorReferenceFrame(const std::string& new_ref)
 
   // Joint positions should cancel out, i.e. it doesn't matter as long as they
   // are the same for both transformations.
-  KDL::JntArray jnts(Base::m_forward_dynamics_solver.getPositions());
+  KDL::JntArray jnts(Base::m_ik_solver->getPositions());
 
   KDL::Frame sensor_ref;
   Base::m_forward_kinematics_solver->JntToCart(

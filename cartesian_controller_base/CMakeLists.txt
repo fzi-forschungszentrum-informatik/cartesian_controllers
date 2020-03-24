@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
   eigen_conversions
   dynamic_reconfigure
+  pluginlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -111,8 +112,8 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES cartesian_controller_base
-  CATKIN_DEPENDS roscpp controller_interface kdl_parser trajectory_msgs control_toolbox eigen_conversions dynamic_reconfigure
+  LIBRARIES cartesian_controller_base ik_solvers
+  CATKIN_DEPENDS roscpp controller_interface kdl_parser trajectory_msgs control_toolbox eigen_conversions dynamic_reconfigure pluginlib
 #  DEPENDS system_lib
 )
 
@@ -130,21 +131,31 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/ForwardDynamicsSolver.cpp
   src/SpatialPDController.cpp
   src/PDController.cpp
   include/cartesian_controller_base/cartesian_controller_base.h
   include/cartesian_controller_base/cartesian_controller_base.hpp
-  include/cartesian_controller_base/ForwardDynamicsSolver.h
   include/cartesian_controller_base/SpatialPDController.h
   include/cartesian_controller_base/PDController.h
   include/cartesian_controller_base/Utility.h
+  src/IKSolver.cpp
+  include/cartesian_controller_base/IKSolver.h
+  include/cartesian_controller_base/IKSolver.hpp
+)
+
+add_library(ik_solvers
+  src/IKSolver.cpp
+  include/cartesian_controller_base/IKSolver.h
+  include/cartesian_controller_base/IKSolver.hpp
+  src/ForwardDynamicsSolver.cpp
+  include/cartesian_controller_base/ForwardDynamicsSolver.h
 )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(ik_solvers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -165,6 +176,9 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
+target_link_libraries(ik_solvers
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -182,6 +196,11 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(TARGETS ik_solvers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

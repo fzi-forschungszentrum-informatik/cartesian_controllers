@@ -29,52 +29,91 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    ForwardDynamicsSolver.hpp
+/*!\file    IKSolver.cpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2019/10/09
+ * \date    2016/02/14
  *
  */
 //-----------------------------------------------------------------------------
 
-
 // this package
-#include <cartesian_controller_base/ForwardDynamicsSolver.h>
+#include <cartesian_controller_base/IKSolver.h>
 
-// ROS control
-#include <hardware_interface/joint_command_interface.h>
+// other
+#include <map>
+#include <sstream>
+#include <boost/algorithm/clamp.hpp>
+#include <eigen_conversions/eigen_kdl.h>
+
+// KDL
+#include <kdl/jntarrayvel.hpp>
+#include <kdl/framevel.hpp>
+
+// DEBUG
+
 
 namespace cartesian_controller_base{
 
-template <>
-void ForwardDynamicsSolver::updateKinematics<hardware_interface::PositionJointInterface>(
-    const std::vector<hardware_interface::JointHandle>&)
-{
-  // Keep feed forward simulation running
-  m_last_positions = m_current_positions;
+  IKSolver::IKSolver()
+  {
+  }
 
-  // Pose w. r. t. base
-  m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
+  IKSolver::~IKSolver(){}
 
-  // Absolute velocity w. r. t. base
-  KDL::FrameVel vel;
-  m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-  m_end_effector_vel[0] = vel.deriv().vel.x();
-  m_end_effector_vel[1] = vel.deriv().vel.y();
-  m_end_effector_vel[2] = vel.deriv().vel.z();
-  m_end_effector_vel[3] = vel.deriv().rot.x();
-  m_end_effector_vel[4] = vel.deriv().rot.y();
-  m_end_effector_vel[5] = vel.deriv().rot.z();
-}
 
-template <>
-void ForwardDynamicsSolver::updateKinematics<hardware_interface::VelocityJointInterface>(
-    const std::vector<hardware_interface::JointHandle>& joint_handles)
-{
-  // Reset internal simulation with real robot state
-  setStartState(joint_handles);
+  const KDL::Frame& IKSolver::getEndEffectorPose() const
+  {
+    return m_end_effector_pose;
+  }
 
-  updateKinematics<hardware_interface::PositionJointInterface>(joint_handles);
-}
+  const ctrl::Vector6D& IKSolver::getEndEffectorVel() const
+  {
+    return m_end_effector_vel;
+  }
 
-}
+  const KDL::JntArray& IKSolver::getPositions() const
+  {
+    return m_current_positions;
+  }
+
+
+  bool IKSolver::setStartState(
+      const std::vector<hardware_interface::JointHandle>& joint_handles)
+  {
+    // Copy into internal buffers.
+    for (int i = 0; i < joint_handles.size(); ++i)
+    {
+      m_current_positions(i)      = joint_handles[i].getPosition();
+      m_current_velocities(i)     = joint_handles[i].getVelocity();
+      m_current_accelerations(i)  = 0.0;
+      m_last_positions(i)         = m_current_positions(i);
+    }
+    return true;
+  }
+
+
+  bool IKSolver::init(
+      const KDL::Chain& chain,
+      const KDL::JntArray& upper_pos_limits,
+      const KDL::JntArray& lower_pos_limits)
+  {
+
+    // Initialize
+    m_chain = chain;
+    m_number_joints              = m_chain.getNrOfJoints();
+    m_current_positions.data     = ctrl::VectorND::Zero(m_number_joints);
+    m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
+    m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
+    m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
+    m_upper_pos_limits           = upper_pos_limits;
+    m_lower_pos_limits           = lower_pos_limits;
+
+    // Forward kinematics
+    m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
+    m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(m_chain));
+
+    return true;
+  }
+
+} // namespace

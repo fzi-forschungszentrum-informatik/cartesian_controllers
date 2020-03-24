@@ -1,4 +1,9 @@
 <launch>
+        <!-- Configuration -->
+        <arg name="debug" default="false"/>
+        <arg if="$(arg debug)" name="launch-prefix" value="screen -d -m gdb -command=/home/scherzin/.ros/stefan_test --ex run --args"/>
+        <arg unless="$(arg debug)" name="launch-prefix" value=""/>
+
         <!-- Load robot_description to parameter server -->
         <param name="/robot_description"
         command="$(find xacro)/xacro --inorder '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
@@ -8,7 +13,7 @@
 
         <!-- Load hardware interface -->
         <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main"
-        output="screen" />
+        output="screen" launch-prefix="$(arg launch-prefix)"/>
 
         <!-- Robot state publisher -->
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
