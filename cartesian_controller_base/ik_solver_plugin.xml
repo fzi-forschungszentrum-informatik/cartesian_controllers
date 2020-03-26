@@ -8,4 +8,12 @@
     </description>
   </class>
 
+  <class name="jacobian_transpose"
+         type="cartesian_controller_base::JacobianTransposeSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A Jacobian transpose-based IK solver
+    </description>
+  </class>
+
 </library>

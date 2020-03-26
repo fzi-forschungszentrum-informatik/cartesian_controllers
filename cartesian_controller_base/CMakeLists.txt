@@ -149,6 +149,8 @@ add_library(ik_solvers
   include/cartesian_controller_base/IKSolver.hpp
   src/ForwardDynamicsSolver.cpp
   include/cartesian_controller_base/ForwardDynamicsSolver.h
+  src/JacobianTransposeSolver.cpp
+  include/cartesian_controller_base/JacobianTransposeSolver.h
 )
 
 ## Add cmake target dependencies of the library
