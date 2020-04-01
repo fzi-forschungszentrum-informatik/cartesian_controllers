@@ -99,6 +99,7 @@ find_package(catkin REQUIRED COMPONENTS
 generate_dynamic_reconfigure_options(
         cfg/CartesianController.cfg
         cfg/PDGains.cfg
+        cfg/DampedLeastSquaresSolver.cfg
 )
 
 ###################################
@@ -151,6 +152,8 @@ add_library(ik_solvers
   include/cartesian_controller_base/ForwardDynamicsSolver.h
   src/JacobianTransposeSolver.cpp
   include/cartesian_controller_base/JacobianTransposeSolver.h
+  src/DampedLeastSquaresSolver.cpp
+  include/cartesian_controller_base/DampedLeastSquaresSolver.h
 )
 
 ## Add cmake target dependencies of the library
