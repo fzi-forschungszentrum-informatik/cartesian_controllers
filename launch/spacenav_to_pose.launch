@@ -1,0 +1,9 @@
+<launch>
+        <!-- Numerically integrate twists into a pose -->
+        <node name="spacenav_to_pose" pkg="spacenav_utils" type="pose.py" output="screen">
+                <param name="twist_topic" value="/spacenav/twist"/>
+                <param name="pose_topic" value="/spacenav/pose"/>
+                <param name="frame_id" value="world"/>
+                <param name="publishing_rate" value="100"/>
+        </node>
+</launch>
