@@ -107,7 +107,9 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cartesian_controller_handles
-  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS
+    roscpp
+    geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -165,10 +167,10 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(PROGRAMS
+  nodes/moving_target.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
