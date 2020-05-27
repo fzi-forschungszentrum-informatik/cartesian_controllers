@@ -106,7 +106,9 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cartesian_motion_controller
-#  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS
+    roscpp
+    geometry_msgs
 #  DEPENDS system_lib
 )
 

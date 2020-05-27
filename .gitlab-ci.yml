@@ -2,6 +2,3 @@ include:
   - project: 'continuous_integration/ci_scripts'
     ref: master
     file: '/gitlab-ci-yml/catkin_pipeline.yml'
-
-variables:
-  BUILD_MELODIC: "false"
