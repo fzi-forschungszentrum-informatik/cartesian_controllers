@@ -77,6 +77,7 @@ PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesi
 namespace cartesian_controller_base{
 
   ForwardDynamicsSolver::ForwardDynamicsSolver()
+    : m_min(0.01)
   {
   }
 
@@ -145,6 +146,18 @@ namespace cartesian_controller_base{
     m_jnt_jacobian.resize(m_number_joints);
     m_jnt_space_inertia.resize(m_number_joints);
 
+    // Connect dynamic reconfigure and overwrite the default values with values
+    // on the parameter server. This is done automatically if parameters with
+    // the according names exist.
+    m_callback_type = boost::bind(
+        &ForwardDynamicsSolver::dynamicReconfigureCallback, this, _1, _2);
+
+    m_dyn_conf_server.reset(
+        new dynamic_reconfigure::Server<IKConfig>(
+          ros::NodeHandle(nh.getNamespace() + "/ik_solver")));
+
+    m_dyn_conf_server->setCallback(m_callback_type);
+
     ROS_INFO("Forward dynamics solver initialized");
     ROS_INFO("Forward dynamics solver has control over %i joints", m_number_joints);
 
@@ -154,7 +167,6 @@ namespace cartesian_controller_base{
   bool ForwardDynamicsSolver::buildGenericModel()
   {
     // Set all masses and inertias to minimal (yet stable) values.
-    double m_min = 0.001;
     double ip_min = 0.000001;
     for (size_t i = 0; i < m_chain.segments.size(); ++i)
     {
@@ -191,5 +203,11 @@ namespace cartesian_controller_base{
 
     return true;
   }
+
+  void ForwardDynamicsSolver::dynamicReconfigureCallback(IKConfig& config, uint32_t level)
+  {
+    m_min = config.link_mass;
+  }
+
 
 } // namespace

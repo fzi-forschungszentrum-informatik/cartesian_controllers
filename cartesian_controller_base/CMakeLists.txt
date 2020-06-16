@@ -100,6 +100,7 @@ generate_dynamic_reconfigure_options(
         cfg/CartesianController.cfg
         cfg/PDGains.cfg
         cfg/DampedLeastSquaresSolver.cfg
+        cfg/ForwardDynamicsSolver.cfg
 )
 
 ###################################

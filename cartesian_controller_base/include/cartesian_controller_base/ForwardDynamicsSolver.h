@@ -45,6 +45,10 @@
 #include <cartesian_controller_base/Utility.h>
 #include <cartesian_controller_base/IKSolver.h>
 
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_controller_base/ForwardDynamicsSolverConfig.h>
+
 // ros_controls
 #include <hardware_interface/joint_command_interface.h>
 
@@ -129,6 +133,16 @@ class ForwardDynamicsSolver : public IKSolver
     boost::shared_ptr<KDL::ChainDynParam>       m_jnt_space_inertia_solver;
     KDL::Jacobian                               m_jnt_jacobian;
     KDL::JntSpaceInertiaMatrix                  m_jnt_space_inertia;
+
+    // IK solver specific dynamic reconfigure
+    double m_min;
+    typedef cartesian_controller_base::ForwardDynamicsSolverConfig
+      IKConfig;
+
+    void dynamicReconfigureCallback(IKConfig& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<IKConfig>::CallbackType m_callback_type;
 };
 
 
