@@ -126,12 +126,12 @@ namespace cartesian_controller_base{
   }
 
 
-  bool ForwardDynamicsSolver::init(
-      const KDL::Chain& chain,
-      const KDL::JntArray& upper_pos_limits,
-      const KDL::JntArray& lower_pos_limits)
+  bool ForwardDynamicsSolver::init(ros::NodeHandle& nh,
+                                   const KDL::Chain& chain,
+                                   const KDL::JntArray& upper_pos_limits,
+                                   const KDL::JntArray& lower_pos_limits)
   {
-    IKSolver::init(chain, upper_pos_limits, lower_pos_limits);
+    IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
     if (!buildGenericModel())
     {

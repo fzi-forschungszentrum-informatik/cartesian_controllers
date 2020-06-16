@@ -69,18 +69,8 @@ PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::DampedLeastSquaresSolver, cart
 namespace cartesian_controller_base{
 
   DampedLeastSquaresSolver::DampedLeastSquaresSolver()
-    : m_alpha(0)
+    : m_alpha(0.01)
   {
-    // Connect dynamic reconfigure and overwrite the default values with values
-    // on the parameter server. This is done automatically if parameters with
-    // the according names exist.
-    m_callback_type = boost::bind(
-        &DampedLeastSquaresSolver::dynamicReconfigureCallback, this, _1, _2);
-
-    m_dyn_conf_server.reset(
-        new dynamic_reconfigure::Server<IKConfig>(
-          ros::NodeHandle("ik_solvers/damped_least_squares")));
-    m_dyn_conf_server->setCallback(m_callback_type);
   }
 
   DampedLeastSquaresSolver::~DampedLeastSquaresSolver(){}
@@ -125,16 +115,26 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-  bool DampedLeastSquaresSolver::init(
-      const KDL::Chain& chain,
-      const KDL::JntArray& upper_pos_limits,
-      const KDL::JntArray& lower_pos_limits)
+  bool DampedLeastSquaresSolver::init(ros::NodeHandle& nh,
+                                      const KDL::Chain& chain,
+                                      const KDL::JntArray& upper_pos_limits,
+                                      const KDL::JntArray& lower_pos_limits)
   {
-    IKSolver::init(chain, upper_pos_limits, lower_pos_limits);
+    IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
     m_jnt_jacobian.resize(m_number_joints);
 
+    // Connect dynamic reconfigure and overwrite the default values with values
+    // on the parameter server. This is done automatically if parameters with
+    // the according names exist.
+    m_callback_type = boost::bind(
+        &DampedLeastSquaresSolver::dynamicReconfigureCallback, this, _1, _2);
+
+    m_dyn_conf_server.reset(
+        new dynamic_reconfigure::Server<IKConfig>(
+          ros::NodeHandle(nh.getNamespace() + "/ik_solver")));
+    m_dyn_conf_server->setCallback(m_callback_type);
     return true;
   }
 
@@ -144,4 +144,3 @@ namespace cartesian_controller_base{
     }
 
 } // namespace
-

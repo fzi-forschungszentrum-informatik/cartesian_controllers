@@ -90,13 +90,15 @@ class DampedLeastSquaresSolver : public IKSolver
     /**
      * \brief Initialize the solver
      *
+     * \param nh A node handle for namespace-local parameter management
      * \param chain The kinematic chain of the robot
      * \param upper_pos_limits Tuple with max positive joint angles
      * \param lower_pos_limits Tuple with max negative joint angles
      *
      * \return True, if everything went well
      */
-    bool init(const KDL::Chain& chain,
+    bool init(ros::NodeHandle& nh,
+              const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 

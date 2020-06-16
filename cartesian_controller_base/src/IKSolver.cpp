@@ -93,12 +93,11 @@ namespace cartesian_controller_base{
   }
 
 
-  bool IKSolver::init(
-      const KDL::Chain& chain,
-      const KDL::JntArray& upper_pos_limits,
-      const KDL::JntArray& lower_pos_limits)
+  bool IKSolver::init(ros::NodeHandle& nh,
+                      const KDL::Chain& chain,
+                      const KDL::JntArray& upper_pos_limits,
+                      const KDL::JntArray& lower_pos_limits)
   {
-
     // Initialize
     m_chain = chain;
     m_number_joints              = m_chain.getNrOfJoints();
