@@ -46,6 +46,11 @@
 // ROS
 #include <std_srvs/Trigger.h>
 
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <cartesian_controller_base/ForwardDynamicsSolverConfig.h>
+#include <cartesian_force_controller/CartesianForceControllerConfig.h>
+
 namespace cartesian_force_controller
 {
 
@@ -115,6 +120,22 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector3D        m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
     KDL::Frame            m_ft_sensor_transform;
+
+    /**
+     * Allow users to choose whether to specify their target wrenches in the
+     * end-effector frame (= True) or the base frame (= False). The first one
+     * is easier for explicit task programming, while the second one is more
+     * intuitive for tele-manipulation.
+     */
+    bool m_hand_frame_control;
+
+    // Force control specific dynamic reconfigure
+    typedef cartesian_force_controller::CartesianForceControllerConfig Config;
+
+    void dynamicReconfigureCallback(Config& config, uint32_t level);
+
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > m_dyn_conf_server;
+    dynamic_reconfigure::Server<Config>::CallbackType m_callback_type;
 };
 
 }
