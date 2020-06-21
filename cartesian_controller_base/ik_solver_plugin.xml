@@ -24,4 +24,12 @@
     </description>
   </class>
 
+  <class name="selectively_damped_least_squares"
+         type="cartesian_controller_base::SelectivelyDampedLeastSquaresSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A selectively damped least squares (SDLS) IK solver
+    </description>
+  </class>
+
 </library>

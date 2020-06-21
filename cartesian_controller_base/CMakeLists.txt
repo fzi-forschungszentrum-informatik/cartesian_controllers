@@ -155,6 +155,8 @@ add_library(ik_solvers
   include/cartesian_controller_base/JacobianTransposeSolver.h
   src/DampedLeastSquaresSolver.cpp
   include/cartesian_controller_base/DampedLeastSquaresSolver.h
+  src/SelectivelyDampedLeastSquaresSolver.cpp
+  include/cartesian_controller_base/SelectivelyDampedLeastSquaresSolver.h
 )
 
 ## Add cmake target dependencies of the library
