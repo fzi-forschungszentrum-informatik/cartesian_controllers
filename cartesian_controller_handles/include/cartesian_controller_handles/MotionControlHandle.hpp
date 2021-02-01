@@ -97,7 +97,6 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   std::string robot_description;
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
 
   // Get configuration from parameter server
   if (!nh.getParam("/robot_description",robot_description))
@@ -139,7 +138,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     ROS_ERROR("Failed to parse KDL tree from urdf model");
     return false;
   }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,m_robot_chain))
   {
     ROS_ERROR_STREAM("Failed to parse robot chain from urdf model.");
     return false;
@@ -159,7 +158,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Initialize kinematics
-  m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(robot_chain));
+  m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(m_robot_chain));
   m_current_pose = getEndEffectorPose();
 
   // Configure the interactive marker for usage in RViz

@@ -155,6 +155,7 @@ class MotionControlHandle : public controller_interface::Controller<HardwareInte
     std::string   m_robot_base_link;
     std::string   m_end_effector_link;
     std::string   m_target_frame_topic;
+    KDL::Chain    m_robot_chain;
     boost::shared_ptr<
       KDL::ChainFkSolverPos_recursive>  m_fk_solver;
 
