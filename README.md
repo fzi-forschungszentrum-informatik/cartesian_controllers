@@ -10,9 +10,9 @@ It makes the following controller types available for the ROS-control framework:
     - position_controllers/CartesianForceController
 
 * for VelocityJointInterfaces:
-    - velocity_interface/CartesianMotionController
-    - velocity_interface/CartesianComplianceController
-    - velocity_interface/CartesianForceController
+    - velocity_controllers/CartesianMotionController
+    - velocity_controllers/CartesianComplianceController
+    - velocity_controllers/CartesianForceController
 
 ## Getting Started
 **Please see the README.md for each controller.**
