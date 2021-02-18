@@ -1,6 +1,8 @@
 # Cartesian Controllers
 This package provides libraries with Cartesian ROS controllers.
 
+Check this [short video][roscon19] from ROSCon'19 to get an overview.
+
 It makes the following controller types available for the ROS-control framework:
 * for PositionJointInterfaces:
     - position_controllers/CartesianMotionController
@@ -89,3 +91,4 @@ and [the paper][paper2] on the recent implementation of the IK solver for motion
 
 [paper1]: https://ieeexplore.ieee.org/document/8206325 "Forward Dynamics Compliance Control (FDCC)"
 [paper2]: https://arxiv.org/pdf/1908.06252.pdf "Inverse Kinematics with Forward Dynamics for Sampled Motion Tracking"
+[roscon19]: https://vimeo.com/378682968
