@@ -76,9 +76,14 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   KDL::Chain  robot_chain;
 
   // Get controller specific configuration
-  if (!nh.getParam("/robot_description",robot_description))
+  if (!ros::param::search("robot_description", robot_description))
   {
-    ROS_ERROR("Failed to load '/robot_description' from parameter server");
+    ROS_ERROR_STREAM("Searched enclosing namespaces for robot_description but nothing found");
+    return false;
+  }
+  if (!nh.getParam(robot_description, robot_description))
+  {
+    ROS_ERROR_STREAM("Failed to load " << robot_description << " from parameter server");
     return false;
   }
   if (!nh.getParam("robot_base_link",m_robot_base_link))
