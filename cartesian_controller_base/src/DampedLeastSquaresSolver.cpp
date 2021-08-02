@@ -84,10 +84,12 @@ namespace cartesian_controller_base{
 
     // Compute joint velocities according to:
     // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
+    ctrl::MatrixND identity;
+    identity.setIdentity(m_number_joints, m_number_joints);
 
     m_current_velocities.data =
       (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data
-       + m_alpha * m_alpha * ctrl::Matrix6D::Identity()).inverse() * m_jnt_jacobian.data.transpose() * net_force;
+       + m_alpha * m_alpha * identity).inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
     // Integrate once, starting with zero motion
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
