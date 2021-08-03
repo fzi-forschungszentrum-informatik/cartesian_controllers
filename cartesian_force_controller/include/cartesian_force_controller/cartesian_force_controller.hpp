@@ -119,6 +119,15 @@ stopping(const ros::Time& time)
 {
 }
 
+template <>
+void CartesianForceController<hardware_interface::VelocityJointInterface>::
+stopping(const ros::Time& time)
+{
+    // Stop drifting by sending zero joint velocities
+    Base::computeJointControlCmds(ctrl::Vector6D::Zero(), ros::Duration(0));
+    Base::writeJointControlCmds();
+}
+
 template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
