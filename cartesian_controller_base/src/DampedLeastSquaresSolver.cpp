@@ -57,6 +57,11 @@
  *     type: "<type_of_your_controller>"
  *     ik_solver: "damped_least_squares"
  *     ...
+ *
+ *     solver:
+ *         ...
+ *         damped_least_squares:
+ *             alpha: 0.5
  * \endcode
  *
  */
@@ -135,7 +140,7 @@ namespace cartesian_controller_base{
 
     m_dyn_conf_server.reset(
         new dynamic_reconfigure::Server<IKConfig>(
-          ros::NodeHandle(nh.getNamespace() + "/ik_solver")));
+          ros::NodeHandle(nh.getNamespace() + "/solver/damped_least_squares")));
     m_dyn_conf_server->setCallback(m_callback_type);
     return true;
   }

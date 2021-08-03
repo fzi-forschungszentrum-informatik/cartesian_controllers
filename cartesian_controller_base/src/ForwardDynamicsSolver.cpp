@@ -65,6 +65,11 @@
  *     type: "<type_of_your_controller>"
  *     ik_solver: "forward_dynamics"
  *     ...
+ *
+ *     solver:
+ *         ...
+ *         forward_dynamics:
+ *             link_mass: 0.5
  * \endcode
  *
  */
@@ -154,7 +159,7 @@ namespace cartesian_controller_base{
 
     m_dyn_conf_server.reset(
         new dynamic_reconfigure::Server<IKConfig>(
-          ros::NodeHandle(nh.getNamespace() + "/ik_solver")));
+          ros::NodeHandle(nh.getNamespace() + "/solver/forward_dynamics")));
 
     m_dyn_conf_server->setCallback(m_callback_type);
 
