@@ -115,4 +115,18 @@ namespace cartesian_controller_base{
     return true;
   }
 
+  void IKSolver::applyJointLimits()
+  {
+    for (int i = 0; i < m_number_joints; ++i)
+    {
+      if (std::isnan(m_lower_pos_limits(i)) || std::isnan(m_upper_pos_limits(i)))
+      {
+        // Joint marked as continuous.
+        continue;
+      }
+      m_current_positions(i) = boost::algorithm::clamp(
+          m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
+    }
+  }
+
 } // namespace
