@@ -44,12 +44,14 @@
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
 // KDL
+#include <cmath>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/jntarray.hpp>
 
 // URDF
 #include <urdf/model.h>
+#include <urdf_model/joint.h>
 
 namespace cartesian_controller_base
 {
@@ -156,8 +158,17 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
       ROS_ERROR_STREAM(error);
       throw std::runtime_error(error);
     }
-    upper_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->upper;
-    lower_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->lower;
+    if (robot_model.getJoint(m_joint_names[i])->type == urdf::Joint::CONTINUOUS)
+    {
+      upper_pos_limits(i) = std::nan("0");
+      lower_pos_limits(i) = std::nan("0");
+    }
+    else
+    {
+      // Non-existent urdf limits are zero initialized
+      upper_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->upper;
+      lower_pos_limits(i) = robot_model.getJoint(m_joint_names[i])->limits->lower;
+    }
   }
 
   // Get the joint handles to use in the control loop

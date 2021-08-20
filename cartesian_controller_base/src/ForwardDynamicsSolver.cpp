@@ -109,11 +109,7 @@ namespace cartesian_controller_base{
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
 
     // Make sure positions stay in allowed margins
-    for (int i = 0; i < m_number_joints; ++i)
-    {
-      m_current_positions(i) = boost::algorithm::clamp(
-          m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
-    }
+    applyJointLimits();
 
     // Apply results
     trajectory_msgs::JointTrajectoryPoint control_cmd;
