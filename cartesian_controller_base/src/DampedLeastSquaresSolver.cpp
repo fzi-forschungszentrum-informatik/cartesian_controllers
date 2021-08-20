@@ -29,51 +29,43 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    ForwardDynamicsSolver.cpp
+/*!\file    DampedLeastSquaresSolver.cpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
- * \date    2020/03/24
+ * \date    2020/03/27
  *
  */
 //-----------------------------------------------------------------------------
 
 // this package
-#include <cartesian_controller_base/ForwardDynamicsSolver.h>
-
-// other
-#include <map>
-#include <sstream>
-#include <boost/algorithm/clamp.hpp>
-#include <eigen_conversions/eigen_kdl.h>
-
-// KDL
-#include <kdl/jntarrayvel.hpp>
-#include <kdl/framevel.hpp>
+#include <cartesian_controller_base/DampedLeastSquaresSolver.h>
 
 // Pluginlib
 #include <pluginlib/class_list_macros.h>
 
+// other
+#include <boost/algorithm/clamp.hpp>
 
 /**
- * \class cartesian_controller_base::ForwardDynamicsSolver 
+ * \class cartesian_controller_base::DampedLeastSquaresSolver 
  *
- * Users may explicitly specify it with \a "forward_dynamics" as \a ik_solver
- * in their controllers.yaml configuration file for each controller:
+ * Users may explicitly specify this solver with \a "damped_least_squares" as \a
+ * ik_solver in their controllers.yaml configuration file for each controller:
  *
  * \code{.yaml}
  * <name_of_your_controller>:
  *     type: "<type_of_your_controller>"
- *     ik_solver: "forward_dynamics"
+ *     ik_solver: "damped_least_squares"
  *     ...
  *
  *     solver:
  *         ...
- *         forward_dynamics:
- *             link_mass: 0.5
+ *         damped_least_squares:
+ *             alpha: 0.5
  * \endcode
  *
  */
-PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesian_controller_base::IKSolver)
+PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::DampedLeastSquaresSolver, cartesian_controller_base::IKSolver)
 
 
 
@@ -81,31 +73,30 @@ PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesi
 
 namespace cartesian_controller_base{
 
-  ForwardDynamicsSolver::ForwardDynamicsSolver()
-    : m_min(0.01)
+  DampedLeastSquaresSolver::DampedLeastSquaresSolver()
+    : m_alpha(0.01)
   {
   }
 
-  ForwardDynamicsSolver::~ForwardDynamicsSolver(){}
+  DampedLeastSquaresSolver::~DampedLeastSquaresSolver(){}
 
-  trajectory_msgs::JointTrajectoryPoint ForwardDynamicsSolver::getJointControlCmds(
+  trajectory_msgs::JointTrajectoryPoint DampedLeastSquaresSolver::getJointControlCmds(
         ros::Duration period,
         const ctrl::Vector6D& net_force)
   {
-
-    // Compute joint space inertia matrix
-    m_jnt_space_inertia_solver->JntToMass(m_current_positions,m_jnt_space_inertia);
-
     // Compute joint jacobian
     m_jnt_jacobian_solver->JntToJac(m_current_positions,m_jnt_jacobian);
 
-    // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
-    m_current_accelerations.data = m_jnt_space_inertia.data.inverse() * m_jnt_jacobian.data.transpose() * net_force;
+    // Compute joint velocities according to:
+    // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
+    ctrl::MatrixND identity;
+    identity.setIdentity(m_number_joints, m_number_joints);
+
+    m_current_velocities.data =
+      (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data
+       + m_alpha * m_alpha * identity).inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
     // Integrate once, starting with zero motion
-    m_current_velocities.data = 0.5 * m_current_accelerations.data * period.toSec();
-
-    // Integrate twice, starting with zero motion
     m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
 
     // Make sure positions stay in allowed margins
@@ -131,88 +122,32 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-
-  bool ForwardDynamicsSolver::init(ros::NodeHandle& nh,
-                                   const KDL::Chain& chain,
-                                   const KDL::JntArray& upper_pos_limits,
-                                   const KDL::JntArray& lower_pos_limits)
+  bool DampedLeastSquaresSolver::init(ros::NodeHandle& nh,
+                                      const KDL::Chain& chain,
+                                      const KDL::JntArray& upper_pos_limits,
+                                      const KDL::JntArray& lower_pos_limits)
   {
     IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
-    if (!buildGenericModel())
-    {
-      ROS_ERROR("ForwardDynamicsSolver: Something went wrong in setting up the internal model.");
-      return false;
-    }
-
-    // Forward dynamics
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
     m_jnt_jacobian.resize(m_number_joints);
-    m_jnt_space_inertia.resize(m_number_joints);
 
     // Connect dynamic reconfigure and overwrite the default values with values
     // on the parameter server. This is done automatically if parameters with
     // the according names exist.
     m_callback_type = boost::bind(
-        &ForwardDynamicsSolver::dynamicReconfigureCallback, this, _1, _2);
+        &DampedLeastSquaresSolver::dynamicReconfigureCallback, this, _1, _2);
 
     m_dyn_conf_server.reset(
         new dynamic_reconfigure::Server<IKConfig>(
-          ros::NodeHandle(nh.getNamespace() + "/solver/forward_dynamics")));
-
+          ros::NodeHandle(nh.getNamespace() + "/solver/damped_least_squares")));
     m_dyn_conf_server->setCallback(m_callback_type);
-
-    ROS_INFO("Forward dynamics solver initialized");
-    ROS_INFO("Forward dynamics solver has control over %i joints", m_number_joints);
-
     return true;
   }
 
-  bool ForwardDynamicsSolver::buildGenericModel()
-  {
-    // Set all masses and inertias to minimal (yet stable) values.
-    double ip_min = 0.000001;
-    for (size_t i = 0; i < m_chain.segments.size(); ++i)
+    void DampedLeastSquaresSolver::dynamicReconfigureCallback(IKConfig& config, uint32_t level)
     {
-      // Fixed joint segment
-      if (m_chain.segments[i].getJoint().getType() == KDL::Joint::None)
-      {
-        m_chain.segments[i].setInertia(
-            KDL::RigidBodyInertia::Zero());
-      }
-      else  // relatively moving segment
-      {
-        m_chain.segments[i].setInertia(
-            KDL::RigidBodyInertia(
-              m_min,                // mass
-              KDL::Vector::Zero(),  // center of gravity
-              KDL::RotationalInertia(
-                ip_min,             // ixx
-                ip_min,             // iyy
-                ip_min              // izz
-                // ixy, ixy, iyz default to 0.0
-                )));
-      }
+      m_alpha = config.alpha;
     }
-
-    // Only give the last segment a generic mass and inertia.
-    // See https://arxiv.org/pdf/1908.06252.pdf for a motivation for this setting.
-    double m = 1;
-    double ip = 1;
-    m_chain.segments[m_chain.segments.size()-1].setInertia(
-        KDL::RigidBodyInertia(
-          m,
-          KDL::Vector::Zero(),
-          KDL::RotationalInertia(ip, ip, ip)));
-
-    return true;
-  }
-
-  void ForwardDynamicsSolver::dynamicReconfigureCallback(IKConfig& config, uint32_t level)
-  {
-    m_min = config.link_mass;
-  }
-
 
 } // namespace

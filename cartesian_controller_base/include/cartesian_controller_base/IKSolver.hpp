@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-/*!\file    ForwardDynamicsSolver.hpp
+/*!\file    IKSolver.hpp
  *
  * \author  Stefan Scherzinger <scherzin@fzi.de>
  * \date    2019/10/09
@@ -39,15 +39,15 @@
 
 
 // this package
-#include <cartesian_controller_base/ForwardDynamicsSolver.h>
+#include <cartesian_controller_base/IKSolver.h>
 
 // ROS control
 #include <hardware_interface/joint_command_interface.h>
 
 namespace cartesian_controller_base{
 
-template <>
-void ForwardDynamicsSolver::updateKinematics<hardware_interface::PositionJointInterface>(
+template <> inline
+void IKSolver::updateKinematics<hardware_interface::PositionJointInterface>(
     const std::vector<hardware_interface::JointHandle>&)
 {
   // Keep feed forward simulation running
@@ -67,8 +67,8 @@ void ForwardDynamicsSolver::updateKinematics<hardware_interface::PositionJointIn
   m_end_effector_vel[5] = vel.deriv().rot.z();
 }
 
-template <>
-void ForwardDynamicsSolver::updateKinematics<hardware_interface::VelocityJointInterface>(
+template <> inline
+void IKSolver::updateKinematics<hardware_interface::VelocityJointInterface>(
     const std::vector<hardware_interface::JointHandle>& joint_handles)
 {
   // Reset internal simulation with real robot state

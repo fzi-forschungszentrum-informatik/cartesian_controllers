@@ -1,0 +1,35 @@
+<library path="lib/libik_solvers">
+
+  <class name="forward_dynamics"
+         type="cartesian_controller_base::ForwardDynamicsSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A forward dynamics-based IK solver
+    </description>
+  </class>
+
+  <class name="jacobian_transpose"
+         type="cartesian_controller_base::JacobianTransposeSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A Jacobian transpose-based IK solver
+    </description>
+  </class>
+
+  <class name="damped_least_squares"
+         type="cartesian_controller_base::DampedLeastSquaresSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A damped least squares (DLS) IK solver
+    </description>
+  </class>
+
+  <class name="selectively_damped_least_squares"
+         type="cartesian_controller_base::SelectivelyDampedLeastSquaresSolver"
+         base_class_type="cartesian_controller_base::IKSolver">
+    <description>
+      A selectively damped least squares (SDLS) IK solver
+    </description>
+  </class>
+
+</library>

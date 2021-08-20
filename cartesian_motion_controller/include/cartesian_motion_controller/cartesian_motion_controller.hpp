@@ -86,7 +86,7 @@ starting(const ros::Time& time)
 {
   // Reset simulation with real joint state
   Base::starting(time);
-  m_current_frame = Base::m_forward_dynamics_solver.getEndEffectorPose();
+  m_current_frame = Base::m_ik_solver->getEndEffectorPose();
 
   // Start where we are
   m_target_frame = m_current_frame;
@@ -151,7 +151,7 @@ ctrl::Vector6D CartesianMotionController<HardwareInterface>::
 computeMotionError()
 {
   // Compute motion error wrt robot_base_link
-  m_current_frame = Base::m_forward_dynamics_solver.getEndEffectorPose();
+  m_current_frame = Base::m_ik_solver->getEndEffectorPose();
 
   // Transformation from target -> current corresponds to error = target - current
   KDL::Frame error_kdl;
