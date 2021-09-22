@@ -1,7 +1,7 @@
 <launch>
         <!-- Configuration -->
         <arg name="debug" default="false"/>
-        <arg if="$(arg debug)" name="launch-prefix" value="screen -d -m gdb -command=/home/scherzin/.ros/stefan_test --ex run --args"/>
+        <arg if="$(arg debug)" name="launch-prefix" value="screen -d -m gdb -command=$(env HOME)/.ros/my_debug_log --ex run --args"/>
         <arg unless="$(arg debug)" name="launch-prefix" value=""/>
 
         <!-- Load robot_description to parameter server -->
@@ -12,8 +12,7 @@
         <rosparam file="$(find cartesian_controller_examples)/config/example_hw_config.yaml" command="load"></rosparam>
 
         <!-- Load hardware interface -->
-        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main"
-        output="screen" launch-prefix="$(arg launch-prefix)"/>
+        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main" output="screen" launch-prefix="$(arg launch-prefix)"/>
 
         <!-- Robot state publisher -->
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
