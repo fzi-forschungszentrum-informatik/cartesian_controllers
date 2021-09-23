@@ -166,9 +166,9 @@ class IKSolver
      * @brief Make sure positions stay in allowed margins
      *
      * Limit internal joint buffers to the position limits provided by URDF.
-     * A joint will be treated as continuous, if both upper and lower limits
-     * are zero for this joint.  Note that this is the default urdf initializer
-     * if limits are ommited.
+     * A joint will be treated as continuous, if the continuous type is set for this joint.
+     * If both upper and lower limits are zero, the joint appears fixed.  Note
+     * that this is the default urdf initializer if limits are omitted.
      */
     void applyJointLimits();
 
