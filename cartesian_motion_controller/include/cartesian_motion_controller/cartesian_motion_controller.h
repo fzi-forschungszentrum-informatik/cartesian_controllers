@@ -79,14 +79,15 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
 {
   public:
     CartesianMotionController();
+    virtual ~CartesianMotionController() = default;
 
-    bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+    virtual bool init(HardwareInterface* hw, ros::NodeHandle& nh);
 
-    void starting(const ros::Time& time);
+    virtual void starting(const ros::Time& time);
 
-    void stopping(const ros::Time& time);
+    virtual void stopping(const ros::Time& time);
 
-    void update(const ros::Time& time, const ros::Duration& period);
+    virtual void update(const ros::Time& time, const ros::Duration& period);
 
     typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
 
@@ -104,14 +105,15 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
      * @return The error as a 6-dim vector (linear, angular) w.r.t to the robot base link
      */
     ctrl::Vector6D        computeMotionError();
+    KDL::Frame      m_target_frame;
+    KDL::Frame      m_current_frame;
+
+    void targetFrameCallback(const geometry_msgs::PoseStamped& pose);
 
   private:
-    void targetFrameCallback(const geometry_msgs::PoseStamped& pose);
 
     ros::Subscriber m_target_frame_subscr;
     std::string     m_target_frame_topic;
-    KDL::Frame      m_target_frame;
-    KDL::Frame      m_current_frame;
 };
 
 }
