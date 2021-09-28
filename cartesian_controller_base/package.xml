@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="2.0"?>
 <package>
   <name>cartesian_controller_base</name>
   <version>0.0.0</version>
@@ -60,6 +60,8 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
+    <build_type>ament_cmake</build_type>
+
     <!-- Other tools can request additional information be placed here -->
     <cartesian_controller_base plugin="${prefix}/ik_solver_plugin.xml"/>
   </export>
