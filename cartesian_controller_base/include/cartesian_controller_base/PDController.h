@@ -42,15 +42,7 @@
 #define PD_CONTROLLER_H_INCLUDED
 
 // ROS
-#include <ros/ros.h>
-
-// ros_control
-#include <realtime_tools/realtime_buffer.h>
-#include <realtime_tools/realtime_box.h>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_controller_base/PDGainsConfig.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace cartesian_controller_base
 {
@@ -58,54 +50,31 @@ namespace cartesian_controller_base
 /**
  * @brief A proportional, derivative controller
  *
- * Motivation for this custom implementation:
+ * This one-dimensional controller exposes a local **p** gain and a **d** gain as parameters.
  *
- *  - Restriction to meaningful parameter ranges.
- *  Users should be able to use the sliders in dynamic
- *  reconfigure to find suitable parameters for their setup.
- *
- *  - No integral gain.
- *  The \ref cartesian_controllers package builds upon a control plant that
- *  already has an integrating part to eliminate steady state errors.
- *  Additionally exposing I-related parameters in dynamic reconfigure distracts
- *  users with unused complexity.
+ * We use a custom implementation to drop the integral gain of the `control_toolbox`.
+ * The \ref _cartesian_controllers_ package builds upon a control plant that
+ * already has an integrating part to eliminate steady state errors.
+ * Exposing parameterization for integral gains would confuse users with unused complexity.
  */
 class PDController
 {
   public:
     PDController();
-    PDController(const PDController& other); ///< RealtimeBuffer needs special treatment
     ~PDController();
 
-    void init(const std::string& name_space);
+    void init(const std::string& params, std::shared_ptr<rclcpp::Node> handle);
 
-    double operator()(const double& error, const ros::Duration& period);
+    double operator()(const double& error, const rclcpp::Duration& period);
 
   private:
-    struct PDGains
-    {
-      PDGains()
-        : m_p(0), m_d(0)
-      {};
+    std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
+    std::string m_params; ///< namespace for parameter access
 
-      PDGains(double p, double d)
-        : m_p(p), m_d(d)
-      {};
-
-      double m_p; ///< proportional gain
-      double m_d; ///< derivative gain
-    };
-
-    realtime_tools::RealtimeBuffer<PDGains> m_gains;
-
+    // Gain parameters
+    double m_p; ///< proportional gain
+    double m_d; ///< derivative gain
     double m_last_p_error;
-
-    // Dynamic reconfigure
-    typedef cartesian_controller_base::PDGainsConfig PDGainsConfig;
-    void dynamicReconfigureCallback(PDGainsConfig& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<PDGainsConfig> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<PDGainsConfig>::CallbackType m_callback_type;
 
 };
 

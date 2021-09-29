@@ -50,7 +50,7 @@ SpatialPDController::SpatialPDController()
 {
 }
 
-ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, const ros::Duration& period)
+ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, const rclcpp::Duration& period)
 {
   // Perform pd control separately on each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
@@ -60,23 +60,23 @@ ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, cons
   return m_cmd;
 }
 
-bool SpatialPDController::init(ros::NodeHandle& nh)
+bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)
 {
-  // Initialize pd controllers for each Cartesian dimension
+  // Create pd controllers for each Cartesian dimension
   for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
   {
     m_pd_controllers.push_back(PDController());
   }
 
   // Load default controller gains
-  std::string solver_config = nh.getNamespace() + "/pd_gains";
+  std::string gains_config = "/pd_gains";
 
-  m_pd_controllers[0].init(solver_config + "/trans_x");
-  m_pd_controllers[1].init(solver_config + "/trans_y");
-  m_pd_controllers[2].init(solver_config + "/trans_z");
-  m_pd_controllers[3].init(solver_config + "/rot_x");
-  m_pd_controllers[4].init(solver_config + "/rot_y");
-  m_pd_controllers[5].init(solver_config + "/rot_z");
+  m_pd_controllers[0].init(gains_config + "/trans_x", handle);
+  m_pd_controllers[1].init(gains_config + "/trans_y", handle);
+  m_pd_controllers[2].init(gains_config + "/trans_z", handle);
+  m_pd_controllers[3].init(gains_config + "/rot_x", handle);
+  m_pd_controllers[4].init(gains_config + "/rot_y", handle);
+  m_pd_controllers[5].init(gains_config + "/rot_z", handle);
 
   return true;
 }

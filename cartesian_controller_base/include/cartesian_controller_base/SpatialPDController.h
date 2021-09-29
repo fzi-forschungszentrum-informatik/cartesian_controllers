@@ -45,7 +45,7 @@
 #include <cartesian_controller_base/PDController.h>
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace cartesian_controller_base
 {
@@ -61,7 +61,7 @@ class SpatialPDController
   public:
     SpatialPDController();
 
-    bool init(ros::NodeHandle& nh);
+    bool init(std::shared_ptr<rclcpp::Node> params);
 
     /**
      * @brief Call operator for one control cycle
@@ -71,7 +71,7 @@ class SpatialPDController
      *
      * @return The controlled 6-dim vector (translational, rotational).
      */
-    ctrl::Vector6D operator()(const ctrl::Vector6D& error, const ros::Duration& period);
+    ctrl::Vector6D operator()(const ctrl::Vector6D& error, const rclcpp::Duration& period);
 
   private:
     ctrl::Vector6D m_cmd;
