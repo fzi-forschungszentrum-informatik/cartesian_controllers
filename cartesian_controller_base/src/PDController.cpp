@@ -48,53 +48,35 @@ PDController::PDController()
 {
 }
 
-PDController::PDController(const PDController& other)
-  : m_last_p_error(other.m_last_p_error)
-  , m_dyn_conf_server(other.m_dyn_conf_server)
-{
-  // Copy constructor would bind non-const ref
-  // to const, so use copy assignment operator.
-  m_gains = other.m_gains;
-}
-
 PDController::~PDController()
 {
 }
 
 
-void PDController::init(const std::string& name_space)
+void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node> handle)
 {
-  // Connect dynamic reconfigure and overwrite the default values with values
-  // on the parameter server. This is done automatically if parameters with
-  // the according names exist.
-  m_callback_type = boost::bind(
-      &PDController::dynamicReconfigureCallback, this, _1, _2);
-
-  m_dyn_conf_server.reset(
-      new dynamic_reconfigure::Server<PDGainsConfig>(
-        ros::NodeHandle(name_space)));
-  m_dyn_conf_server->setCallback(m_callback_type);
-
+  m_params = params;
+  m_handle = handle;
+  m_handle->declare_parameter(m_params + "/p", 0);
+  m_handle->declare_parameter(m_params + "/d", 0);
 }
 
 
-double PDController::operator()(const double& error, const ros::Duration& period)
+double PDController::operator()(const double& error, const rclcpp::Duration& period)
 {
-  if (period == ros::Duration(0.0))
+  if (period == rclcpp::Duration(0.0))
   {
     return 0.0;
   }
 
-  PDGains gains(*m_gains.readFromRT());
-  double result = gains.m_p * error + gains.m_d * (error - m_last_p_error) / period.toSec();
+  // Get latest gains
+  m_handle->get_parameter(+ "/p", m_p);
+  m_handle->get_parameter(+ "/d", m_d);
+  double result = m_p * error + m_d * (error - m_last_p_error) / period.seconds();
 
   m_last_p_error = error;
   return result;
 }
 
-void PDController::dynamicReconfigureCallback(PDGainsConfig& config, uint32_t level)
-{
-  m_gains.writeFromNonRT(PDGains(config.p, config.d));
-}
 
 }

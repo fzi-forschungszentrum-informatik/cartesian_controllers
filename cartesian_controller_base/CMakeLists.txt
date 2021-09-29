@@ -17,9 +17,7 @@ find_package(rclcpp REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(trajectory_msgs REQUIRED)
-find_package(control_toolbox REQUIRED)
 find_package(eigen_conversions REQUIRED)
-find_package(dynamic_reconfigure REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(urdf REQUIRED)
 
@@ -27,7 +25,6 @@ find_package(urdf REQUIRED)
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 #generate_dynamic_reconfigure_options(
 #        cfg/CartesianController.cfg
-#        cfg/PDGains.cfg
 #        cfg/DampedLeastSquaresSolver.cfg
 #        cfg/ForwardDynamicsSolver.cfg
 #)
@@ -39,9 +36,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
         controller_interface
         kdl_parser
         trajectory_msgs
-        control_toolbox
         eigen_conversions
-        dynamic_reconfigure
         pluginlib
         urdf
         Eigen3
