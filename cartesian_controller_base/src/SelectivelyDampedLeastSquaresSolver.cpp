@@ -41,10 +41,8 @@
 #include <cartesian_controller_base/SelectivelyDampedLeastSquaresSolver.h>
 
 // Pluginlib
-#include <pluginlib/class_list_macros.h>
-
-// other
-#include <boost/algorithm/clamp.hpp>
+#include <memory>
+#include <pluginlib/class_list_macros.hpp>
 
 /**
  * \class cartesian_controller_base::SelectivelyDampedLeastSquaresSolver 
@@ -74,8 +72,8 @@ namespace cartesian_controller_base{
 
   SelectivelyDampedLeastSquaresSolver::~SelectivelyDampedLeastSquaresSolver(){}
 
-  trajectory_msgs::JointTrajectoryPoint SelectivelyDampedLeastSquaresSolver::getJointControlCmds(
-        ros::Duration period,
+  trajectory_msgs::msg::JointTrajectoryPoint SelectivelyDampedLeastSquaresSolver::getJointControlCmds(
+        rclcpp::Duration period,
         const ctrl::Vector6D& net_force)
   {
     // Compute joint Jacobian
@@ -120,13 +118,13 @@ namespace cartesian_controller_base{
     m_current_velocities.data = clampMaxAbs(sum_phi, gamma_max);
 
     // Integrate once, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
+    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
 
     // Make sure positions stay in allowed margins
     applyJointLimits();
 
     // Apply results
-    trajectory_msgs::JointTrajectoryPoint control_cmd;
+    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
     for (int i = 0; i < m_number_joints; ++i)
     {
       control_cmd.positions.push_back(m_current_positions(i));
@@ -144,7 +142,7 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-  bool SelectivelyDampedLeastSquaresSolver::init(ros::NodeHandle& nh,
+  bool SelectivelyDampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
                                       const KDL::Chain& chain,
                                       const KDL::JntArray& upper_pos_limits,
                                       const KDL::JntArray& lower_pos_limits)

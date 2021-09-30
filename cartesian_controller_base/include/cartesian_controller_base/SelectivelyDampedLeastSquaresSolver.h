@@ -48,6 +48,7 @@
 
 // KDL
 #include <kdl/jacobian.hpp>
+#include <memory>
 
 namespace cartesian_controller_base{
 
@@ -82,9 +83,9 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::JointTrajectoryPoint getJointControlCmds(
-        ros::Duration period,
-        const ctrl::Vector6D& net_force);
+    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+        rclcpp::Duration period,
+        const ctrl::Vector6D& net_force) override;
 
     /**
      * \brief Initialize the solver
@@ -96,10 +97,10 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
      *
      * \return True, if everything went well
      */
-    bool init(ros::NodeHandle& nh,
+    bool init(std::shared_ptr<rclcpp::Node> nh,
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits);
+              const KDL::JntArray& lower_pos_limits) override;
 
   private:
     /**
