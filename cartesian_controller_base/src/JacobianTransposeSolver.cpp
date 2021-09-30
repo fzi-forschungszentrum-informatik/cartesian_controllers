@@ -41,7 +41,7 @@
 #include <cartesian_controller_base/JacobianTransposeSolver.h>
 
 // Pluginlib
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 // other
 #include <boost/algorithm/clamp.hpp>
@@ -74,8 +74,8 @@ namespace cartesian_controller_base{
 
   JacobianTransposeSolver::~JacobianTransposeSolver(){}
 
-  trajectory_msgs::JointTrajectoryPoint JacobianTransposeSolver::getJointControlCmds(
-        ros::Duration period,
+  trajectory_msgs::msg::JointTrajectoryPoint JacobianTransposeSolver::getJointControlCmds(
+        rclcpp::Duration period,
         const ctrl::Vector6D& net_force)
   {
     // Compute joint jacobian
@@ -85,16 +85,16 @@ namespace cartesian_controller_base{
     m_current_accelerations.data = m_jnt_jacobian.data.transpose() * net_force;
 
     // Integrate once, starting with zero motion
-    m_current_velocities.data = 0.5 * m_current_accelerations.data * period.toSec();
+    m_current_velocities.data = 0.5 * m_current_accelerations.data * period.seconds();
 
     // Integrate twice, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
+    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
 
     // Make sure positions stay in allowed margins
     applyJointLimits();
 
     // Apply results
-    trajectory_msgs::JointTrajectoryPoint control_cmd;
+    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
     for (int i = 0; i < m_number_joints; ++i)
     {
       control_cmd.positions.push_back(m_current_positions(i));
@@ -112,7 +112,7 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-  bool JacobianTransposeSolver::init(ros::NodeHandle& nh,
+  bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp::Node> nh,
                                      const KDL::Chain& chain,
                                      const KDL::JntArray& upper_pos_limits,
                                      const KDL::JntArray& lower_pos_limits)

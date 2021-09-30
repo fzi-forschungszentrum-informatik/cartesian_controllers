@@ -46,6 +46,9 @@
 // KDL
 #include <kdl/jacobian.hpp>
 
+// Other
+#include <memory>
+
 namespace cartesian_controller_base{
 
   /**
@@ -76,24 +79,23 @@ class JacobianTransposeSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::JointTrajectoryPoint getJointControlCmds(
-        ros::Duration period,
-        const ctrl::Vector6D& net_force);
+    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+        rclcpp::Duration period,
+        const ctrl::Vector6D& net_force) override;
 
     /**
      * \brief Initialize the solver
      *
-     * \param nh A node handle for namespace-local parameter management
      * \param chain The kinematic chain of the robot
      * \param upper_pos_limits Tuple with max positive joint angles
      * \param lower_pos_limits Tuple with max negative joint angles
      *
      * \return True, if everything went well
      */
-    bool init(ros::NodeHandle& nh,
+    bool init(std::shared_ptr<rclcpp::Node> /*nh*/,
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits);
+              const KDL::JntArray& lower_pos_limits) override;
 
   private:
     std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
