@@ -129,7 +129,6 @@ namespace cartesian_controller_base{
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
     m_jnt_jacobian.resize(m_number_joints);
 
-    m_params = "/solver/damped_least_squares";
     nh->declare_parameter<double>(m_params + "/alpha", 1.0);
 
     return true;
