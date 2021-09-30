@@ -105,7 +105,7 @@ class DampedLeastSquaresSolver : public IKSolver
 
     // Dynamic parameters
     std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
-    std::string m_params; ///< namespace for parameter access
+    const std::string m_params = "/solver/damped_least_squares"; ///< namespace for parameter access
     double m_alpha; ///< damping coefficient
 
 };
