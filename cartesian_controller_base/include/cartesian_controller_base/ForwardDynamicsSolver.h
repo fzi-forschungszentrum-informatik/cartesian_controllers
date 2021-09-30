@@ -45,20 +45,9 @@
 #include <cartesian_controller_base/Utility.h>
 #include <cartesian_controller_base/IKSolver.h>
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_controller_base/ForwardDynamicsSolverConfig.h>
-
-// ros_controls
-#include <hardware_interface/joint_command_interface.h>
-
-// ros general
-#include <ros/ros.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
-
 // other
-#include <vector>
 #include <memory>
+#include <vector>
 
 // KDL
 #include <kdl/frames.hpp>
@@ -104,9 +93,9 @@ class ForwardDynamicsSolver : public IKSolver
      *
      * @return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::JointTrajectoryPoint getJointControlCmds(
-        ros::Duration period,
-        const ctrl::Vector6D& net_force);
+    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+        rclcpp::Duration period,
+        const ctrl::Vector6D& net_force) override;
 
     /**
      * @brief Initialize the solver
@@ -118,10 +107,10 @@ class ForwardDynamicsSolver : public IKSolver
      *
      * @return True, if everything went well
      */
-    bool init(ros::NodeHandle& nh,
+    bool init(std::shared_ptr<rclcpp::Node> nh,
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits);
+              const KDL::JntArray& lower_pos_limits) override;
 
   private:
 
@@ -134,15 +123,17 @@ class ForwardDynamicsSolver : public IKSolver
     KDL::Jacobian                               m_jnt_jacobian;
     KDL::JntSpaceInertiaMatrix                  m_jnt_space_inertia;
 
-    // IK solver specific dynamic reconfigure
+    // Dynamic parameters
+    std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
+    const std::string m_params = "/solver/forward_dynamics"; ///< namespace for parameter access
+
+    /**
+     * Virtual link mass
+     * Virtual mass of the manipulator's links. The smaller this value, the
+     * more does the end-effector (which has a unit mass of 1.0) dominate dynamic
+     * behavior. Near singularities, a bigger value leads to smoother motion.
+     */
     double m_min;
-    typedef cartesian_controller_base::ForwardDynamicsSolverConfig
-      IKConfig;
-
-    void dynamicReconfigureCallback(IKConfig& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<IKConfig>::CallbackType m_callback_type;
 };
 
 
