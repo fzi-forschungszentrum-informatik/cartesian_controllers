@@ -41,10 +41,7 @@
 #include <cartesian_controller_base/DampedLeastSquaresSolver.h>
 
 // Pluginlib
-#include <pluginlib/class_list_macros.h>
-
-// other
-#include <boost/algorithm/clamp.hpp>
+#include <pluginlib/class_list_macros.hpp>
 
 /**
  * \class cartesian_controller_base::DampedLeastSquaresSolver 
@@ -80,8 +77,8 @@ namespace cartesian_controller_base{
 
   DampedLeastSquaresSolver::~DampedLeastSquaresSolver(){}
 
-  trajectory_msgs::JointTrajectoryPoint DampedLeastSquaresSolver::getJointControlCmds(
-        ros::Duration period,
+  trajectory_msgs::msg::JointTrajectoryPoint DampedLeastSquaresSolver::getJointControlCmds(
+        rclcpp::Duration period,
         const ctrl::Vector6D& net_force)
   {
     // Compute joint jacobian
@@ -91,19 +88,20 @@ namespace cartesian_controller_base{
     // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
     ctrl::MatrixND identity;
     identity.setIdentity(m_number_joints, m_number_joints);
+    m_handle->get_parameter(m_params + "/alpha", m_alpha);
 
     m_current_velocities.data =
       (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data
        + m_alpha * m_alpha * identity).inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
     // Integrate once, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.toSec();
+    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
 
     // Make sure positions stay in allowed margins
     applyJointLimits();
 
     // Apply results
-    trajectory_msgs::JointTrajectoryPoint control_cmd;
+    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
     for (int i = 0; i < m_number_joints; ++i)
     {
       control_cmd.positions.push_back(m_current_positions(i));
@@ -121,7 +119,7 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-  bool DampedLeastSquaresSolver::init(ros::NodeHandle& nh,
+  bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
                                       const KDL::Chain& chain,
                                       const KDL::JntArray& upper_pos_limits,
                                       const KDL::JntArray& lower_pos_limits)
@@ -131,22 +129,11 @@ namespace cartesian_controller_base{
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
     m_jnt_jacobian.resize(m_number_joints);
 
-    // Connect dynamic reconfigure and overwrite the default values with values
-    // on the parameter server. This is done automatically if parameters with
-    // the according names exist.
-    m_callback_type = boost::bind(
-        &DampedLeastSquaresSolver::dynamicReconfigureCallback, this, _1, _2);
+    m_params = "/solver/damped_least_squares";
+    nh->declare_parameter<double>(m_params + "/alpha", 1.0);
 
-    m_dyn_conf_server.reset(
-        new dynamic_reconfigure::Server<IKConfig>(
-          ros::NodeHandle(nh.getNamespace() + "/solver/damped_least_squares")));
-    m_dyn_conf_server->setCallback(m_callback_type);
     return true;
   }
 
-    void DampedLeastSquaresSolver::dynamicReconfigureCallback(IKConfig& config, uint32_t level)
-    {
-      m_alpha = config.alpha;
-    }
 
 } // namespace

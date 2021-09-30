@@ -45,10 +45,7 @@
 
 // KDL
 #include <kdl/jacobian.hpp>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_controller_base/DampedLeastSquaresSolverConfig.h>
+#include <memory>
 
 namespace cartesian_controller_base{
 
@@ -83,9 +80,9 @@ class DampedLeastSquaresSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::JointTrajectoryPoint getJointControlCmds(
-        ros::Duration period,
-        const ctrl::Vector6D& net_force);
+    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+        rclcpp::Duration period,
+        const ctrl::Vector6D& net_force) override;
 
     /**
      * \brief Initialize the solver
@@ -97,24 +94,20 @@ class DampedLeastSquaresSolver : public IKSolver
      *
      * \return True, if everything went well
      */
-    bool init(ros::NodeHandle& nh,
+    bool init(std::shared_ptr<rclcpp::Node> nh,
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits);
+              const KDL::JntArray& lower_pos_limits) override;
 
   private:
     std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
     KDL::Jacobian m_jnt_jacobian;
-    double m_alpha;
 
-    // IK solver specific dynamic reconfigure
-    typedef cartesian_controller_base::DampedLeastSquaresSolverConfig
-      IKConfig;
+    // Dynamic parameters
+    std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
+    std::string m_params; ///< namespace for parameter access
+    double m_alpha; ///< damping coefficient
 
-    void dynamicReconfigureCallback(IKConfig& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<IKConfig>::CallbackType m_callback_type;
 };
 
 }
