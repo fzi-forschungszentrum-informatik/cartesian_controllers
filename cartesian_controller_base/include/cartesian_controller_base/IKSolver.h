@@ -45,11 +45,13 @@
 #include <cartesian_controller_base/Utility.h>
 
 // ros_controls
-#include <hardware_interface/joint_command_interface.h>
+#include <hardware_interface/loaned_state_interface.hpp>
+#include <hardware_interface/loaned_command_interface.hpp>
 
 // ros general
-#include <ros/ros.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 // other
 #include <vector>
@@ -88,8 +90,8 @@ class IKSolver
      *
      * @return A point holding positions, velocities and accelerations of each joint
      */
-    virtual trajectory_msgs::JointTrajectoryPoint getJointControlCmds(
-        ros::Duration period,
+    virtual trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+        rclcpp::Duration period,
         const ctrl::Vector6D& net_force) = 0;
 
     /**
@@ -123,7 +125,7 @@ class IKSolver
     const KDL::JntArray& getPositions() const;
 
     //! Set initial joint configuration
-    bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
+    bool setStartState(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
 
     /**
      * @brief Synchronize joint positions with the real robot
@@ -139,14 +141,14 @@ class IKSolver
     /**
      * @brief Initialize the solver
      *
-     * @param nh A node handle for namespace-local parameter management
+     * @param nh A handle to the node's parameter management
      * @param chain The kinematic chain of the robot
      * @param upper_pos_limits Tuple with max positive joint angles
      * @param lower_pos_limits Tuple with max negative joint angles
      *
      * @return True, if everything went well
      */
-    virtual bool init(ros::NodeHandle& nh,
+    virtual bool init(std::shared_ptr<rclcpp::Node> nh,
                       const KDL::Chain& chain,
                       const KDL::JntArray& upper_pos_limits,
                       const KDL::JntArray& lower_pos_limits);

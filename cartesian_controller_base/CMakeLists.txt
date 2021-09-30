@@ -17,7 +17,6 @@ find_package(rclcpp REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(trajectory_msgs REQUIRED)
-find_package(eigen_conversions REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(urdf REQUIRED)
 
@@ -36,7 +35,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
         controller_interface
         kdl_parser
         trajectory_msgs
-        eigen_conversions
         pluginlib
         urdf
         Eigen3

@@ -38,13 +38,13 @@
 //-----------------------------------------------------------------------------
 
 // this package
+#include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include <cartesian_controller_base/IKSolver.h>
 
 // other
 #include <map>
 #include <sstream>
-#include <boost/algorithm/clamp.hpp>
-#include <eigen_conversions/eigen_kdl.h>
+#include <algorithm>
 
 // KDL
 #include <kdl/jntarrayvel.hpp>
@@ -79,33 +79,40 @@ namespace cartesian_controller_base{
 
 
   bool IKSolver::setStartState(
-      const std::vector<hardware_interface::JointHandle>& joint_handles)
+      const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
   {
     // Copy into internal buffers.
-    for (size_t i = 0; i < joint_handles.size(); ++i)
+    for (int i = 0; i < joint_state_handles.size(); ++i)
     {
-      m_current_positions(i)      = joint_handles[i].getPosition();
-      m_current_velocities(i)     = joint_handles[i].getVelocity();
-      m_current_accelerations(i)  = 0.0;
-
-      m_last_positions(i)         = m_current_positions(i);
-      m_last_velocities(i)        = m_current_velocities(i);
+      if (joint_state_handles[i].get_interface_name() == hardware_interface::HW_IF_POSITION)
+      {
+        m_current_positions(i)      = joint_state_handles[i].get_value();
+        m_current_velocities(i)     = 0.0;
+        m_current_accelerations(i)  = 0.0;
+        m_last_positions(i)         = m_current_positions(i);
+        m_last_velocities(i)        = m_current_velocities(i);
+      }
+      else return false;
     }
     return true;
   }
 
 
-  void IKSolver::synchronizeJointPositions(const std::vector<hardware_interface::JointHandle>& joint_handles)
+  void IKSolver::synchronizeJointPositions(
+    const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
   {
-    for (size_t i = 0; i < joint_handles.size(); ++i)
+    for (size_t i = 0; i < joint_state_handles.size(); ++i)
     {
-      m_current_positions(i) = joint_handles[i].getPosition();
-      m_last_positions(i)    = m_current_positions(i);
+      if (joint_state_handles[i].get_interface_name() == hardware_interface::HW_IF_POSITION)
+      {
+        m_current_positions(i) = joint_state_handles[i].get_value();
+        m_last_positions(i)    = m_current_positions(i);
+      }
     }
   }
 
 
-  bool IKSolver::init(ros::NodeHandle& nh,
+  bool IKSolver::init(std::shared_ptr<rclcpp::Node> /*nh*/,
                       const KDL::Chain& chain,
                       const KDL::JntArray& upper_pos_limits,
                       const KDL::JntArray& lower_pos_limits)
@@ -153,9 +160,39 @@ namespace cartesian_controller_base{
         // Joint marked as continuous.
         continue;
       }
-      m_current_positions(i) = boost::algorithm::clamp(
+      m_current_positions(i) = std::clamp(
           m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
     }
   }
+
+void IKSolver::updateKinematics(
+        const std::vector<hardware_interface::LoanedCommandInterface>& joint_cmd_handles,
+        const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
+{
+  if (joint_cmd_handles[0].get_interface_name() == hardware_interface::HW_IF_VELOCITY)
+  {
+    // Reset internal simulation with real robot state
+    setStartState(joint_state_handles);
+  }
+
+  if (joint_cmd_handles[0].get_interface_name() == hardware_interface::HW_IF_POSITION)
+  {
+    // Keep feed forward simulation running
+    m_last_positions = m_current_positions;
+
+    // Pose w. r. t. base
+    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
+
+    // Absolute velocity w. r. t. base
+    KDL::FrameVel vel;
+    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
+    m_end_effector_vel[0] = vel.deriv().vel.x();
+    m_end_effector_vel[1] = vel.deriv().vel.y();
+    m_end_effector_vel[2] = vel.deriv().vel.z();
+    m_end_effector_vel[3] = vel.deriv().rot.x();
+    m_end_effector_vel[4] = vel.deriv().rot.y();
+    m_end_effector_vel[5] = vel.deriv().rot.z();
+  }
+}
 
 } // namespace
