@@ -169,12 +169,7 @@ void IKSolver::updateKinematics(
         const std::vector<hardware_interface::LoanedCommandInterface>& joint_cmd_handles,
         const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
 {
-  if (joint_cmd_handles[0].get_interface_name() == hardware_interface::HW_IF_VELOCITY)
-  {
-    // Reset internal simulation with real robot state
-    setStartState(joint_state_handles);
-  }
-
+  // TODO: How do we check properly what hardware control type we have?
   if (joint_cmd_handles[0].get_interface_name() == hardware_interface::HW_IF_POSITION)
   {
     // Keep feed forward simulation running

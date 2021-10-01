@@ -21,15 +21,6 @@ find_package(pluginlib REQUIRED)
 find_package(urdf REQUIRED)
 
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-#generate_dynamic_reconfigure_options(
-#        cfg/CartesianController.cfg
-#        cfg/DampedLeastSquaresSolver.cfg
-#        cfg/ForwardDynamicsSolver.cfg
-#)
-
-
-
 # Convenience variable for dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
         controller_interface
@@ -49,6 +40,7 @@ ament_export_dependencies(
 # Libraries
 #--------------------------------------------------------------------------------
 add_library(${PROJECT_NAME}
+  src/cartesian_controller_base.cpp
   src/SpatialPDController.cpp
   src/PDController.cpp
 )
