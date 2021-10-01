@@ -41,15 +41,11 @@
 #define CARTESIAN_FORCE_CONTROLLER_H_INCLUDED
 
 // Project
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
 // ROS
-#include <std_srvs/Trigger.h>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_controller_base/ForwardDynamicsSolverConfig.h>
-#include <cartesian_force_controller/CartesianForceControllerConfig.h>
+#include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_force_controller
 {
@@ -75,23 +71,27 @@ namespace cartesian_force_controller
  * real hardware, such that some experiments might be required for each use
  * case.
  *
- * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
+ * The supported interface is `position` only at the moment.
  */
-template <class HardwareInterface>
-class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
+class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase
 {
   public:
     CartesianForceController();
 
-    bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+    controller_interface::return_type init(const std::string & controller_name) override;
 
-    void starting(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    void stopping(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    void update(const ros::Time& time, const ros::Duration& period);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
+    controller_interface::return_type update() override;
+
+    using Base = cartesian_controller_base::CartesianControllerBase;
 
   protected:
     /**
@@ -106,18 +106,13 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
   private:
     ctrl::Vector6D        compensateGravity();
 
-    void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
-    void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
-    bool signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
+    void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
+    void ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
 
-    ros::ServiceServer    m_signal_taring_server;
-    ros::Subscriber       m_target_wrench_subscriber;
-    ros::Subscriber       m_ft_sensor_wrench_subscriber;
+    rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
+    rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_ft_sensor_wrench_subscriber;
     ctrl::Vector6D        m_target_wrench;
     ctrl::Vector6D        m_ft_sensor_wrench;
-    ctrl::Vector6D        m_weight_force;
-    ctrl::Vector6D        m_grav_comp_during_taring;
-    ctrl::Vector3D        m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
     KDL::Frame            m_ft_sensor_transform;
 
@@ -129,17 +124,8 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
      */
     bool m_hand_frame_control;
 
-    // Force control specific dynamic reconfigure
-    typedef cartesian_force_controller::CartesianForceControllerConfig Config;
-
-    void dynamicReconfigureCallback(Config& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<Config> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<Config>::CallbackType m_callback_type;
 };
 
 }
-
-#include <cartesian_force_controller/cartesian_force_controller.hpp>
 
 #endif

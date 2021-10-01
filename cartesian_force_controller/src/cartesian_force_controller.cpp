@@ -37,29 +37,168 @@
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
-
 // Project
+#include "cartesian_controller_base/Utility.h"
+#include "controller_interface/controller_interface.hpp"
 #include <cartesian_force_controller/cartesian_force_controller.h>
 
-namespace position_controllers
+// Other
+
+namespace cartesian_force_controller
 {
-  /**
-   * @brief Cartesian compliance controller that implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a position interface. 
-   */
-  typedef cartesian_force_controller::CartesianForceController<
-    hardware_interface::PositionJointInterface> CartesianForceController;
+
+CartesianForceController::CartesianForceController()
+: Base::CartesianControllerBase(), m_hand_frame_control(true)
+{
 }
 
-namespace velocity_controllers
+controller_interface::return_type CartesianForceController::init(const std::string & controller_name)
 {
-  /**
-   * @brief Cartesian compliance controller that implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a velocity interface. 
-   */
-  typedef cartesian_force_controller::CartesianForceController<
-    hardware_interface::VelocityJointInterface> CartesianForceController;
+  const auto ret = Base::init(controller_name);
+  if (ret != controller_interface::return_type::OK)
+  {
+    return ret;
+  }
+
+  auto_declare<std::string>("ft_sensor_ref_link", "");
+  auto_declare<bool>("hand_frame_control", true);
+
+  return controller_interface::return_type::OK;
 }
 
-PLUGINLIB_EXPORT_CLASS(position_controllers::CartesianForceController, controller_interface::ControllerBase)
-PLUGINLIB_EXPORT_CLASS(velocity_controllers::CartesianForceController, controller_interface::ControllerBase)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_configure(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  // Make sure sensor wrenches are interpreted correctly
+  setFtSensorReferenceFrame(Base::m_end_effector_link);
+
+  m_target_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
+      "target_wrench", 10, std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
+
+  m_ft_sensor_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
+      "m_ft_sensor_wrench", 10, std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
+
+  m_target_wrench.setZero();
+  m_ft_sensor_wrench.setZero();
+
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_activate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  Base::on_activate(previous_state);
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_deactivate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+controller_interface::return_type CartesianForceController::update()
+{
+  // Only position control for now.
+
+  // Control the robot motion in such a way that the resulting net force
+  // vanishes. This internal control needs some simulation time steps.
+  for (int i = 0; i < Base::m_iterations; ++i)
+  {
+    // The internal 'simulation time' is deliberately independent of the outer
+    // control cycle.
+    auto internal_period = rclcpp::Duration::from_seconds(0.02);
+
+    // Compute the net force
+    ctrl::Vector6D error = computeForceError();
+
+    // Turn Cartesian error into joint motion
+    Base::computeJointControlCmds(error,internal_period);
+  }
+
+  // Write final commands to the hardware interface
+  Base::writeJointControlCmds();
+
+  return controller_interface::return_type::OK;
+}
+
+ctrl::Vector6D CartesianForceController::computeForceError()
+{
+  ctrl::Vector6D target_wrench;
+  m_hand_frame_control = get_node()->get_parameter("hand_frame_control").as_bool();
+
+  if (m_hand_frame_control) // Assume end-effector frame by convention
+  {
+    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
+  }
+  else // Default to robot base frame
+  {
+    target_wrench = m_target_wrench;
+  }
+
+  // Superimpose target wrench and sensor wrench in base frame
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref) + target_wrench;
+}
+
+void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_ref)
+{
+  // Compute static transform from the force torque sensor to the new reference
+  // frame of interest.
+  m_new_ft_sensor_ref = new_ref;
+
+  // Joint positions should cancel out, i.e. it doesn't matter as long as they
+  // are the same for both transformations.
+  KDL::JntArray jnts(Base::m_ik_solver->getPositions());
+
+  KDL::Frame sensor_ref;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      sensor_ref,
+      m_ft_sensor_ref_link);
+
+  KDL::Frame new_sensor_ref;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      new_sensor_ref,
+      m_new_ft_sensor_ref);
+
+  m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
+}
+
+void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
+{
+  m_target_wrench[0] = wrench->wrench.force.x;
+  m_target_wrench[1] = wrench->wrench.force.y;
+  m_target_wrench[2] = wrench->wrench.force.z;
+  m_target_wrench[3] = wrench->wrench.torque.x;
+  m_target_wrench[4] = wrench->wrench.torque.y;
+  m_target_wrench[5] = wrench->wrench.torque.z;
+}
+
+void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
+{
+  KDL::Wrench tmp;
+  tmp[0] = wrench->wrench.force.x;
+  tmp[1] = wrench->wrench.force.y;
+  tmp[2] = wrench->wrench.force.z;
+  tmp[3] = wrench->wrench.torque.x;
+  tmp[4] = wrench->wrench.torque.y;
+  tmp[5] = wrench->wrench.torque.z;
+
+  // Compute how the measured wrench appears in the frame of interest.
+  tmp = m_ft_sensor_transform * tmp;
+
+  m_ft_sensor_wrench[0] = tmp[0];
+  m_ft_sensor_wrench[1] = tmp[1];
+  m_ft_sensor_wrench[2] = tmp[2];
+  m_ft_sensor_wrench[3] = tmp[3];
+  m_ft_sensor_wrench[4] = tmp[4];
+  m_ft_sensor_wrench[5] = tmp[5];
+}
+
+}
+
+// Pluginlib
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(cartesian_force_controller::CartesianForceController, controller_interface::ControllerInterface)
