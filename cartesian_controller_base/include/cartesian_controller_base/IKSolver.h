@@ -49,7 +49,6 @@
 #include <hardware_interface/loaned_command_interface.hpp>
 
 // ros general
-#include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
@@ -191,12 +190,10 @@ class IKSolver
     KDL::JntArray m_lower_pos_limits;
 
     // Forward kinematics
-    std::shared_ptr<
-      KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
-    std::shared_ptr<
-      KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
-    KDL::Frame                          m_end_effector_pose;
-    ctrl::Vector6D                      m_end_effector_vel;
+    std::shared_ptr<KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
+    std::shared_ptr<KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
+    KDL::Frame      m_end_effector_pose;
+    ctrl::Vector6D  m_end_effector_vel;
 };
 
 
