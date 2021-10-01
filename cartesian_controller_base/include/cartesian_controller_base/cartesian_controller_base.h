@@ -41,13 +41,15 @@
 #define CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 
 // ROS
-#include <ros/node_handle.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
-#include <geometry_msgs/WrenchStamped.h>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
 
 // ros_controls
-#include <controller_interface/controller.h>
-#include <hardware_interface/joint_command_interface.h>
+#include <controller_interface/controller_interface.hpp>
+#include <hardware_interface/loaned_command_interface.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
 
 // KDL
 #include <kdl/treefksolverpos_recursive.hpp>
@@ -57,12 +59,8 @@
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_controller_base/CartesianControllerConfig.h>
-
 // Pluginlib
-#include <pluginlib/class_loader.h>
+#include <pluginlib/class_loader.hpp>
 
 // Other
 #include <vector>
@@ -80,18 +78,28 @@ namespace cartesian_controller_base
  * call \ref computeJointControlCmds with that error.  The control commands are
  * sent to the hardware with \ref writeJointControlCmds.
  *
- * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
+ * Supported hardware interfaces are `position` and `velocity`.
  */
-template <class HardwareInterface>
-class CartesianControllerBase : public controller_interface::Controller<HardwareInterface>
+class CartesianControllerBase : public controller_interface::ControllerInterface
 {
   public:
     CartesianControllerBase();
-    virtual ~CartesianControllerBase<HardwareInterface>(){};
+    virtual ~CartesianControllerBase(){};
 
-    virtual bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+    virtual controller_interface::InterfaceConfiguration command_interface_configuration() const override;
 
-    virtual void starting(const ros::Time& time);
+    virtual controller_interface::InterfaceConfiguration state_interface_configuration() const override;
+
+    virtual controller_interface::return_type init(const std::string & controller_name) override;
+
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+        const rclcpp_lifecycle::State & previous_state) override;
+
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+        const rclcpp_lifecycle::State & previous_state) override;
+
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
   protected:
     /**
@@ -110,7 +118,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      * @param error The error to minimize
      * @param period The period for this control cycle
      */
-    void computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period);
+    void computeJointControlCmds(const ctrl::Vector6D& error, const rclcpp::Duration& period);
 
     /**
      * @brief Display the given vector in the given robot base link
@@ -155,30 +163,23 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::string m_end_effector_link;
     std::string m_robot_base_link;
 
-    int m_iterations;
-    std::vector<hardware_interface::JointHandle>      m_joint_handles;
-
   private:
+    std::vector<hardware_interface::LoanedStateInterface>     m_joint_state_handles;
+    std::vector<hardware_interface::LoanedCommandInterface>   m_joint_cmd_handles;
     std::vector<std::string>                          m_joint_names;
-    trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
-    SpatialPDController                              m_spatial_controller;
+    trajectory_msgs::msg::JointTrajectoryPoint        m_simulated_joint_motion;
+    SpatialPDController                               m_spatial_controller;
     ctrl::Vector6D                                    m_cartesian_input;
-    double m_error_scale;
 
     // Against multi initialization in multi inheritance scenarios
     bool m_already_initialized;
 
-    // Dynamic reconfigure
-    typedef cartesian_controller_base::CartesianControllerConfig ControllerConfig;
-
-    void dynamicReconfigureCallback(ControllerConfig& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<ControllerConfig> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<ControllerConfig>::CallbackType m_callback_type;
+    // Dynamic parameters
+    double m_error_scale;
+    int m_iterations;
+    std::string m_robot_description;
 };
 
 }
-
-#include <cartesian_controller_base/cartesian_controller_base.hpp>
 
 #endif
