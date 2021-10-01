@@ -38,19 +38,18 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
-  <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>cartesian_controller_base</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
 
-  <run_depend>roscpp</run_depend>
+  <run_depend>rclcpp</run_depend>
   <run_depend>cartesian_controller_base</run_depend>
   <run_depend>controller_interface</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
+    <build_type>ament_cmake</build_type>
+
     <!-- Other tools can request additional information be placed here -->
     <controller_interface plugin="${prefix}/cartesian_force_controller_plugin.xml"/>
   </export>
