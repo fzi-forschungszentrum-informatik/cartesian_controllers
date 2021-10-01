@@ -1,20 +1,11 @@
-<library path="lib/libcartesian_force_controller">
+<library path="cartesian_force_controller">
 
-  <class name="position_controllers/CartesianForceController"
-         type="position_controllers::CartesianForceController"
-         base_class_type="controller_interface::ControllerBase">
+  <class name="cartesian_force_controller/CartesianForceController"
+         type="cartesian_force_controller::CartesianForceController"
+         base_class_type="controller_interface::ControllerInterface">
     <description>
       The CartesianForceController implements free-floating force control on a set of joints.
       This variant sends commands to a position interface.
-    </description>
-  </class>
-
-  <class name="velocity_controllers/CartesianForceController"
-         type="velocity_controllers::CartesianForceController"
-         base_class_type="controller_interface::ControllerBase">
-    <description>
-      The CartesianForceController implements free-floating froce control on a set of joints.
-      This variant sends commands to a velocity interface.
     </description>
   </class>
 

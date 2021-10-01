@@ -39,7 +39,7 @@ ament_export_dependencies(
 #--------------------------------------------------------------------------------
 # Libraries
 #--------------------------------------------------------------------------------
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/cartesian_controller_base.cpp
   src/SpatialPDController.cpp
   src/PDController.cpp
@@ -59,7 +59,7 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 
 
-add_library(ik_solvers
+add_library(ik_solvers SHARED
   src/IKSolver.cpp
   src/ForwardDynamicsSolver.cpp
   src/JacobianTransposeSolver.cpp

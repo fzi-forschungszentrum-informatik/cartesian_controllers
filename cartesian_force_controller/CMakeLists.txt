@@ -31,7 +31,7 @@ ament_export_dependencies(
 #--------------------------------------------------------------------------------
 # Libraries
 #--------------------------------------------------------------------------------
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/cartesian_force_controller.cpp
 )
 
