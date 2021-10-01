@@ -43,9 +43,6 @@
 // Pluginlib
 #include <pluginlib/class_list_macros.hpp>
 
-// other
-#include <boost/algorithm/clamp.hpp>
-
 /**
  * \class cartesian_controller_base::JacobianTransposeSolver 
  *

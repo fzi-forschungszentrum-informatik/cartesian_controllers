@@ -73,6 +73,9 @@ target_include_directories(ik_solvers
     $<INSTALL_INTERFACE:include>
 )
 
+# Prevent pluginlib from using boost
+target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+
 ament_target_dependencies(ik_solvers
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${THIS_PACKAGE_INCLUDE_DEPENDS}
