@@ -160,8 +160,10 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     std::shared_ptr<pluginlib::ClassLoader<IKSolver> > m_solver_loader;
     std::shared_ptr<IKSolver> m_ik_solver;
 
+    // Dynamic parameters
     std::string m_end_effector_link;
     std::string m_robot_base_link;
+    int m_iterations;
 
   private:
     std::vector<hardware_interface::LoanedStateInterface>     m_joint_state_handles;
@@ -176,7 +178,6 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
 
     // Dynamic parameters
     double m_error_scale;
-    int m_iterations;
     std::string m_robot_description;
 };
 
