@@ -38,15 +38,14 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
-  <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>controller_interface</build_depend>
   <build_depend>kdl_parser</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
 
-  <run_depend>roscpp</run_depend>
+  <run_depend>rclcpp</run_depend>
   <run_depend>controller_interface</run_depend>
   <run_depend>kdl_parser</run_depend>
   <run_depend>trajectory_msgs</run_depend>

@@ -51,7 +51,6 @@ ament_export_dependencies(
 add_library(${PROJECT_NAME}
   src/SpatialPDController.cpp
   src/PDController.cpp
-  src/IKSolver.cpp
 )
 
 # Manual includes for local directories and non-ament packages
