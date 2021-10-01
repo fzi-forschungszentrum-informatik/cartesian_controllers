@@ -1,4 +1,4 @@
 include:
   - project: 'continuous_integration/ci_scripts'
     ref: master
-    file: '/gitlab-ci-yml/catkin_pipeline.yml'
+    file: '/gitlab-ci-yml/ros2_pipeline.yml'
