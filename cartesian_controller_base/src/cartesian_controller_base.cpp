@@ -103,8 +103,8 @@ controller_interface::return_type CartesianControllerBase::init(const std::strin
   auto_declare<std::string>("robot_base_link", "");
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-  auto_declare<double>("/solver/error_scale", 1.0);
-  auto_declare<int>("/solver/iterations", 1);
+  auto_declare<double>("solver/error_scale", 1.0);
+  auto_declare<int>("solver/iterations", 1);
 
   return controller_interface::return_type::OK;
 }
@@ -206,8 +206,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   KDL::Tree tmp("not_relevant");
   tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
-  m_iterations = get_node()->get_parameter("/solver/iterations").as_int();
-  m_error_scale = get_node()->get_parameter("/solver/error_scale").as_double();
+  m_iterations = get_node()->get_parameter("solver/iterations").as_int();
+  m_error_scale = get_node()->get_parameter("solver/error_scale").as_double();
 
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(get_node());
