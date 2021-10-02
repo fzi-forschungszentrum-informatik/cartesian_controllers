@@ -89,10 +89,11 @@ ament_target_dependencies(ik_solvers
 
 pluginlib_export_plugin_description_file(cartesian_controller_base ik_solver_plugin.xml)
 
-# Note: The workflow as described here https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html#building-a-library
-# does not work for me.
-# I'm not sure what's the problem right now, but I need to out-comment the
-# lines below to achieve a correct symlink-install.
+# Note: The workflow as described here
+# https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html#building-a-library
+# clashes with colcon's --symlink-install option.
+# See here: /opt/ros/foxy/share/ament_cmake_core/cmake/symlink_install/ament_cmake_symlink_install_targets.cmake
+# which lists `EXPORT` and `INCLUDES` (among other install keywords) to trigger a normal resource install.
 
 #ament_export_targets(my_targets_from_this_package HAS_LIBRARY_TARGET)
 
