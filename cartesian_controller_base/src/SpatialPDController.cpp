@@ -69,14 +69,14 @@ bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)
   }
 
   // Load default controller gains
-  std::string gains_config = "/pd_gains";
+  std::string gains_config = "pd_gains";
 
-  m_pd_controllers[0].init(gains_config + "/trans_x", handle);
-  m_pd_controllers[1].init(gains_config + "/trans_y", handle);
-  m_pd_controllers[2].init(gains_config + "/trans_z", handle);
-  m_pd_controllers[3].init(gains_config + "/rot_x", handle);
-  m_pd_controllers[4].init(gains_config + "/rot_y", handle);
-  m_pd_controllers[5].init(gains_config + "/rot_z", handle);
+  m_pd_controllers[0].init(gains_config + ".trans_x", handle);
+  m_pd_controllers[1].init(gains_config + ".trans_y", handle);
+  m_pd_controllers[2].init(gains_config + ".trans_z", handle);
+  m_pd_controllers[3].init(gains_config + ".rot_x", handle);
+  m_pd_controllers[4].init(gains_config + ".rot_y", handle);
+  m_pd_controllers[5].init(gains_config + ".rot_z", handle);
 
   return true;
 }

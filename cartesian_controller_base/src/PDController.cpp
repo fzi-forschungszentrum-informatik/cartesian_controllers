@@ -57,8 +57,21 @@ void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node>
 {
   m_params = params;
   m_handle = handle;
-  m_handle->declare_parameter<double>(m_params + "/p", 0.0);
-  m_handle->declare_parameter<double>(m_params + "/d", 0.0);
+
+  auto auto_declare = [this](const std::string& s)
+  {
+    if (!m_handle->has_parameter(s))
+    {
+      return m_handle->declare_parameter<double>(s, 0.0);
+    }
+    else
+    {
+      return m_handle->get_parameter(s).as_double();
+    }
+  };
+
+  auto_declare(m_params + ".p");
+  auto_declare(m_params + ".d");
 }
 
 
@@ -70,8 +83,8 @@ double PDController::operator()(const double& error, const rclcpp::Duration& per
   }
 
   // Get latest gains
-  m_handle->get_parameter(m_params + "/p", m_p);
-  m_handle->get_parameter(m_params + "/d", m_d);
+  m_handle->get_parameter(m_params + ".p", m_p);
+  m_handle->get_parameter(m_params + ".d", m_d);
   double result = m_p * error + m_d * (error - m_last_p_error) / period.seconds();
 
   m_last_p_error = error;
