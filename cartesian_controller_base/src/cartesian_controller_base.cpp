@@ -131,16 +131,19 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   KDL::Tree   robot_tree;
   KDL::Chain  robot_chain;
 
+  m_robot_description = get_node()->get_parameter("robot_description").as_string();
   if (m_robot_description.empty())
   {
     RCLCPP_ERROR(get_node()->get_logger(), "robot_description is empty");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
+  m_robot_base_link = get_node()->get_parameter("robot_base_link").as_string();
   if (m_robot_base_link.empty())
   {
     RCLCPP_ERROR(get_node()->get_logger(), "robot_base_link is empty");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
+  m_end_effector_link = get_node()->get_parameter("end_effector_link").as_string();
   if (m_end_effector_link.empty())
   {
     RCLCPP_ERROR(get_node()->get_logger(), "end_effector_link is empty");
@@ -168,6 +171,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   }
 
   // Get names of actuated joints
+  m_joint_names = get_node()->get_parameter("joints").as_string_array();
   if (m_joint_names.empty())
   {
     RCLCPP_ERROR(get_node()->get_logger(), "joints array is empty");
@@ -202,6 +206,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   KDL::Tree tmp("not_relevant");
   tmp.addChain(robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
+  m_iterations = get_node()->get_parameter("/solver/iterations").as_int();
+  m_error_scale = get_node()->get_parameter("/solver/error_scale").as_double();
 
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(get_node());
