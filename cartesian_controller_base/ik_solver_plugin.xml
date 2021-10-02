@@ -1,4 +1,4 @@
-<library path="lib/libik_solvers">
+<library path="ik_solvers">
 
   <class name="forward_dynamics"
          type="cartesian_controller_base::ForwardDynamicsSolver"

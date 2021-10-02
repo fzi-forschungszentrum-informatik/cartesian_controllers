@@ -43,6 +43,7 @@ add_library(${PROJECT_NAME} SHARED
   src/cartesian_controller_base.cpp
   src/SpatialPDController.cpp
   src/PDController.cpp
+  src/IKSolver.cpp
 )
 
 # Manual includes for local directories and non-ament packages
@@ -86,6 +87,8 @@ ament_target_dependencies(ik_solvers
 # Install and export
 #--------------------------------------------------------------------------------
 ament_export_targets(my_targets_from_this_package HAS_LIBRARY_TARGET)
+
+pluginlib_export_plugin_description_file(cartesian_controller_base ik_solver_plugin.xml)
 
 install(
   DIRECTORY include/
