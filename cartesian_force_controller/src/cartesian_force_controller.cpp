@@ -69,6 +69,12 @@ controller_interface::return_type CartesianForceController::init(const std::stri
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_configure(
     const rclcpp_lifecycle::State & previous_state)
 {
+  const auto ret = Base::on_configure(previous_state);
+  if (ret != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS)
+  {
+    return ret;
+  }
+
   // Make sure sensor wrenches are interpreted correctly
   setFtSensorReferenceFrame(Base::m_end_effector_link);
 
