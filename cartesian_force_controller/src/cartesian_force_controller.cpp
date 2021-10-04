@@ -143,7 +143,7 @@ ctrl::Vector6D CartesianForceController::computeForceError()
   }
 
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref) + target_wrench;
+  return m_ft_sensor_wrench + target_wrench;
 }
 
 void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_ref)
@@ -184,23 +184,14 @@ void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::Wr
 
 void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
-  KDL::Wrench tmp;
-  tmp[0] = wrench->wrench.force.x;
-  tmp[1] = wrench->wrench.force.y;
-  tmp[2] = wrench->wrench.force.z;
-  tmp[3] = wrench->wrench.torque.x;
-  tmp[4] = wrench->wrench.torque.y;
-  tmp[5] = wrench->wrench.torque.z;
-
-  // Compute how the measured wrench appears in the frame of interest.
-  tmp = m_ft_sensor_transform * tmp;
-
-  m_ft_sensor_wrench[0] = tmp[0];
-  m_ft_sensor_wrench[1] = tmp[1];
-  m_ft_sensor_wrench[2] = tmp[2];
-  m_ft_sensor_wrench[3] = tmp[3];
-  m_ft_sensor_wrench[4] = tmp[4];
-  m_ft_sensor_wrench[5] = tmp[5];
+  // We assume base frame for the measurements
+  // This is currently URe-ROS2 driver-specific.
+  m_ft_sensor_wrench[0] = wrench->wrench.force.x;
+  m_ft_sensor_wrench[1] = wrench->wrench.force.y;
+  m_ft_sensor_wrench[2] = wrench->wrench.force.z;
+  m_ft_sensor_wrench[3] = wrench->wrench.torque.x;
+  m_ft_sensor_wrench[4] = wrench->wrench.torque.y;
+  m_ft_sensor_wrench[5] = wrench->wrench.torque.z;
 }
 
 }
