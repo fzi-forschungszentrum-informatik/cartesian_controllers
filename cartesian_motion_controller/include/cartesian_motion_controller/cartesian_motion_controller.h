@@ -110,8 +110,6 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
 
     void targetFrameCallback(const geometry_msgs::PoseStamped& pose);
 
-  private:
-
     ros::Subscriber m_target_frame_subscr;
     std::string     m_target_frame_topic;
 };
