@@ -88,6 +88,7 @@ namespace cartesian_controller_base{
       m_current_velocities(i)     = joint_handles[i].getVelocity();
       m_current_accelerations(i)  = 0.0;
       m_last_positions(i)         = m_current_positions(i);
+      m_last_velocities(i)        = m_current_velocities(i);
     }
     return true;
   }
@@ -105,6 +106,7 @@ namespace cartesian_controller_base{
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
+    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
 
