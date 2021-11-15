@@ -114,6 +114,7 @@ namespace cartesian_controller_base{
       // Accumulate velocity
       m_current_positions.data = m_last_positions.data + m_last_velocities.data * period.toSec();
       m_current_velocities.data = m_last_velocities.data + m_current_accelerations.data * period.toSec();
+      m_current_velocities.data *= 0.9;  // 10 % global damping against unwanted null space motion
     }
 
     // Make sure positions stay in allowed margins
