@@ -69,14 +69,14 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   }
 
   // Register external state_handles
-  for (int i = 0; i < m_number_joints; ++i)
+  for (size_t i = 0; i < m_number_joints; ++i)
   {
     m_state_interface.registerHandle(state_handles[i]);
   }
   registerInterface(&m_state_interface);
 
   // Initialize and register handles to the actuators
-  for (int i = 0; i < m_number_joints; ++i)
+  for (size_t i = 0; i < m_number_joints; ++i)
   {
     m_joint_handles.push_back(
         hardware_interface::JointHandle(
@@ -89,7 +89,7 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
 
   // Read joint limits from param server
   joint_limits_interface::JointLimits limits;
-  for (int i = 0; i < m_number_joints; ++i)
+  for (size_t i = 0; i < m_number_joints; ++i)
   {
     joint_limits_interface::getJointLimits(
         m_joint_names[i],
@@ -100,7 +100,7 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   joint_limits_interface::SoftJointLimits soft_limits;
 
   // Initialize and register handles to the joint limits
-  for (int i = 0; i < m_number_joints; ++i)
+  for (size_t i = 0; i < m_number_joints; ++i)
   {
     m_limits_handles.push_back(
         joint_limits_interface::PositionJointSoftLimitsHandle(
@@ -110,7 +110,7 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
           ));
   }
 
-  for (int i = 0; i < m_number_joints; ++i)
+  for (size_t i = 0; i < m_number_joints; ++i)
   {
     m_limits_interface.registerHandle(m_limits_handles[i]);
   }
@@ -124,7 +124,7 @@ JointControllerAdapter::~JointControllerAdapter()
 
 void JointControllerAdapter::write(KDL::JntArray& positions)
 {
-  if (positions.data.size() != m_cmd.size())
+  if (static_cast<size_t>(positions.data.size()) != m_cmd.size())
   {
     throw std::runtime_error("Joint number mismatch!");
   }

@@ -82,7 +82,7 @@ namespace cartesian_controller_base{
       const std::vector<hardware_interface::JointHandle>& joint_handles)
   {
     // Copy into internal buffers.
-    for (int i = 0; i < joint_handles.size(); ++i)
+    for (size_t i = 0; i < joint_handles.size(); ++i)
     {
       m_current_positions(i)      = joint_handles[i].getPosition();
       m_current_velocities(i)     = joint_handles[i].getVelocity();
