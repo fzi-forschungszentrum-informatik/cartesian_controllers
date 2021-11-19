@@ -172,7 +172,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     double m_error_scale;
 
     // Against multi initialization in multi inheritance scenarios
-    bool m_already_initialized;;
+    bool m_already_initialized;
 
     // Dynamic reconfigure
     typedef cartesian_controller_base::CartesianControllerConfig ControllerConfig;

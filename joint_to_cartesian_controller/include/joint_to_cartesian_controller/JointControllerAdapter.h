@@ -75,7 +75,7 @@ class JointControllerAdapter : public hardware_interface::RobotHW
 
   private:
     //! Number of actuated joints
-    int m_number_joints;
+    size_t m_number_joints;
 
     //! Actuated joints in order from base to tip
     std::vector<std::string> m_joint_names;

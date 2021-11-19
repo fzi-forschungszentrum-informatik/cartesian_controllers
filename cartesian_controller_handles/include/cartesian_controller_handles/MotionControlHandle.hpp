@@ -262,7 +262,7 @@ void MotionControlHandle<HardwareInterface>::
 addAxisControl(
     visualization_msgs::InteractiveMarker& marker, double x, double y, double z)
 {
-  if (x == y == z == 0)
+  if (x == 0 && y == 0 && z == 0)
   {
     return;
   }
