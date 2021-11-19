@@ -1,3 +1,5 @@
+![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_action.yml/badge.svg)
+
 # Cartesian Controllers
 This package provides libraries with Cartesian ROS controllers.
 
