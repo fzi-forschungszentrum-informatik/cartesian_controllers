@@ -103,10 +103,10 @@ class JointToCartesianController
     std::vector<
       hardware_interface::JointStateHandle>   m_joint_handles;
 
-    boost::shared_ptr<
+    std::shared_ptr<
       KDL::ChainFkSolverPos_recursive>        m_fk_solver;
 
-    boost::shared_ptr<
+    std::shared_ptr<
       controller_manager::ControllerManager>  m_controller_manager;
 
 };

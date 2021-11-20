@@ -115,7 +115,7 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
     Eigen::Matrix<double, Eigen::Dynamic, 1>
     clampMaxAbs(const Eigen::Matrix<double, Eigen::Dynamic, 1>& w, double d);
 
-    boost::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
     KDL::Jacobian m_jnt_jacobian;
 
 };

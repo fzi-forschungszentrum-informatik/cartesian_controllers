@@ -58,7 +58,7 @@
 
 // other
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // KDL
 #include <kdl/frames.hpp>
@@ -129,8 +129,8 @@ class ForwardDynamicsSolver : public IKSolver
     bool buildGenericModel();
 
     // Forward dynamics
-    boost::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
-    boost::shared_ptr<KDL::ChainDynParam>       m_jnt_space_inertia_solver;
+    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+    std::shared_ptr<KDL::ChainDynParam>       m_jnt_space_inertia_solver;
     KDL::Jacobian                               m_jnt_jacobian;
     KDL::JntSpaceInertiaMatrix                  m_jnt_space_inertia;
 
@@ -141,7 +141,7 @@ class ForwardDynamicsSolver : public IKSolver
 
     void dynamicReconfigureCallback(IKConfig& config, uint32_t level);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
+    std::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
     dynamic_reconfigure::Server<IKConfig>::CallbackType m_callback_type;
 };
 

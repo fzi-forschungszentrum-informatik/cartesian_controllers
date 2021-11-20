@@ -103,7 +103,7 @@ class DampedLeastSquaresSolver : public IKSolver
               const KDL::JntArray& lower_pos_limits);
 
   private:
-    boost::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
     KDL::Jacobian m_jnt_jacobian;
     double m_alpha;
 
@@ -113,7 +113,7 @@ class DampedLeastSquaresSolver : public IKSolver
 
     void dynamicReconfigureCallback(IKConfig& config, uint32_t level);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
+    std::shared_ptr<dynamic_reconfigure::Server<IKConfig> > m_dyn_conf_server;
     dynamic_reconfigure::Server<IKConfig>::CallbackType m_callback_type;
 };
 

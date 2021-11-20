@@ -134,7 +134,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
 
     void dynamicReconfigureCallback(Config& config, uint32_t level);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > m_dyn_conf_server;
+    std::shared_ptr<dynamic_reconfigure::Server<Config> > m_dyn_conf_server;
     dynamic_reconfigure::Server<Config>::CallbackType m_callback_type;
 };
 

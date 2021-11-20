@@ -44,7 +44,7 @@
 #include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 
 // Other
-#include <boost/algorithm/clamp.hpp>
+#include <algorithm>
 #include <map>
 
 namespace cartesian_compliance_controller
@@ -81,8 +81,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
   // the according names exist.
-  m_callback_type = boost::bind(
-      &CartesianComplianceController<HardwareInterface>::dynamicReconfigureCallback, this, _1, _2);
+  m_callback_type = std::bind(
+      &CartesianComplianceController<HardwareInterface>::dynamicReconfigureCallback, this, std::placeholders::_1, std::placeholders::_2);
 
   m_dyn_conf_server.reset(
       new dynamic_reconfigure::Server<ComplianceConfig>(
