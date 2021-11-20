@@ -149,13 +149,13 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
-    boost::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
+    std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
 
     /**
      * @brief Allow users to choose the IK solver type on startup
      */
-    boost::shared_ptr<pluginlib::ClassLoader<IKSolver> > m_solver_loader;
-    boost::shared_ptr<IKSolver> m_ik_solver;
+    std::shared_ptr<pluginlib::ClassLoader<IKSolver> > m_solver_loader;
+    std::shared_ptr<IKSolver> m_ik_solver;
 
     std::string m_end_effector_link;
     std::string m_robot_base_link;
@@ -179,7 +179,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     void dynamicReconfigureCallback(ControllerConfig& config, uint32_t level);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<ControllerConfig> > m_dyn_conf_server;
+    std::shared_ptr<dynamic_reconfigure::Server<ControllerConfig> > m_dyn_conf_server;
     dynamic_reconfigure::Server<ControllerConfig>::CallbackType m_callback_type;
 };
 

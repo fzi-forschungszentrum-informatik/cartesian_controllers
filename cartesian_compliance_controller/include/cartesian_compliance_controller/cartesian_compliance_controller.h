@@ -110,7 +110,7 @@ class CartesianComplianceController
 
     void dynamicReconfigureCallback(ComplianceConfig& config, uint32_t level);
 
-    boost::shared_ptr<dynamic_reconfigure::Server<ComplianceConfig> > m_dyn_conf_server;
+    std::shared_ptr<dynamic_reconfigure::Server<ComplianceConfig> > m_dyn_conf_server;
     dynamic_reconfigure::Server<ComplianceConfig>::CallbackType m_callback_type;
 };
 

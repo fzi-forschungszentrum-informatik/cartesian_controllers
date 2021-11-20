@@ -50,7 +50,7 @@
 #include <hardware_interface/joint_state_interface.h>
 
 // Other
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // KDL
 #include <kdl/chain.hpp>
@@ -156,14 +156,14 @@ class MotionControlHandle : public controller_interface::Controller<HardwareInte
     std::string   m_end_effector_link;
     std::string   m_target_frame_topic;
     KDL::Chain    m_robot_chain;
-    boost::shared_ptr<
+    std::shared_ptr<
       KDL::ChainFkSolverPos_recursive>  m_fk_solver;
 
     geometry_msgs::PoseStamped  m_current_pose;
     ros::Publisher  m_pose_publisher;
 
     // Interactive marker
-    boost::shared_ptr<
+    std::shared_ptr<
       interactive_markers::InteractiveMarkerServer> m_server;
 
     visualization_msgs::InteractiveMarker           m_marker; //!< Controller handle for RViz

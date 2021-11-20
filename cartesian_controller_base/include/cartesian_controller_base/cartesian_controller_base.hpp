@@ -80,7 +80,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     "cartesian_controller_base", "cartesian_controller_base::IKSolver"));
   try
   {
-    m_ik_solver = m_solver_loader->createInstance(ik_solver);
+    m_ik_solver = m_solver_loader->createUniqueInstance(ik_solver);
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -191,8 +191,8 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // the according names exist.
   m_error_scale = 1.0;
   m_iterations = 1;
-  m_callback_type = boost::bind(
-      &CartesianControllerBase<HardwareInterface>::dynamicReconfigureCallback, this, _1, _2);
+  m_callback_type = std::bind(
+      &CartesianControllerBase<HardwareInterface>::dynamicReconfigureCallback, this, std::placeholders::_1, std::placeholders::_2);
 
   m_dyn_conf_server.reset(
       new dynamic_reconfigure::Server<ControllerConfig>(

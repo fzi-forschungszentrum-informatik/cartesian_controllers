@@ -44,7 +44,7 @@
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
 
 // Other
-#include <boost/algorithm/clamp.hpp>
+#include <algorithm>
 
 namespace cartesian_motion_controller
 {
@@ -168,8 +168,8 @@ computeMotionError()
   // The remaining error will be handled in the next control cycle.
   const double max_angle = 1.0;
   const double max_distance = 1.0;
-  angle    = boost::algorithm::clamp(angle,-max_angle,max_angle);
-  distance = boost::algorithm::clamp(distance,-max_distance,max_distance);
+  angle    = std::clamp(angle,-max_angle,max_angle);
+  distance = std::clamp(distance,-max_distance,max_distance);
 
   // Scale errors to allowed magnitudes
   rot_axis = rot_axis * angle;

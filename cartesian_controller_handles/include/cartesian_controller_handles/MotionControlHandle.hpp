@@ -184,13 +184,13 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Add callback for motion in RViz
   m_server->setCallback(
       m_marker.name,
-      boost::bind(&MotionControlHandle::updateMotionControlCallback,this,_1),
+      std::bind(&MotionControlHandle::updateMotionControlCallback,this,std::placeholders::_1),
       visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE);
 
   // Add callback for menu interaction in RViz
   m_server->setCallback(
       m_marker.name,
-      boost::bind(&MotionControlHandle::updateMarkerMenuCallback,this,_1),
+      std::bind(&MotionControlHandle::updateMarkerMenuCallback,this,std::placeholders::_1),
       visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT);
 
   // Activate configuration
