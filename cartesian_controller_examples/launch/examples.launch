@@ -1,18 +1,29 @@
 <launch>
         <!-- Configuration -->
+        <arg name="rviz" default="true"/>
         <arg name="debug" default="false"/>
         <arg if="$(arg debug)" name="launch-prefix" value="screen -d -m gdb -command=$(env HOME)/.ros/my_debug_log --ex run --args"/>
         <arg unless="$(arg debug)" name="launch-prefix" value=""/>
 
         <!-- Load robot_description to parameter server -->
         <param name="/robot_description"
-        command="$(find xacro)/xacro --inorder '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
+        command="$(find xacro)/xacro '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
 
         <!-- Load hardware configuration -->
         <rosparam file="$(find cartesian_controller_examples)/config/example_hw_config.yaml" command="load"></rosparam>
 
         <!-- Load hardware interface -->
-        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main" output="screen" launch-prefix="$(arg launch-prefix)"/>
+        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main" output="screen" launch-prefix="$(arg launch-prefix)">
+
+                <!-- Control motion and compliance controller with one handle -->
+                <remap from="my_motion_control_handle/target_frame" to="target_frame" />
+                <remap from="my_cartesian_motion_controller/target_frame" to="target_frame" />
+                <remap from="my_cartesian_compliance_controller/target_frame" to="target_frame" />
+
+                <!-- Control wrenches via one topic -->
+                <remap from="my_cartesian_force_controller/target_wrench" to="target_wrench" />
+                <remap from="my_cartesian_compliance_controller/target_wrench" to="target_wrench" />
+        </node>
 
         <!-- Robot state publisher -->
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
@@ -45,7 +56,8 @@
         </group>
 
         <!-- Visualization -->
-        <arg name="my_rviz" value="-d $(find cartesian_controller_examples)/etc/examples.rviz" />
-        <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="$(arg my_rviz)" output="screen" >
-        </node>
+        <group if="$(arg rviz)">
+                <arg name="my_rviz" value="-d $(find cartesian_controller_examples)/etc/examples.rviz" />
+                <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="$(arg my_rviz)" output="screen" />
+        </group>
 </launch>

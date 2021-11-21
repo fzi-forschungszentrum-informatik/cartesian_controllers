@@ -184,6 +184,16 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
+# We build our integration tests on the example.launch,
+# so make sure each component is installed.
+install(DIRECTORY
+  config
+  etc
+  launch
+  urdf
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
 #############
 ## Testing ##
 #############
