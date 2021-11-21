@@ -35,7 +35,12 @@
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
+  <run_depend>xacro</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>joint_trajectory_controller</run_depend>
+  <run_depend>ros_control_boilerplate</run_depend>
+  <run_depend>controller_manager</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
 
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
