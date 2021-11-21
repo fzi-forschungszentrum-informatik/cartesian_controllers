@@ -36,6 +36,7 @@ class IntegrationTest(unittest.TestCase):
             'my_cartesian_compliance_controller': False,
             'my_motion_control_handle': False,
         }
+        time.sleep(3)  # Wait until controller spawner is done
         listed_controllers = self.list_controllers()
         for name in our_controllers.keys():
             for entry in listed_controllers.controller:
