@@ -7,7 +7,7 @@
 
         <!-- Load robot_description to parameter server -->
         <param name="/robot_description"
-        command="$(find xacro)/xacro --inorder '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
+        command="$(find xacro)/xacro '$(find cartesian_controller_examples)/urdf/robot.urdf.xacro'" />
 
         <!-- Load hardware configuration -->
         <rosparam file="$(find cartesian_controller_examples)/config/example_hw_config.yaml" command="load"></rosparam>
