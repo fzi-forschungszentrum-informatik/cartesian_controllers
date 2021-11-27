@@ -3,7 +3,7 @@
 
 # Cartesian Controllers
 This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS-control` framework.
-The controllers are meant for `joint_position` and `joint_velocity` interfaces on the manipulators.
+The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
 As a unique selling point, they use fast forward dynamics simulations of
 virtually conditioned twins of the real setup as a solver for the inverse kinematics problem.
 They are designed to trade smooth and stable behavior for accuracy where
@@ -41,10 +41,25 @@ and try things. Here are some quick tutorials with further details:
 - [Cartesian compliance controller](cartesian_compliance_controller/README.md)
 - [Cartesian controller handles](cartesian_controller_handles/README.md)
 
-## Further reading
-If you are interested in more details, check out [the paper][paper1] on the initial idea of the compliance controller,
-and [the paper][paper2] on the recent implementation of the IK solver for motion control.
+## Citation and further reading
+If you use the *cartesian_controllers* in your research projects, please
+consider citing our initial idea of the forward dynamics-based control
+approach ([Paper](https://ieeexplore.ieee.org/document/8206325)):
+```bibtex
+@InProceedings{FDCC,
+  Title                    = {Forward Dynamics Compliance Control (FDCC): A new approach to cartesian compliance for robotic manipulators},
+  Author                   = {S. Scherzinger and A. Roennau and R. Dillmann},
+  Booktitle                = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  Year                     = {2017},
+  Pages                    = {4568-4575},
+  Doi                      = {10.1109/IROS.2017.8206325}
+}
 
-[paper1]: https://ieeexplore.ieee.org/document/8206325 "Forward Dynamics Compliance Control (FDCC)"
-[paper2]: https://arxiv.org/pdf/1908.06252.pdf "Inverse Kinematics with Forward Dynamics for Sampled Motion Tracking"
-[roscon19]: https://vimeo.com/378682968
+```
+
+If you are interested in more details, have a look at
+- *Inverse Kinematics with Forward Dynamics Solvers for Sampled Motion Tracking* ([Paper](https://arxiv.org/pdf/1908.06252.pdf))
+- *Virtual Forward Dynamics Models for Cartesian Robot Control* ([Paper](https://arxiv.org/pdf/2009.11888.pdf))
+- *Contact Skill Imitation Learning for Robot-Independent Assembly Programming* ([Paper](https://arxiv.org/pdf/1908.06272.pdf))
+- *Human-Inspired Compliant Controllers for Robotic Assembly* ([PhD Thesis](https://publikationen.bibliothek.kit.edu/1000139834), especially Chapter 4)
+
