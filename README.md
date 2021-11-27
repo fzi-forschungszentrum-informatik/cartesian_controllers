@@ -16,8 +16,22 @@ It makes the following controller types available for the ROS-control framework:
     - velocity_controllers/CartesianComplianceController
     - velocity_controllers/CartesianForceController
 
+## Installation
+Switch into the `src` folder of your current ROS workspace and
+```bash
+git clone git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
+rosdep install --from-paths ./ --ignore-src -y
+catkin_make -DCMAKE_BUILD_TYPE=Release
+```
+Source your workspace again and you are ready to go.
+
 ## Getting Started
-**Please see the README.md for each controller.**
+Launch the `examples.launch` file to start a simulated setup and get to know each controller
+```bash
+roslaunch cartesian_controller_examples examples.launch
+```
+
+**Please see the README.md for further details on each controller.**
 
 ## Features
 All controllers rely on fast forward dynamics computations to circumvent the Inverse Kinematics problem.
