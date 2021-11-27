@@ -1,6 +1,7 @@
 ## Cartesian Compliance Controller ##
 
-This package provides a ros-controller which implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a set of joints.
+This package provides a ros-controller which implements [Forward Dynamics Compliance Control (FDCC)](https://ieeexplore.ieee.org/document/8206325) on a set of joints.
+It's essentially a hybrid of the `CartesianMotionController` and the `CartesianForceController`, and offers both interfaces for control.
 
 ## Getting Started
 1) In a sourced terminal, run
@@ -12,9 +13,17 @@ Select */controller_manager* as namespace and activate *my_cartesian_compliance_
 
 3) Publish a geometry_msgs/WrenchStamped to */my_cartesian_compliance_controller/target_wrench* with force x = 10 and watch the robot move.
 
-3) In rqt open the *Dynamic Reconfigure* plugin under *Configuration*. Play a
+4) In rqt open the *Dynamic Reconfigure* plugin under *Configuration*. Play a
 little with the parameters of *my_cartesian_compliance_controller* (e.g. stiffness/trans_x) and observe the
 effect of the target_wrench in RViz.
+
+5) In rqt in the *Controller Manager*, activate *my_motion_control_handle*.
+
+6) Switch to the RViz window and tick the box *Interactive Markers*. Use the
+interactive marker to guide the end effector of the robot. Adjust the solver's
+parameters in *Dynamic Reconfigure*, such as `error_scale` and get a feeling
+how it responds.
+
 
 ## Example Configuration
 Below is an example entry for a controller specific configuration. Also see cartesian_controller_examples/config/example_controllers.yaml for further tips.
@@ -51,5 +60,5 @@ my_cartesian_compliance_controller:
         rot_z: {p: 0.01}
 ```
 
-A minimal example can be found in *cartesian_controller_test* of this meta package.
+A minimal example can be found in *cartesian_controller_examples* of this meta package.
 Also check the top-level **README.md** for further information.

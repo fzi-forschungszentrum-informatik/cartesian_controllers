@@ -2,20 +2,25 @@
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 # Cartesian Controllers
-This package provides libraries with Cartesian ROS controllers.
+This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS-control` framework.
+The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
+As a unique selling point, they use fast forward dynamics simulations of
+virtually conditioned twins of the real setup as a solver for the inverse kinematics problem.
+They are designed to trade smooth and stable behavior for accuracy where
+appropriate, and behave physically plausible for targets outside the robots reach.
+The package is for users who require interfaces to direct task space control
+without the need for collision checking.
+See [this talk at ROSCon'19](https://vimeo.com/378682968) and [the
+slides](https://roscon.ros.org/2019/talks/roscon2019_cartesiancontrollers.pdf)
+to get an overview.
 
-Check this [short video][roscon19] from ROSCon'19 to get an overview.
-
-It makes the following controller types available for the ROS-control framework:
-* for PositionJointInterfaces:
-    - position_controllers/CartesianMotionController
-    - position_controllers/CartesianComplianceController
-    - position_controllers/CartesianForceController
-
-* for VelocityJointInterfaces:
-    - velocity_controllers/CartesianMotionController
-    - velocity_controllers/CartesianComplianceController
-    - velocity_controllers/CartesianForceController
+## Why this package?
+Users may refer to `MoveIt` for end-effector motion planning, but 
+integrating a full planning stack is often unnecessary for simple applications.
+Additionally, there are a lot of use cases where direct control in task space is mandatory:
+Dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
+any form of **closed loop control with external sensors** for physical interactions with environments.
+This package provides such a controller suite for the [ROS-control](http://wiki.ros.org/ros_control) framework.
 
 ## Installation
 Switch into the `src` folder of your current ROS workspace and
@@ -26,86 +31,35 @@ catkin_make -DCMAKE_BUILD_TYPE=Release
 ```
 Source your workspace again and you are ready to go.
 
-## Getting Started
-Launch the `examples.launch` file to start a simulated setup and get to know each controller
-```bash
-roslaunch cartesian_controller_examples examples.launch
+## Getting started
+In a sourced terminal, call `roslaunch cartesian_controller_examples
+examples.launch `. This will start a simulated world in which you can inspect
+and try things. Here are some quick tutorials with further details:
+- [Solver details](resources/doc/Solver_details.md)
+- [Cartesian motion controller](cartesian_motion_controller/README.md)
+- [Cartesian force controller](cartesian_force_controller/README.md)
+- [Cartesian compliance controller](cartesian_compliance_controller/README.md)
+- [Cartesian controller handles](cartesian_controller_handles/README.md)
+
+## Citation and further reading
+If you use the *cartesian_controllers* in your research projects, please
+consider citing our initial idea of the forward dynamics-based control
+approach ([Paper](https://ieeexplore.ieee.org/document/8206325)):
+```bibtex
+@InProceedings{FDCC,
+  Title                    = {Forward Dynamics Compliance Control (FDCC): A new approach to cartesian compliance for robotic manipulators},
+  Author                   = {S. Scherzinger and A. Roennau and R. Dillmann},
+  Booktitle                = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  Year                     = {2017},
+  Pages                    = {4568-4575},
+  Doi                      = {10.1109/IROS.2017.8206325}
+}
+
 ```
 
-**Please see the README.md for further details on each controller.**
+If you are interested in more details, have a look at
+- *Inverse Kinematics with Forward Dynamics Solvers for Sampled Motion Tracking* ([Paper](https://arxiv.org/pdf/1908.06252.pdf))
+- *Virtual Forward Dynamics Models for Cartesian Robot Control* ([Paper](https://arxiv.org/pdf/2009.11888.pdf))
+- *Contact Skill Imitation Learning for Robot-Independent Assembly Programming* ([Paper](https://arxiv.org/pdf/1908.06272.pdf))
+- *Human-Inspired Compliant Controllers for Robotic Assembly* ([PhD Thesis](https://publikationen.bibliothek.kit.edu/1000139834), especially Chapter 4)
 
-## Features
-All controllers rely on fast forward dynamics computations to circumvent the Inverse Kinematics problem.
-This dynamics-based solver is the same for all controller types and provides a consistent interface for configuration.
-
-All controllers can handle robot chains with *1* to *n* joints.
-Note, however, that using less than *6* joints results in limited Cartesian responsiveness.
-For those systems, the controllers will try to get as close to minimizing the
-Cartesian error as possible, and as best as the robot kinematics allows for it.
-
-With robot chains containing more than *6* joints, the controllers will move
-the additional elbows in an energy optimized manner.
-
-## The Control Loop
-![The control loop][control_loop]
-
-The above image depicts the general pipeline of the controllers.
-Users set specific targets, depending on their use case and the controller used.
-Each controller computes an error with respect to the current state.
-Users configure the responsiveness of the controller to that error with a set of gains.
-The error_scale is a convenient option to post-multiply the error on all dimensions uniformly.
-This is handy for testing parameter ranges with the slider in dynamic reconfigure.
-All controllers use the same virtual model to map this Cartesian error to joint accelerations, which is then double time integrated.
-There are two different mechanisms how those joint values get send to the robot.
-The joint position interface works in an open-loop manner, and allows for internal iterations, using feedback from the virtual robot model.
-The joint velocity interface takes the current robot state into account, and does not provide internal iterations.
-
-[control_loop]: etc/Control_Loop.png "The common control loop"
-
-## Configuration
-### Controller gains
-Forward dynamics turns the search for a feasible mapping of Cartesian input to joint space into a control problem.
-The solutions are found iteratively, whereby the system *leaps* forward in virtual time steps to reduce the Cartesian error.
-What this error is depends on the controller type used.
-For all controllers, a set of six PD gains (one for each Cartesian dimension)
-allows to tweak the responsiveness of the system with respect to this error.
-
-Each controller README.md provides a set of meaningful default gains.
-Try starting with these values and continuously adapt those to your special use case.
-
-Unfortunately, there won't exist ideal parameters for every use case and robot.
-So, for your specific application, you will be tweaking the PD gains at some point.
-
-### Solver parameters
-The common solver has two parameters:
-* iterations: The number of forward simulated steps for each control cycle.
-  Increasing this number will give the solver more iterations to decrease the
-  error. However, this mostly makes sense for the CartesianMotionController,
-  where increasing means switching from a smoothing controller to a fast and
-  exact inverse kinematics solver.
-
-* error_scale: An additional multiplicative factor that uniformly scales the
-  6-dimensional PD controlled error (both translation and rotation alike).
-  Use this parameter to find the right range
-  for your PD gains. It's handy to use the slider in dynamic reconfigure for this.
-
-## Performance
-As a default, please build the cartesian_controllers in release mode:
-
-```bash
-catkin_make -DCMAKE_BUILD_TYPE=Release
-```
-The forward dynamics implementation heavily relies on
-orocos_kinematics_dynamics (KDL), which use Eigen for linear algebra.
-Building in Release mode can give you a 10-times speed-up, and makes sure that
-the implementation of the control loop is not the performance bottle neck.
-If you use a higher number of iterations,
-then this in fact becomes a requirement.
-
-## Further reading
-If you are interested in more details, check out [the paper][paper1] on the initial idea of the compliance controller,
-and [the paper][paper2] on the recent implementation of the IK solver for motion control.
-
-[paper1]: https://ieeexplore.ieee.org/document/8206325 "Forward Dynamics Compliance Control (FDCC)"
-[paper2]: https://arxiv.org/pdf/1908.06252.pdf "Inverse Kinematics with Forward Dynamics for Sampled Motion Tracking"
-[roscon19]: https://vimeo.com/378682968
