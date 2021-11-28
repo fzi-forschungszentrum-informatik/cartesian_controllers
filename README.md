@@ -27,6 +27,7 @@ Switch into the `src` folder of your current ROS workspace and
 ```bash
 git clone git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
 rosdep install --from-paths ./ --ignore-src -y
+cd ..
 catkin_make -DCMAKE_BUILD_TYPE=Release
 ```
 Source your workspace again and you are ready to go.
