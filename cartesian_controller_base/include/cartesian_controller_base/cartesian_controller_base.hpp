@@ -213,7 +213,7 @@ starting(const ros::Time& time)
 {
   // Copy joint state to internal simulation
   m_ik_solver->setStartState(m_joint_handles);
-  m_ik_solver->updateKinematics<HardwareInterface>(m_joint_handles);
+  m_ik_solver->updateKinematics(m_joint_handles);
 }
 
 template <class HardwareInterface>
