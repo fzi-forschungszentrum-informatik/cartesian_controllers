@@ -155,8 +155,8 @@ computeMotionError()
 
   // Clamp maximal tolerated error.
   // The remaining error will be handled in the next control cycle.
-  const double max_angle = 1.0;
-  const double max_distance = 1.0;
+  const double max_angle = 0.1;
+  const double max_distance = 0.1;
   angle    = std::clamp(angle,-max_angle,max_angle);
   distance = std::clamp(distance,-max_distance,max_distance);
 
