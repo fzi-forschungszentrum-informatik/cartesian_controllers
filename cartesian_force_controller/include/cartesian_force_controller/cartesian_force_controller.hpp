@@ -148,19 +148,15 @@ update(const ros::Time& time, const ros::Duration& period)
   Base::m_ik_solver->updateKinematics(Base::m_joint_handles);
 
   // Control the robot motion in such a way that the resulting net force
-  // vanishes. This internal control needs some simulation time steps.
-  for (int i = 0; i < Base::m_iterations; ++i)
-  {
-    // The internal 'simulation time' is deliberately independent of the outer
-    // control cycle.
-    ros::Duration internal_period(0.02);
+  // vanishes.  The internal 'simulation time' is deliberately independent of
+  // the outer control cycle.
+  ros::Duration internal_period(0.02);
 
-    // Compute the net force
-    ctrl::Vector6D error = computeForceError();
+  // Compute the net force
+  ctrl::Vector6D error = computeForceError();
 
-    // Turn Cartesian error into joint motion
-    Base::computeJointControlCmds(error,internal_period);
-  }
+  // Turn Cartesian error into joint motion
+  Base::computeJointControlCmds(error,internal_period);
 
   // Write final commands to the hardware interface
   Base::writeJointControlCmds();
