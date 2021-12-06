@@ -162,9 +162,9 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     bool m_paused;
     int m_iterations;
+    std::vector<hardware_interface::JointHandle>      m_joint_handles;
 
   private:
-    std::vector<hardware_interface::JointHandle>      m_joint_handles;
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
     SpatialPDController                              m_spatial_controller;

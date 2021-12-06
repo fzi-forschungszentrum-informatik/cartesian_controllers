@@ -287,9 +287,6 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
   m_simulated_joint_motion = m_ik_solver->getJointControlCmds(
       period,
       m_cartesian_input);
-
-  // Update according to control policy for next cycle
-  m_ik_solver->updateKinematics<HardwareInterface>(m_joint_handles);
 }
 
 template <class HardwareInterface>
