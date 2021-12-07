@@ -87,9 +87,21 @@ namespace cartesian_controller_base{
       m_current_positions(i)      = joint_handles[i].getPosition();
       m_current_velocities(i)     = joint_handles[i].getVelocity();
       m_current_accelerations(i)  = 0.0;
+
       m_last_positions(i)         = m_current_positions(i);
+      m_last_velocities(i)        = m_current_velocities(i);
     }
     return true;
+  }
+
+
+  void IKSolver::synchronizeJointPositions(const std::vector<hardware_interface::JointHandle>& joint_handles)
+  {
+    for (size_t i = 0; i < joint_handles.size(); ++i)
+    {
+      m_current_positions(i) = joint_handles[i].getPosition();
+      m_last_positions(i)    = m_current_positions(i);
+    }
   }
 
 
@@ -105,6 +117,7 @@ namespace cartesian_controller_base{
     m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
+    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
     m_upper_pos_limits           = upper_pos_limits;
     m_lower_pos_limits           = lower_pos_limits;
 
@@ -115,11 +128,8 @@ namespace cartesian_controller_base{
     return true;
   }
 
-  void IKSolver::updateKinematics(const std::vector<hardware_interface::JointHandle>& joint_handles)
+  void IKSolver::updateKinematics()
   {
-    // Reset internal simulation with real robot state
-    setStartState(joint_handles);
-
     // Pose w. r. t. base
     m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
 
