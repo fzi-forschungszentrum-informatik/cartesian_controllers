@@ -126,6 +126,17 @@ class IKSolver
     bool setStartState(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
     /**
+     * @brief Synchronize joint positions with the real robot
+     *
+     * Call this periodically in the controller's update() function.
+     * The internal model's joint velocity is not sychronized. Derived IK
+     * solvers should implement how to keep or reset those values.
+     *
+     * @param joint_handles Read handles to the joints.
+     */
+    void synchronizeJointPositions(const std::vector<hardware_interface::JointHandle>& joint_handles);
+
+    /**
      * @brief Initialize the solver
      *
      * @param nh A node handle for namespace-local parameter management
@@ -143,13 +154,10 @@ class IKSolver
     /**
      * @brief Update the robot kinematics of the solver
      *
-     * Call this periodically to update the internal simulation with the real
-     * robot state. This makes sure that the solver starts in sync with the
-     * real robot in each control step.
-     *
-     * @param joint_handles The read/write handles to the joint buffers.
+     * Call this periodically to update the internal simulation's forward
+     * kinematics.
      */
-    void updateKinematics(const std::vector<hardware_interface::JointHandle>& joint_handles);
+    void updateKinematics();
 
   protected:
 

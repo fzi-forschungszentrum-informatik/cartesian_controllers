@@ -145,7 +145,7 @@ void CartesianForceController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
   // Synchronize the internal model and the real robot
-  Base::m_ik_solver->updateKinematics(Base::m_joint_handles);
+  Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_handles);
 
   // Control the robot motion in such a way that the resulting net force
   // vanishes.  The internal 'simulation time' is deliberately independent of

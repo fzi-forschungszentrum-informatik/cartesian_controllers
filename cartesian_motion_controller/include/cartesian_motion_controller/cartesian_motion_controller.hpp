@@ -112,7 +112,7 @@ void CartesianMotionController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
   // Synchronize the internal model and the real robot
-  Base::m_ik_solver->updateKinematics(Base::m_joint_handles);
+  Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_handles);
 
   // Forward Dynamics turns the search for the according joint motion into a
   // control process. So, we control the internal model until we meet the
