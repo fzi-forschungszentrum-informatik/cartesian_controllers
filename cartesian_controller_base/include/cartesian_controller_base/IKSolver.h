@@ -143,22 +143,13 @@ class IKSolver
     /**
      * @brief Update the robot kinematics of the solver
      *
-     * This template has two specializations for two distinct controller
-     * policies, depending on the hardware interface used:
+     * Call this periodically to update the internal simulation with the real
+     * robot state. This makes sure that the solver starts in sync with the
+     * real robot in each control step.
      *
-     * 1) PositionJointInterface: The solver's internal simulation is continued
-     * on each call without taking the real robot state into account.
-     *
-     * 2) VelocityJointInterface: The internal simulation is updated with the
-     * real robot state. On each call, the solver starts with its internal
-     * simulation in sync with the real robot.
-     *
-     * @tparam HardwareInterface
-     * @param joint_handles
+     * @param joint_handles The read/write handles to the joint buffers.
      */
-    template <class HardwareInterface>
-    void updateKinematics(
-        const std::vector<hardware_interface::JointHandle>& joint_handles);
+    void updateKinematics(const std::vector<hardware_interface::JointHandle>& joint_handles);
 
   protected:
 
@@ -199,7 +190,5 @@ class IKSolver
 
 
 } // namespace
-
-#include <cartesian_controller_base/IKSolver.hpp>
 
 #endif

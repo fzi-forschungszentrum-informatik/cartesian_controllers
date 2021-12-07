@@ -115,6 +115,9 @@ namespace cartesian_controller_base{
     }
     control_cmd.time_from_start = period; // valid for this duration
 
+    // Update for the next cycle
+    m_last_positions = m_current_positions;
+
     return control_cmd;
   }
 

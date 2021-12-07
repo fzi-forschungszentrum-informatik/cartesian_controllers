@@ -111,6 +111,9 @@ template <class HardwareInterface>
 void CartesianMotionController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
+  // Synchronize the internal model and the real robot
+  Base::m_ik_solver->updateKinematics(Base::m_joint_handles);
+
   // Forward Dynamics turns the search for the according joint motion into a
   // control process. So, we control the internal model until we meet the
   // Cartesian target motion. This internal control needs some simulation time
@@ -129,20 +132,6 @@ update(const ros::Time& time, const ros::Duration& period)
   }
 
   // Write final commands to the hardware interface
-  Base::writeJointControlCmds();
-}
-
-template <>
-void CartesianMotionController<hardware_interface::VelocityJointInterface>::
-update(const ros::Time& time, const ros::Duration& period)
-{
-  // Simulate only one step forward to avoid drift.
-  ros::Duration internal_period(0.02);
-
-  ctrl::Vector6D error = computeMotionError();
-
-  Base::computeJointControlCmds(error,internal_period);
-
   Base::writeJointControlCmds();
 }
 
@@ -166,8 +155,8 @@ computeMotionError()
 
   // Clamp maximal tolerated error.
   // The remaining error will be handled in the next control cycle.
-  const double max_angle = 1.0;
-  const double max_distance = 1.0;
+  const double max_angle = 0.1;
+  const double max_distance = 0.1;
   angle    = std::clamp(angle,-max_angle,max_angle);
   distance = std::clamp(distance,-max_distance,max_distance);
 

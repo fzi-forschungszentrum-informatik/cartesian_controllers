@@ -20,10 +20,9 @@ Each controller computes an error with respect to the current state.
 Users configure the responsiveness of the controller to that error with a set of gains.
 The error_scale is a convenient option to post-multiply the error on all dimensions uniformly.
 This is handy for testing parameter ranges with the slider in dynamic reconfigure.
-All controllers use the same virtual model to map this Cartesian error to joint accelerations, which is then double time integrated.
-There are two different mechanisms how those joint values get send to the robot.
-The joint position interface works in an open-loop manner, and allows for internal iterations, using feedback from the virtual robot model.
-The joint velocity interface takes the current robot state into account, and does not provide internal iterations.
+All controllers use the same virtual model to map this Cartesian error to joint motion.
+
+There are two different compile-time interfaces, over which the robots get actuated: `PositionJointInterfaces` and `VelocityJointInterfaces`.
 
 ## Configuration
 ### Controller gains
@@ -41,13 +40,13 @@ So, for your specific application, you will be tweaking the PD gains at some poi
 
 ### Solver parameters
 The common solver has two parameters:
-* iterations: The number of forward simulated steps for each control cycle.
-  Increasing this number will give the solver more iterations to decrease the
-  error. However, this mostly makes sense for the CartesianMotionController,
-  where increasing means switching from a smoothing controller to a fast and
-  exact inverse kinematics solver.
+* **iterations**: The number of internally simulated cycles per control cycle.
+  Increasing this number will give the solver more iterations to approach the given target.
+  A value of `10` is a good default for the `CartesianMotionController` and the `CartesianComplianceController`.
+  The higher this value, the more does the controller behave like an ideal *inverse kinematics* solver.
+  This parameter has no effect for the `CartesianForceController`.
 
-* error_scale: An additional multiplicative factor that uniformly scales the
+* **error_scale**: An additional multiplicative factor that uniformly scales the
   6-dimensional PD controlled error (both translation and rotation alike).
   Use this parameter to find the right range
   for your PD gains. It's handy to use the slider in dynamic reconfigure for this.

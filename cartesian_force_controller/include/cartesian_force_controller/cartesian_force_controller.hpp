@@ -144,37 +144,21 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
+  // Synchronize the internal model and the real robot
+  Base::m_ik_solver->updateKinematics(Base::m_joint_handles);
+
   // Control the robot motion in such a way that the resulting net force
-  // vanishes. This internal control needs some simulation time steps.
-  for (int i = 0; i < Base::m_iterations; ++i)
-  {
-    // The internal 'simulation time' is deliberately independent of the outer
-    // control cycle.
-    ros::Duration internal_period(0.02);
-
-    // Compute the net force
-    ctrl::Vector6D error = computeForceError();
-
-    // Turn Cartesian error into joint motion
-    Base::computeJointControlCmds(error,internal_period);
-  }
-
-  // Write final commands to the hardware interface
-  Base::writeJointControlCmds();
-}
-
-template <>
-void CartesianForceController<hardware_interface::VelocityJointInterface>::
-update(const ros::Time& time, const ros::Duration& period)
-{
-  // Simulate only one step forward.
-  // The constant simulation time adds to solver stability.
+  // vanishes.  The internal 'simulation time' is deliberately independent of
+  // the outer control cycle.
   ros::Duration internal_period(0.02);
 
+  // Compute the net force
   ctrl::Vector6D error = computeForceError();
 
+  // Turn Cartesian error into joint motion
   Base::computeJointControlCmds(error,internal_period);
 
+  // Write final commands to the hardware interface
   Base::writeJointControlCmds();
 }
 

@@ -115,6 +115,25 @@ namespace cartesian_controller_base{
     return true;
   }
 
+  void IKSolver::updateKinematics(const std::vector<hardware_interface::JointHandle>& joint_handles)
+  {
+    // Reset internal simulation with real robot state
+    setStartState(joint_handles);
+
+    // Pose w. r. t. base
+    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
+
+    // Absolute velocity w. r. t. base
+    KDL::FrameVel vel;
+    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
+    m_end_effector_vel[0] = vel.deriv().vel.x();
+    m_end_effector_vel[1] = vel.deriv().vel.y();
+    m_end_effector_vel[2] = vel.deriv().vel.z();
+    m_end_effector_vel[3] = vel.deriv().rot.x();
+    m_end_effector_vel[4] = vel.deriv().rot.y();
+    m_end_effector_vel[5] = vel.deriv().rot.z();
+  }
+
   void IKSolver::applyJointLimits()
   {
     for (int i = 0; i < m_number_joints; ++i)
