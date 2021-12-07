@@ -136,7 +136,6 @@ class ForwardDynamicsSolver : public IKSolver
 
     // IK solver specific dynamic reconfigure
     double m_min;
-    std::atomic<bool> m_instantaneous_motion;
     typedef cartesian_controller_base::ForwardDynamicsSolverConfig
       IKConfig;
 
