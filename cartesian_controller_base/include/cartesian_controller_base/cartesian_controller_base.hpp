@@ -201,9 +201,6 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   m_already_initialized = true;
 
-  // Start with normal ROS control behavior
-  m_paused = false;
-
   return true;
 }
 
@@ -216,34 +213,10 @@ starting(const ros::Time& time)
   m_ik_solver->updateKinematics(m_joint_handles);
 }
 
-template <class HardwareInterface>
-void CartesianControllerBase<HardwareInterface>::
-pause(const ros::Time& time)
-{
-  m_paused = true;
-}
-
-template <class HardwareInterface>
-bool CartesianControllerBase<HardwareInterface>::
-resume(const ros::Time& time)
-{
-  m_paused = false;
-  return true;
-}
-
 template <>
 void CartesianControllerBase<hardware_interface::PositionJointInterface>::
 writeJointControlCmds()
 {
-  // Don't update position commands when paused.
-  // Note: CartesianMotionControllers don't take any feedback from the joint
-  // handles. These controllers will drift if the target frame they are
-  // following isn't also paused.
-  if (m_paused)
-  {
-    return;
-  }
-
   // Take position commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
@@ -255,15 +228,6 @@ template <>
 void CartesianControllerBase<hardware_interface::VelocityJointInterface>::
 writeJointControlCmds()
 {
-  // Don't update velocity commands when paused.
-  // Note: CartesianMotionControllers don't take any feedback from the joint
-  // handles. These controllers will drift if the target frame they are
-  // following isn't also paused.
-  if (m_paused)
-  {
-    return;
-  }
-
   // Take velocity commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
@@ -275,11 +239,6 @@ template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period)
 {
-  if (m_paused)
-  {
-    return;
-  }
-
   // PD controlled system input
   m_cartesian_input = m_error_scale * m_spatial_controller(error,period);
 
