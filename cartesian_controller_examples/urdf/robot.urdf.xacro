@@ -220,8 +220,8 @@
         </link>
 
         <joint name="tool0_joint" type="fixed">
-                <origin xyz="0 ${link6_length} 0" rpy="${-pi / 2.0} 0 0"/>
-                <parent link="link6"/>
+                <origin xyz="${link6_length / 2.0} 0 0" rpy="0 ${pi / 2.0} 0"/>
+                <parent link="sensor_link"/>
                 <child link="tool0"/>
         </joint>
         <link name="tool0">
