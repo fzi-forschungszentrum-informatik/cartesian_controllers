@@ -145,13 +145,11 @@ add_library(${PROJECT_NAME}
   include/cartesian_controller_base/Utility.h
   src/IKSolver.cpp
   include/cartesian_controller_base/IKSolver.h
-  include/cartesian_controller_base/IKSolver.hpp
 )
 
 add_library(ik_solvers
   src/IKSolver.cpp
   include/cartesian_controller_base/IKSolver.h
-  include/cartesian_controller_base/IKSolver.hpp
   src/ForwardDynamicsSolver.cpp
   include/cartesian_controller_base/ForwardDynamicsSolver.h
   src/JacobianTransposeSolver.cpp
