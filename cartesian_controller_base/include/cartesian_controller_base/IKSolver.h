@@ -135,7 +135,7 @@ class IKSolver
      *
      * @param joint_handles Read handles to the joints.
      */
-    void synchronizeJointPositions(const std::vector<hardware_interface::JointHandle>& joint_handles);
+    void synchronizeJointPositions(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
 
     /**
      * @brief Initialize the solver

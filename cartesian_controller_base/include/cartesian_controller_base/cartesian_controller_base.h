@@ -165,8 +165,9 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     std::string m_robot_base_link;
     int m_iterations;
 
-  private:
     std::vector<hardware_interface::LoanedStateInterface>     m_joint_state_handles;
+
+  private:
     std::vector<hardware_interface::LoanedCommandInterface>   m_joint_cmd_handles;
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::msg::JointTrajectoryPoint        m_simulated_joint_motion;
