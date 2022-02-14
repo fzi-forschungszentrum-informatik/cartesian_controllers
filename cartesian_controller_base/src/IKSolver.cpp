@@ -103,6 +103,8 @@ namespace cartesian_controller_base{
   {
     for (size_t i = 0; i < joint_state_handles.size(); ++i)
     {
+      // TODO: We need both joint positions and velocities.
+      // Get both from the system_interface.
       if (joint_state_handles[i].get_interface_name() == hardware_interface::HW_IF_POSITION)
       {
         m_current_positions(i) = joint_state_handles[i].get_value();
@@ -164,30 +166,5 @@ namespace cartesian_controller_base{
           m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
     }
   }
-
-void IKSolver::updateKinematics(
-        const std::vector<hardware_interface::LoanedCommandInterface>& joint_cmd_handles,
-        const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
-{
-  // TODO: How do we check properly what hardware control type we have?
-  if (joint_cmd_handles[0].get_interface_name() == hardware_interface::HW_IF_POSITION)
-  {
-    // Keep feed forward simulation running
-    m_last_positions = m_current_positions;
-
-    // Pose w. r. t. base
-    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
-
-    // Absolute velocity w. r. t. base
-    KDL::FrameVel vel;
-    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    m_end_effector_vel[0] = vel.deriv().vel.x();
-    m_end_effector_vel[1] = vel.deriv().vel.y();
-    m_end_effector_vel[2] = vel.deriv().vel.z();
-    m_end_effector_vel[3] = vel.deriv().rot.x();
-    m_end_effector_vel[4] = vel.deriv().rot.y();
-    m_end_effector_vel[5] = vel.deriv().rot.z();
-  }
-}
 
 } // namespace

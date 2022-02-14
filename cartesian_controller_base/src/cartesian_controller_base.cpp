@@ -232,7 +232,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     RCLCPP_ERROR(get_node()->get_logger(), "Could not set start state");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   };
-  m_ik_solver->updateKinematics(command_interfaces_, state_interfaces_);
+  m_ik_solver->updateKinematics();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 

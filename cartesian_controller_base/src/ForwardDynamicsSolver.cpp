@@ -102,8 +102,8 @@ namespace cartesian_controller_base{
     m_current_accelerations.data = m_jnt_space_inertia.data.inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
     // Numerical time integration with the Euler forward method
-    m_current_positions.data = m_last_positions.data + m_last_velocities.data * period.toSec();
-    m_current_velocities.data = m_last_velocities.data + m_current_accelerations.data * period.toSec();
+    m_current_positions.data = m_last_positions.data + m_last_velocities.data * period.seconds();
+    m_current_velocities.data = m_last_velocities.data + m_current_accelerations.data * period.seconds();
     m_current_velocities.data *= 0.9;  // 10 % global damping against unwanted null space motion.
                                        // Will cause exponential slow-down without input.
     // Make sure positions stay in allowed margins
