@@ -43,6 +43,7 @@
 // Project
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cartesian_controller_base/ROS2VersionConfig.h>
 
 // ROS
 #include <controller_interface/controller_interface.hpp>
@@ -78,7 +79,11 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
   public:
     CartesianForceController();
 
-    controller_interface::return_type init(const std::string & controller_name) override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+    virtual controller_interface::return_type init(const std::string & controller_name) override;
+#endif
 
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
         const rclcpp_lifecycle::State & previous_state) override;
@@ -89,7 +94,11 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
         const rclcpp_lifecycle::State & previous_state) override;
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
     controller_interface::return_type update() override;
+#endif
 
     using Base = cartesian_controller_base::CartesianControllerBase;
 

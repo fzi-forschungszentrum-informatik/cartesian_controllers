@@ -6,6 +6,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(ADDITIONAL_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Wno-unused-parameter)
 add_compile_options(${ADDITIONAL_COMPILE_OPTIONS})
 
+# Use CMake to pass the current ROS_DISTRO via variables into a preprocessor template.
+# We then include this file and switch between the API for foxy and galactic.
+if($ENV{ROS_DISTRO} STREQUAL "galactic")
+        set(CARTESIAN_CONTROLLERS_GALACTIC TRUE)
+elseif($ENV{ROS_DISTRO} STREQUAL "foxy")
+        set(CARTESIAN_CONTROLLERS_FOXY TRUE)
+else()
+        message(WARNING "ROS2 version must be {foxy|galactic}")
+endif()
+configure_file(include/cartesian_controller_base/ROS2VersionConfig.h.in ROS2VersionConfig.h)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -52,6 +63,7 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${EIGEN3_INCLUDE_DIR}
+    ${CMAKE_BINARY_DIR}  # ROS2VersionConfig.h
 )
 
 ament_target_dependencies(${PROJECT_NAME}
@@ -109,6 +121,11 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   #INCLUDES DESTINATION include
+)
+
+install(
+  FILES ${CMAKE_BINARY_DIR}/ROS2VersionConfig.h
+  DESTINATION include/${PROJECT_NAME}
 )
 
 # Note: For the target based workflow, they seem to be superfluous.
