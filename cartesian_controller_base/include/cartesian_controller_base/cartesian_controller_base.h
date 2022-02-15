@@ -45,6 +45,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
+#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
 // ros_controls
 #include <controller_interface/controller_interface.hpp>
@@ -58,6 +59,7 @@
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
+#include "ROS2VersionConfig.h"
 
 // Pluginlib
 #include <pluginlib/class_loader.hpp>
@@ -90,7 +92,11 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
 
     virtual controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
     virtual controller_interface::return_type init(const std::string & controller_name) override;
+#endif
 
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
         const rclcpp_lifecycle::State & previous_state) override;
