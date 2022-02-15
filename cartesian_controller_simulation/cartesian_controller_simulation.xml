@@ -1,0 +1,9 @@
+<library path="cartesian_controller_simulation">
+  <class name="cartesian_controller_simulation/Simulator"
+         type="cartesian_controller_simulation::Simulator"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+        A simulation environment for cartesian_controllers
+    </description>
+  </class>
+</library>
