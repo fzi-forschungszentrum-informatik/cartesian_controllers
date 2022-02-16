@@ -1,0 +1,5 @@
+// Cmake will update these defines depending on our current ROS_DISTRO.
+// We use this mechanism to react to API changes in ROS2-control.
+//
+#cmakedefine CARTESIAN_CONTROLLERS_FOXY
+#cmakedefine CARTESIAN_CONTROLLERS_GALACTIC

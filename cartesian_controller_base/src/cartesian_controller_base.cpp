@@ -84,6 +84,26 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
   return conf;
 }
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_init()
+{
+  if (m_already_initialized)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
+  auto_declare<std::string>("ik_solver", "forward_dynamics");
+  auto_declare<std::string>("robot_description", "");
+  auto_declare<std::string>("robot_base_link", "");
+  auto_declare<std::string>("end_effector_link", "");
+  auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
+  auto_declare<double>("solver.error_scale", 1.0);
+  auto_declare<int>("solver.iterations", 1);
+
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+#elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianControllerBase::init(const std::string & controller_name)
 {
   // Initialize lifecycle node
@@ -108,6 +128,7 @@ controller_interface::return_type CartesianControllerBase::init(const std::strin
 
   return controller_interface::return_type::OK;
 }
+#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_configure(
     const rclcpp_lifecycle::State & previous_state)
@@ -166,7 +187,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     const std::string error = ""
       "Failed to parse robot chain from urdf model. "
       "Do robot_base_link and end_effector_link exist?";
-    RCLCPP_ERROR(get_node()->get_logger(), error);
+    RCLCPP_ERROR(get_node()->get_logger(), error.c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 

@@ -52,6 +52,21 @@ CartesianForceController::CartesianForceController()
 {
 }
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_init()
+{
+  const auto ret = Base::on_init();
+  if (ret != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS)
+  {
+    return ret;
+  }
+
+  auto_declare<std::string>("ft_sensor_ref_link", "");
+  auto_declare<bool>("hand_frame_control", true);
+
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;;
+}
+#elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianForceController::init(const std::string & controller_name)
 {
   const auto ret = Base::init(controller_name);
@@ -65,6 +80,7 @@ controller_interface::return_type CartesianForceController::init(const std::stri
 
   return controller_interface::return_type::OK;
 }
+#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_configure(
     const rclcpp_lifecycle::State & previous_state)
@@ -103,7 +119,12 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+controller_interface::return_type CartesianForceController::update(const rclcpp::Time& time,
+                                                                   const rclcpp::Duration& period)
+#elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianForceController::update()
+#endif
 {
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_handles);
