@@ -15,5 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Install MuJoCo
+        run: |
+                .github/script/install_mujoco.sh
+        shell: bash
+
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
