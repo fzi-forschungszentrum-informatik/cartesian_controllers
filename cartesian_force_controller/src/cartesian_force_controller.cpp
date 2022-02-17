@@ -161,7 +161,11 @@ ctrl::Vector6D CartesianForceController::computeForceError()
   }
 
   // Superimpose target wrench and sensor wrench in base frame
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
   return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref) + target_wrench;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+  return m_ft_sensor_wrench + target_wrench;
+#endif
 }
 
 void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_ref)
@@ -202,6 +206,7 @@ void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::Wr
 
 void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
   KDL::Wrench tmp;
   tmp[0] = wrench->wrench.force.x;
   tmp[1] = wrench->wrench.force.y;
@@ -219,6 +224,16 @@ void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::
   m_ft_sensor_wrench[3] = tmp[3];
   m_ft_sensor_wrench[4] = tmp[4];
   m_ft_sensor_wrench[5] = tmp[5];
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+  // We assume base frame for the measurements
+  // This is currently URe-ROS2 driver-specific (branch foxy).
+  m_ft_sensor_wrench[0] = wrench->wrench.force.x;
+  m_ft_sensor_wrench[1] = wrench->wrench.force.y;
+  m_ft_sensor_wrench[2] = wrench->wrench.force.z;
+  m_ft_sensor_wrench[3] = wrench->wrench.torque.x;
+  m_ft_sensor_wrench[4] = wrench->wrench.torque.y;
+  m_ft_sensor_wrench[5] = wrench->wrench.torque.z;
+#endif
 }
 
 }
