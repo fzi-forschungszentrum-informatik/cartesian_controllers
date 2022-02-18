@@ -41,6 +41,7 @@
 #define CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 
 // ROS
+#include <functional>
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
@@ -171,7 +172,8 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     std::string m_robot_base_link;
     int m_iterations;
 
-    std::vector<hardware_interface::LoanedStateInterface>     m_joint_state_handles;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
+      m_joint_state_pos_handles;
 
   private:
     std::vector<hardware_interface::LoanedCommandInterface>   m_joint_cmd_handles;

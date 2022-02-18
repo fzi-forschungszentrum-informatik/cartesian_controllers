@@ -45,6 +45,7 @@
 #include <cartesian_controller_base/Utility.h>
 
 // ros_controls
+#include <functional>
 #include <hardware_interface/loaned_state_interface.hpp>
 #include <hardware_interface/loaned_command_interface.hpp>
 
@@ -124,18 +125,23 @@ class IKSolver
     const KDL::JntArray& getPositions() const;
 
     //! Set initial joint configuration
-    bool setStartState(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
+    bool setStartState(
+      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+        joint_pos_handles);
 
     /**
      * @brief Synchronize joint positions with the real robot
      *
      * Call this periodically in the controller's update() function.
-     * The internal model's joint velocity is not sychronized. Derived IK
-     * solvers should implement how to keep or reset those values.
+     * The internal model's joint velocity is not sychronized. This makes the
+     * solver more stable. Derived IK solvers should implement how to keep or
+     * reset those values.
      *
-     * @param joint_handles Read handles to the joints.
+     * @param joint_pos_handles Read handles to the joint positions.
      */
-    void synchronizeJointPositions(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
+    void synchronizeJointPositions(
+      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+        joint_pos_handles);
 
     /**
      * @brief Initialize the solver

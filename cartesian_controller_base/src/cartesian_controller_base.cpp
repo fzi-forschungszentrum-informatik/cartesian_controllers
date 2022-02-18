@@ -52,6 +52,9 @@
 #include <urdf/model.h>
 #include <urdf_model/joint.h>
 
+#include "controller_interface/helpers.hpp"
+#include "hardware_interface/types/hardware_interface_type_values.hpp"
+
 namespace cartesian_controller_base
 {
 
@@ -76,7 +79,7 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
 {
   controller_interface::InterfaceConfiguration conf;
   conf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  conf.names.reserve(m_joint_names.size() * 1); // only position for now
+  conf.names.reserve(m_joint_names.size()); // Only position
   for (const auto & joint_name : m_joint_names)
   {
     conf.names.push_back(joint_name + "/position");
@@ -247,8 +250,21 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_activate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (!controller_interface::get_ordered_interfaces(state_interfaces_,
+                                                    m_joint_names,
+                                                    hardware_interface::HW_IF_POSITION,
+                                                    m_joint_state_pos_handles))
+  {
+    RCLCPP_ERROR(node_->get_logger(),
+                 "Expected %zu '%s' state interfaces, got %zu.",
+                 m_joint_names.size(),
+                 hardware_interface::HW_IF_POSITION,
+                 m_joint_state_pos_handles.size());
+    return CallbackReturn::ERROR;
+  }
+
   // Copy joint state to internal simulation
-  if (!m_ik_solver->setStartState(state_interfaces_))
+  if (!m_ik_solver->setStartState(m_joint_state_pos_handles))
   {
     RCLCPP_ERROR(get_node()->get_logger(), "Could not set start state");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
