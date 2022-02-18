@@ -2,7 +2,33 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
-    joint_state_controller:
-      type: joint_state_controller/JointStateController
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
 
+    cartesian_force_controller:
+      type: cartesian_force_controller/CartesianForceController
 
+cartesian_force_controller:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "tool0"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # Choose: position | velocity.
+    command_interfaces:
+      - position
+
+    pd_gains:
+        trans_x: {p: 0.05}
+        trans_y: {p: 0.05}
+        trans_z: {p: 0.05}
+        rot_x: {p: 0.01}
+        rot_y: {p: 0.01}
+        rot_z: {p: 0.01}
