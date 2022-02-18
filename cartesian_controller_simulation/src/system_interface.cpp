@@ -48,18 +48,20 @@
 #include <vector>
 #include <thread>
 
+#include "hardware_interface/handle.hpp"
+#include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "cartesian_controller_simulation/mujoco_simulator.h"
 
 namespace cartesian_controller_simulation {
 
-Simulator::return_type Simulator::configure(const hardware_interface::HardwareInfo& info)
+Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareInfo& info)
 {
   // Keep an internal copy of the given configuration
-  if (configure_default(info) != return_type::OK)
+  if (hardware_interface::SystemInterface::on_init(info) != Simulator::CallbackReturn::SUCCESS)
   {
-    return return_type::ERROR;
+    return Simulator::CallbackReturn::ERROR;
   }
 
   // Start the simulator in parallel.
@@ -88,7 +90,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs two possible command interfaces.",
                    joint.name.c_str());
-      return return_type::ERROR;
+      return Simulator::CallbackReturn::ERROR;
     }
 
     if (!(joint.command_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -99,7 +101,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
                    joint.name.c_str(),
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY);
-      return return_type::ERROR;
+      return Simulator::CallbackReturn::ERROR;
     }
 
     if (joint.state_interfaces.size() != 3)
@@ -107,7 +109,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs 3 state interfaces.",
                    joint.name.c_str());
-      return return_type::ERROR;
+      return Simulator::CallbackReturn::ERROR;
     }
 
     if (!(joint.state_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -120,12 +122,11 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY,
                    hardware_interface::HW_IF_EFFORT);
-      return return_type::ERROR;
+      return Simulator::CallbackReturn::ERROR;
     }
   }
 
-  this->status_ = hardware_interface::status::CONFIGURED;
-  return return_type::OK;
+  return Simulator::CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> Simulator::export_state_interfaces()
@@ -167,27 +168,6 @@ Simulator::prepare_command_mode_switch(const std::vector<std::string>& start_int
                                        const std::vector<std::string>& stop_interfaces)
 {
   // TODO: Exclusive OR for position and velocity commands
-
-  return return_type::OK;
-}
-
-Simulator::return_type Simulator::start()
-{
-  RCLCPP_INFO(rclcpp::get_logger("Simulator"), "Starting simulation ...");
-
-  this->status_ = hardware_interface::status::STARTED;
-
-  RCLCPP_INFO(rclcpp::get_logger("Simulator"), "Successfully started simulation.");
-  return return_type::OK;
-}
-
-Simulator::return_type Simulator::stop()
-{
-  RCLCPP_INFO(rclcpp::get_logger("Simulator"), "Stopping simulation ...");
-
-  this->status_ = hardware_interface::status::STOPPED;
-
-  RCLCPP_INFO(rclcpp::get_logger("Simulator"), "Successfully stopped simulation.");
 
   return return_type::OK;
 }

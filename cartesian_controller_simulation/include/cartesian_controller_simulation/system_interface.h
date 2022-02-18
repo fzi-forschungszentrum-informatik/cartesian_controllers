@@ -39,11 +39,12 @@
 
 #pragma once
 
-#include "hardware_interface/base_interface.hpp"
+#include "hardware_interface/system.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/system_interface.hpp"
 #include "rclcpp/macros.hpp"
+#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "cartesian_controller_simulation/mujoco_simulator.h"
 #include <map>
 #include <thread>
@@ -64,14 +65,15 @@ constexpr char HW_IF_DAMPING[]   = "damping";
  * controller_manager coordinated library.
  *
  */
-class Simulator : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+class Simulator : public hardware_interface::SystemInterface
 {
 public:
   using return_type = hardware_interface::return_type;
+  using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
   RCLCPP_SHARED_PTR_DEFINITIONS(Simulator);
 
-  return_type configure(const hardware_interface::HardwareInfo& info) override;
+  CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
@@ -79,10 +81,6 @@ public:
 
   return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                           const std::vector<std::string>& stop_interfaces) override;
-
-  return_type start() override;
-
-  return_type stop() override;
 
   return_type read() override;
 

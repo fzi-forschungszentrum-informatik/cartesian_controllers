@@ -39,9 +39,7 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
-
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
@@ -80,7 +78,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
-        #prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
+        prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
         output={
             "stdout": "screen",
             "stderr": "screen",
@@ -88,10 +86,15 @@ def generate_launch_description():
     )
 
     # Joint states
-    joint_state_controller_spawner = Node(
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
+    )
+    cartesian_force_controller_spawner = Node(
         package="controller_manager",
         executable="spawner.py",
-        arguments=["joint_state_controller", "-c", "/controller_manager"],
+        arguments=["cartesian_force_controller", "-c", "/controller_manager"],
     )
 
     # TF tree
@@ -117,7 +120,8 @@ def generate_launch_description():
     # Nodes to start
     nodes = [
         control_node,
-        joint_state_controller_spawner,
+        joint_state_broadcaster_spawner,
+        cartesian_force_controller_spawner,
         robot_state_publisher,
         rviz
     ]
