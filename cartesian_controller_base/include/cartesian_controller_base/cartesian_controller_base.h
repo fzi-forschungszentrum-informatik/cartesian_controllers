@@ -176,7 +176,10 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
       m_joint_state_pos_handles;
 
   private:
-    std::vector<hardware_interface::LoanedCommandInterface>   m_joint_cmd_handles;
+    std::vector<std::string> m_cmd_interface_types;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_pos_handles;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_vel_handles;
+
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::msg::JointTrajectoryPoint        m_simulated_joint_motion;
     SpatialPDController                               m_spatial_controller;
