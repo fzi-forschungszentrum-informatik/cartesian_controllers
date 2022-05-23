@@ -42,10 +42,11 @@
 
 // Project
 #include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cartesian_controller_base/ROS2VersionConfig.h>
 
 // ROS
-#include <kdl/frames.hpp>
-#include <geometry_msgs/PoseStamped.h>
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_motion_controller
 {
@@ -74,22 +75,35 @@ namespace cartesian_motion_controller
  *
  * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
  */
-template <class HardwareInterface>
-class CartesianMotionController : public virtual cartesian_controller_base::CartesianControllerBase<HardwareInterface>
+class CartesianMotionController : public virtual cartesian_controller_base::CartesianControllerBase
 {
   public:
     CartesianMotionController();
     virtual ~CartesianMotionController() = default;
 
-    virtual bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+    virtual controller_interface::return_type init(const std::string & controller_name) override;
+#endif
 
-    virtual void starting(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    virtual void stopping(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    virtual void update(const ros::Time& time, const ros::Duration& period);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+    controller_interface::return_type update() override;
+#endif
+
+    using Base = cartesian_controller_base::CartesianControllerBase;
+
 
   protected:
     /**
@@ -108,14 +122,12 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
     KDL::Frame      m_target_frame;
     KDL::Frame      m_current_frame;
 
-    void targetFrameCallback(const geometry_msgs::PoseStamped& pose);
+    void targetFrameCallback(const geometry_msgs::msg::PoseStamped::SharedPtr target);
 
-    ros::Subscriber m_target_frame_subscr;
-    std::string     m_target_frame_topic;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr m_target_frame_subscr;
 };
 
 }
 
-#include <cartesian_motion_controller/cartesian_motion_controller.hpp>
 
 #endif
