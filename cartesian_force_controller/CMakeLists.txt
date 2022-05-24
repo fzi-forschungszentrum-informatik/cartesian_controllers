@@ -11,12 +11,6 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cartesian_controller_base REQUIRED)
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-#generate_dynamic_reconfigure_options(
-#  cfg/CartesianForceController.cfg
-#)
-
-
 # Convenience variable for dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
         rclcpp
