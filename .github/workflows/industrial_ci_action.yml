@@ -2,23 +2,21 @@ name: CI
 
 on: [push, pull_request]
 
+
 jobs:
   industrial_ci:
+    env:
+      BEFORE_BUILD_TARGET_WORKSPACE: '.github/script/install_mujoco.sh'
     strategy:
       fail-fast: false
       matrix:
         env:
-          - {ROS_DISTRO: foxy, ROS_REPO: testing}
-          - {ROS_DISTRO: foxy, ROS_REPO: main}
+          #- {ROS_DISTRO: foxy, ROS_REPO: testing}
+          #- {ROS_DISTRO: foxy, ROS_REPO: main}
           - {ROS_DISTRO: galactic, ROS_REPO: testing}
           - {ROS_DISTRO: galactic, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Install MuJoCo
-        run: |
-                .github/script/install_mujoco.sh
-        shell: bash
-
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
