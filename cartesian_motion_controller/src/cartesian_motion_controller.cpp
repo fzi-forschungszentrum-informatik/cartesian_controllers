@@ -88,7 +88,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return ret;
   }
 
-  m_target_frame_subscr = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
+  m_target_frame_subscr = get_node()->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_frame", 3, std::bind(&CartesianMotionController::targetFrameCallback, this, std::placeholders::_1));
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
