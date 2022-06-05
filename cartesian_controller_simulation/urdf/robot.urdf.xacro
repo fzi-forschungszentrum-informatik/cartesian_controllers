@@ -10,12 +10,12 @@
 
         <!-- ROS2 control interfaces -->
         <ros2_control name="cartesian_controller_simulation" type="system">
-                <xacro:joint_interface name="joint1" />
-                <xacro:joint_interface name="joint2" />
-                <xacro:joint_interface name="joint3" />
-                <xacro:joint_interface name="joint4" />
-                <xacro:joint_interface name="joint5" />
-                <xacro:joint_interface name="joint6" />
+                <xacro:joint_interface name="joint1" p="80" d="0.4" />
+                <xacro:joint_interface name="joint2" p="80" d="0.4" />
+                <xacro:joint_interface name="joint3" p="80" d="0.4" />
+                <xacro:joint_interface name="joint4" p="80" d="0.4" />
+                <xacro:joint_interface name="joint5" p="80" d="0.4" />
+                <xacro:joint_interface name="joint6" p="10" d="1.0" />
                 <hardware>
                         <plugin>cartesian_controller_simulation/Simulator</plugin>
                         <param name="mujoco_model">$(arg mujoco_model)</param>

@@ -78,10 +78,15 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
   m_velocity_commands.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
   // Default gains
-  constexpr double default_p = 80.0;
-  constexpr double default_d = 0.4;
-  m_stiffness.resize(info_.joints.size(), default_p);
-  m_damping.resize(info_.joints.size(), default_d);
+  m_stiffness.resize(info_.joints.size(), 0);
+  m_damping.resize(info_.joints.size(), 0);
+
+  // Initialize joint gains for the simulator
+  for (size_t i = 0; i < info_.joints.size(); ++i)
+  {
+    m_stiffness[i] = std::stod(info_.joints[i].parameters.at("p"));
+    m_damping[i]   = std::stod(info_.joints[i].parameters.at("d"));
+  }
 
   for (const hardware_interface::ComponentInfo& joint : info_.joints)
   {
