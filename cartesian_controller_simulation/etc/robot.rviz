@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 371
+    Tree Height: 565
 Visualization Manager:
   Class: ""
   Displays:
@@ -58,17 +58,18 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
+        base_link:
+          link1:
+            link2:
+              link3:
+                link4:
+                  link5:
+                    link6:
+                      sensor_link:
+                        tool0:
+                          {}
         world:
-          base_link:
-            link1:
-              link2:
-                link3:
-                  link4:
-                    link5:
-                      link6:
-                        sensor_link:
-                          tool0:
-                            {}
+          {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -142,6 +143,15 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz_default_plugins/InteractiveMarkers
+      Enable Transparency: true
+      Enabled: true
+      Interactive Markers Namespace: /motion_control_handle
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: true
+      Show Visual Aids: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 85; 87; 83

@@ -8,6 +8,12 @@ controller_manager:
     cartesian_force_controller:
       type: cartesian_force_controller/CartesianForceController
 
+    cartesian_motion_controller:
+      type: cartesian_motion_controller/CartesianMotionController
+
+    motion_control_handle:
+      type: cartesian_controller_handles/MotionControlHandle
+
 cartesian_force_controller:
   ros__parameters:
     end_effector_link: "tool0"
@@ -21,9 +27,11 @@ cartesian_force_controller:
       - joint5
       - joint6
 
-    # Choose: position | velocity.
+    # Choose: position or velocity.
     command_interfaces:
       - position
+        #- velocity
+
 
     pd_gains:
         trans_x: {p: 0.05}
@@ -32,3 +40,46 @@ cartesian_force_controller:
         rot_x: {p: 0.01}
         rot_y: {p: 0.01}
         rot_z: {p: 0.01}
+
+cartesian_motion_controller:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # Choose: position or velocity.
+    command_interfaces:
+      - position
+        #- velocity
+
+    solver:
+        error_scale: 10.0
+        iterations: 10
+
+    pd_gains:
+        trans_x: {p: 1.0}
+        trans_y: {p: 1.0}
+        trans_z: {p: 1.0}
+        rot_x: {p: 0.1}
+        rot_y: {p: 0.1}
+        rot_z: {p: 0.1}
+
+motion_control_handle:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "tool0"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
