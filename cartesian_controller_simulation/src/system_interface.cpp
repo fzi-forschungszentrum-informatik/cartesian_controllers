@@ -75,7 +75,7 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
   m_velocities.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   m_efforts.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   m_position_commands.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  m_velocity_commands.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+  m_velocity_commands.resize(info_.joints.size(), 0.0);
 
   // Default gains
   m_stiffness.resize(info_.joints.size(), 0);
@@ -181,10 +181,14 @@ Simulator::return_type Simulator::read()
 {
   MuJoCoSimulator::getInstance().read(m_positions, m_velocities, m_efforts);
 
-  // Always start with the current states as safe default commands.
-  // These will be overwritten by active controllers.
-  m_position_commands = m_positions;
-  m_velocity_commands = m_velocities;
+  // Start with the current positions as safe default, but let active
+  // controllers overrride them in each cycle.
+  if (std::any_of(m_position_commands.begin(), m_position_commands.end(), [](double i) {
+        return std::isnan(i);
+      }))
+  {
+    m_position_commands = m_positions;
+  }
 
   return return_type::OK;
 }
