@@ -10,12 +10,12 @@
 
         <!-- ROS2 control interfaces -->
         <ros2_control name="cartesian_controller_simulation" type="system">
-                <xacro:joint_interface name="joint1" p="80" d="0.4" />
-                <xacro:joint_interface name="joint2" p="80" d="0.4" />
-                <xacro:joint_interface name="joint3" p="80" d="0.4" />
-                <xacro:joint_interface name="joint4" p="80" d="0.4" />
-                <xacro:joint_interface name="joint5" p="80" d="0.4" />
-                <xacro:joint_interface name="joint6" p="10" d="1.0" />
+                <xacro:joint_interface name="joint1" p="1000" d="0.5" />
+                <xacro:joint_interface name="joint2" p="1000" d="0.5" />
+                <xacro:joint_interface name="joint3" p="500" d="0.5" />
+                <xacro:joint_interface name="joint4" p="100" d="0.5" />
+                <xacro:joint_interface name="joint5" p="10" d="0.5" />
+                <xacro:joint_interface name="joint6" p="10" d="0.5" />
                 <hardware>
                         <plugin>cartesian_controller_simulation/Simulator</plugin>
                         <param name="mujoco_model">$(arg mujoco_model)</param>
@@ -71,7 +71,7 @@
                 <inertial>
                         <origin xyz="0 0 ${joint_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="base">
                         <origin xyz="0 0 ${joint_length / 2.0}" rpy="0 0 0" />
@@ -94,7 +94,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link1_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint1">
                         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -129,7 +129,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link2_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint2">
                         <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
@@ -164,7 +164,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link3_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint3">
                         <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
@@ -199,7 +199,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link4_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint4">
                         <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
@@ -234,7 +234,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link5_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint5">
                         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -269,7 +269,7 @@
                 <inertial>
                         <origin xyz="0 0 ${link6_length / 2.0}" rpy="0 0 0"/>
                         <mass value="1"/>
-                        <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+                        <inertia ixx="1.0"  ixy="0"  ixz="0" iyy="1.0" iyz="0" izz="1.0" />
                 </inertial>
                 <visual name="joint6">
                         <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
