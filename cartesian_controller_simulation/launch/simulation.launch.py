@@ -78,7 +78,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
-        prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
+        #prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
         output={
             "stdout": "screen",
             "stderr": "screen",
@@ -106,6 +106,11 @@ def generate_launch_description():
         executable="spawner",
         arguments=["motion_control_handle", "-c", "/controller_manager"],
     )
+    joint_trajectory_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
+    )
 
     # TF tree
     robot_state_publisher = Node(
@@ -132,8 +137,9 @@ def generate_launch_description():
         control_node,
         joint_state_broadcaster_spawner,
         #cartesian_force_controller_spawner,
-        cartesian_motion_controller_spawner,
-        motion_control_handle_spawner,
+        #cartesian_motion_controller_spawner,
+        #motion_control_handle_spawner,
+        joint_trajectory_controller_spawner,
         robot_state_publisher,
         rviz
     ]
