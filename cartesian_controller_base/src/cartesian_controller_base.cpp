@@ -269,6 +269,10 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  m_joint_cmd_pos_handles.clear();
+  m_joint_cmd_vel_handles.clear();
+  m_joint_state_pos_handles.clear();
+  this->release_interfaces();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
