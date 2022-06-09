@@ -83,6 +83,8 @@ MotionControlHandle::on_activate(const rclcpp_lifecycle::State& previous_state)
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_deactivate(const rclcpp_lifecycle::State& previous_state)
 {
+  m_joint_handles.clear();
+  this->release_interfaces();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
