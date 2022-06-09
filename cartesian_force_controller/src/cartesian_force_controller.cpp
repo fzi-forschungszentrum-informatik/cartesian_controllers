@@ -116,6 +116,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  // Stop drifting by sending zero joint velocities
+  Base::computeJointControlCmds(ctrl::Vector6D::Zero(), rclcpp::Duration::from_seconds(0));
+  Base::writeJointControlCmds();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
