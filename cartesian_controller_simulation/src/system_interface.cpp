@@ -190,6 +190,12 @@ Simulator::return_type Simulator::read()
     m_position_commands = m_positions;
   }
 
+  // TODO: Reconnect the MuJoCo simulator once we have implemented joint control with
+  // - Gravity compensation
+  // - integral gains for steady state accuracy
+  m_positions = m_position_commands;
+  m_velocities = m_velocity_commands;
+
   return return_type::OK;
 }
 
