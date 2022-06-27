@@ -290,10 +290,12 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
                                                         : m_joint_cmd_vel_handles))
     {
       RCLCPP_ERROR(node_->get_logger(),
-                   "Expected %zu '%s' state interfaces, got %zu.",
+                   "Expected %zu '%s' command interfaces, got %zu.",
                    m_joint_names.size(),
                    type.c_str(),
-                   m_joint_state_pos_handles.size());
+                   (type == hardware_interface::HW_IF_POSITION)
+                   ? m_joint_cmd_pos_handles.size()
+                   : m_joint_cmd_vel_handles.size());
       return CallbackReturn::ERROR;
     }
   }
