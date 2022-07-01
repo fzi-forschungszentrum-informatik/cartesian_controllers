@@ -1,6 +1,13 @@
 ![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_action.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
+---
+
+The **ROS2** port is currently under active development [here](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2-devel). Any testing on real hardware is highly appreciated :)
+
+---
+
+
 # Cartesian Controllers
 This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS-control` framework.
 The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
