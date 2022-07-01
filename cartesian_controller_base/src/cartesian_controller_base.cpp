@@ -59,7 +59,6 @@ namespace cartesian_controller_base
 {
 
 CartesianControllerBase::CartesianControllerBase()
-: m_already_initialized(false)
 {
 }
 
@@ -93,47 +92,44 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
 #if defined CARTESIAN_CONTROLLERS_GALACTIC
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_init()
 {
-  if (m_already_initialized)
+  if (!m_initialized)
   {
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    auto_declare<std::string>("ik_solver", "forward_dynamics");
+    auto_declare<std::string>("robot_description", "");
+    auto_declare<std::string>("robot_base_link", "");
+    auto_declare<std::string>("end_effector_link", "");
+    auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
+    auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
+    auto_declare<double>("solver.error_scale", 1.0);
+    auto_declare<int>("solver.iterations", 1);
+    m_initialized = true;
   }
-
-  auto_declare<std::string>("ik_solver", "forward_dynamics");
-  auto_declare<std::string>("robot_description", "");
-  auto_declare<std::string>("robot_base_link", "");
-  auto_declare<std::string>("end_effector_link", "");
-  auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-  auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
-  auto_declare<double>("solver.error_scale", 1.0);
-  auto_declare<int>("solver.iterations", 1);
-
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianControllerBase::init(const std::string & controller_name)
 {
-  // Initialize lifecycle node
-  const auto ret = ControllerInterface::init(controller_name);
-  if (ret != controller_interface::return_type::OK)
+  if (m_initialized)
   {
-    return ret;
+    // Initialize lifecycle node
+    const auto ret = ControllerInterface::init(controller_name);
+    if (ret != controller_interface::return_type::OK)
+    {
+      return ret;
+    }
+
+    auto_declare<std::string>("ik_solver", "forward_dynamics");
+    auto_declare<std::string>("robot_description", "");
+    auto_declare<std::string>("robot_base_link", "");
+    auto_declare<std::string>("end_effector_link", "");
+    auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
+    auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
+    auto_declare<double>("solver.error_scale", 1.0);
+    auto_declare<int>("solver.iterations", 1);
+
+    m_initialized = true;
   }
-
-  if (m_already_initialized)
-  {
-    return controller_interface::return_type::OK;
-  }
-
-  auto_declare<std::string>("ik_solver", "forward_dynamics");
-  auto_declare<std::string>("robot_description", "");
-  auto_declare<std::string>("robot_base_link", "");
-  auto_declare<std::string>("end_effector_link", "");
-  auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-  auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
-  auto_declare<double>("solver.error_scale", 1.0);
-  auto_declare<int>("solver.iterations", 1);
-
   return controller_interface::return_type::OK;
 }
 #endif
@@ -141,6 +137,11 @@ controller_interface::return_type CartesianControllerBase::init(const std::strin
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_configure(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (m_configured)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
   // Load user specified inverse kinematics solver
   std::string ik_solver = get_node()->get_parameter("ik_solver").as_string();
   m_solver_loader.reset(new pluginlib::ClassLoader<IKSolver>(
@@ -261,7 +262,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     }
   }
 
-  m_already_initialized = true;
+  m_configured = true;
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -269,16 +270,25 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
-  m_joint_cmd_pos_handles.clear();
-  m_joint_cmd_vel_handles.clear();
-  m_joint_state_pos_handles.clear();
-  this->release_interfaces();
+  if (m_active)
+  {
+    m_joint_cmd_pos_handles.clear();
+    m_joint_cmd_vel_handles.clear();
+    m_joint_state_pos_handles.clear();
+    this->release_interfaces();
+    m_active = false;
+  }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_activate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (m_active)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
   // Get command handles.
   for (const auto& type : m_cmd_interface_types)
   {
@@ -321,6 +331,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   };
   m_ik_solver->updateKinematics();
+  m_active = true;
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
