@@ -80,7 +80,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 controller_interface::return_type CartesianComplianceController::init(const std::string & controller_name)
 {
   using TYPE = controller_interface::return_type;
-  if (MotionBase::on_init() != TYPE::SUCCESS || ForceBase::on_init() != TYPE::SUCCESS)
+  if (MotionBase::init(controller_name) != TYPE::OK || ForceBase::init(controller_name) != TYPE::OK)
   {
     return TYPE::ERROR;
   }
