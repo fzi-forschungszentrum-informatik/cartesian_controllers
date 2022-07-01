@@ -39,15 +39,21 @@
 
 #pragma once
 
+#include <cartesian_controller_base/ROS2VersionConfig.h>
+
 #include "hardware_interface/system.hpp"
+#include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
-#include "hardware_interface/system_interface.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "cartesian_controller_simulation/mujoco_simulator.h"
 #include <map>
 #include <thread>
+
+#if defined CARTESIAN_CONTROLLERS_FOXY
+#include "hardware_interface/base_interface.hpp"
+#endif
 
 
 namespace cartesian_controller_simulation {
@@ -65,7 +71,11 @@ constexpr char HW_IF_DAMPING[]   = "damping";
  * controller_manager coordinated library.
  *
  */
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
 class Simulator : public hardware_interface::SystemInterface
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+class Simulator : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+#endif
 {
 public:
   using return_type = hardware_interface::return_type;
@@ -73,7 +83,11 @@ public:
 
   RCLCPP_SHARED_PTR_DEFINITIONS(Simulator);
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+  return_type configure(const hardware_interface::HardwareInfo& info) override;
+#endif
 
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
@@ -81,6 +95,12 @@ public:
 
   return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                           const std::vector<std::string>& stop_interfaces) override;
+
+#if defined CARTESIAN_CONTROLLERS_FOXY
+  return_type start() override;
+
+  return_type stop() override;
+#endif
 
   return_type read() override;
 
