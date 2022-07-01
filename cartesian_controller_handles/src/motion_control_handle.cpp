@@ -137,7 +137,11 @@ controller_interface::return_type MotionControlHandle::init(const std::string& c
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+  return controller_interface::return_type::OK;
+#endif
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
