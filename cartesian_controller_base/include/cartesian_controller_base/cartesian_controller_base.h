@@ -186,7 +186,9 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     ctrl::Vector6D                                    m_cartesian_input;
 
     // Against multi initialization in multi inheritance scenarios
-    bool m_already_initialized;
+    bool m_initialized = {false};
+    bool m_configured = {false};
+    bool m_active = {false};
 
     // Dynamic parameters
     double m_error_scale;
