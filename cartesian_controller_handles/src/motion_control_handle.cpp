@@ -128,10 +128,18 @@ MotionControlHandle::state_interface_configuration() const
 #if defined CARTESIAN_CONTROLLERS_GALACTIC
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_init()
+{
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type MotionControlHandle::init(const std::string& controller_name)
-#endif
 {
+  // Initialize lifecycle node
+  const auto ret = ControllerInterface::init(controller_name);
+  if (ret != controller_interface::return_type::OK)
+  {
+    return ret;
+  }
+#endif
+
   auto_declare<std::string>("robot_description", "");
   auto_declare<std::string>("robot_base_link", "");
   auto_declare<std::string>("end_effector_link", "");
