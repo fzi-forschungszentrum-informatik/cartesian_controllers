@@ -1,100 +1,28 @@
-#!/usr/bin/env python
-import sys
+#!/usr/bin/env python3
 import unittest
-import time
-import rospy
-from controller_manager_msgs.srv import ListControllers
-from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest
 
-PKG = 'cartesian_controller_tests'
-NAME = 'test_startup'
+import launch
+import launch.actions
+import launch_testing.actions
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_test_description():
+
+    setup = IncludeLaunchDescription(
+        PathJoinSubstitution(
+            [FindPackageShare("cartesian_controller_simulation"), "launch", "simulation.launch.py"]
+        )
+    )
+    until_ready = 10.0 # sec
+    return LaunchDescription([setup, TimerAction(period=until_ready, actions=[launch_testing.actions.ReadyToTest()])])
 
 
 class IntegrationTest(unittest.TestCase):
-    """ An integration test for controller initialization and startup
-
-    We check if each controller successfully performs the life cycle of:
-    `init()` - `starting()` - `update()` - `stopping()`.
-    """
-    def __init__(self, *args):
-        super(IntegrationTest, self).__init__(*args)
-
-        # Configuration
-        rospy.init_node(NAME)
-        timeout = rospy.Duration(5)
-        self.our_controllers = [
-            'my_cartesian_motion_controller',
-            'my_cartesian_force_controller',
-            'my_cartesian_compliance_controller',
-            'my_motion_control_handle',
-        ]
-
-        # ROS Interfaces
-        self.list_controllers = rospy.ServiceProxy('/controller_manager/list_controllers', ListControllers)
-        try:
-            self.list_controllers.wait_for_service(timeout.to_sec())
-        except rospy.exceptions.ROSException as err:
-            self.fail("Service list_controllers not available: {}".format(err))
-
-        self.switch_controller = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
-        try:
-            self.switch_controller.wait_for_service(timeout.to_sec())
-        except rospy.exceptions.ROSException as err:
-            self.fail("Service switch_controllers not available: {}".format(err))
-
-        # Wait until controller spawner is done
-        time.sleep(3)
 
     def test_controller_initialization(self):
-        """ Test whether every controller got initialized correctly
+        self.assertTrue(True)
 
-        We check if the list of all controllers currently managed by the
-        controller manager contains our controllers and if they have `state:
-        initialized`.
-        """
-        for name in self.our_controllers:
-            self.assertTrue(self.check_state(name, 'initialized'), "{} is initialized correctly".format(name))
-
-    def test_controller_switches(self):
-        """ Test whether every controller starts, runs, and stops correctly
-
-        We start each of our controllers individually and check if its state is
-        `running`.  We then switch it off and check whether its state is
-        `stopped`.
-        """
-        for name in self.our_controllers:
-            self.start_controller(name)
-            self.assertTrue(self.check_state(name, 'running'), "{} is starting correctly".format(name))
-            time.sleep(1) # process some update() cycles
-            self.stop_controller(name)
-            self.assertTrue(self.check_state(name, 'stopped'), "{} is stopping correctly".format(name))
-
-    def check_state(self, controller, state):
-        """ Check the controller's state
-
-        Return True if the controller's state is `state`, else False.
-        Return False if the controller is not listed.
-        """
-        listed_controllers = self.list_controllers()
-        for entry in listed_controllers.controller:
-            if entry.name == controller:
-                return True if entry.state == state else False
-        return False
-
-    def start_controller(self, controller):
-        """ Start the given controller with a best-effort strategy """
-        srv = SwitchControllerRequest()
-        srv.start_controllers = [controller]
-        srv.strictness = SwitchControllerRequest.BEST_EFFORT
-        self.switch_controller(srv)
-
-    def stop_controller(self, controller):
-        """ Stop the given controller with a best-effort strategy """
-        srv = SwitchControllerRequest()
-        srv.stop_controllers = [controller]
-        srv.strictness = SwitchControllerRequest.BEST_EFFORT
-        self.switch_controller(srv)
-
-if __name__ == '__main__':
-    import rostest
-    rostest.run(PKG, NAME, IntegrationTest, sys.argv)
