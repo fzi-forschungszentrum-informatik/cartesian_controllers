@@ -110,7 +110,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianControllerBase::init(const std::string & controller_name)
 {
-  if (m_initialized)
+  if (!m_initialized)
   {
     // Initialize lifecycle node
     const auto ret = ControllerInterface::init(controller_name);
