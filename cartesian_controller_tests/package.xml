@@ -1,27 +1,23 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>cartesian_controller_tests</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Integration tests for the Cartesian controllers</description>
 
-  <maintainer email="scherzin@fzi.de">scherzin</maintainer>
+  <maintainer email="scherzin@fzi.de">Stefan Scherzinger</maintainer>
   <license>BSD</license>
   <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
 
-  <!-- Use test_depend for packages you need only for testing: -->
-  <test_depend>rostest</test_depend>
-  <test_depend>rospy</test_depend> 
-  <test_depend>cartesian_force_controller</test_depend> 
+  <test_depend>launch</test_depend> 
+  <test_depend>launch_ros</test_depend> 
+  <test_depend>cartesian_controller_base</test_depend> 
   <test_depend>cartesian_motion_controller</test_depend> 
+  <test_depend>cartesian_force_controller</test_depend> 
   <test_depend>cartesian_compliance_controller</test_depend> 
   <test_depend>cartesian_controller_handles</test_depend> 
-  <test_depend>cartesian_controller_examples</test_depend> 
+  <test_depend>cartesian_controller_simulation</test_depend> 
+  <test_depend>launch_testing_ament_cmake</test_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
 </package>
