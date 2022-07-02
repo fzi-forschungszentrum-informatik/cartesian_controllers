@@ -50,12 +50,14 @@
 
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/system_interface.hpp"
+#include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "cartesian_controller_simulation/mujoco_simulator.h"
 
 namespace cartesian_controller_simulation {
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
 Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareInfo& info)
 {
   // Keep an internal copy of the given configuration
@@ -63,7 +65,15 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
   {
     return Simulator::CallbackReturn::ERROR;
   }
-
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+Simulator::return_type Simulator::configure(const hardware_interface::HardwareInfo& info)
+{
+  // Keep an internal copy of the given configuration
+  if (configure_default(info) != return_type::OK)
+  {
+    return return_type::ERROR;
+  }
+#endif
   // Start the simulator in parallel.
   // Let the thread's destructor clean-up all resources
   // once users close the simulation window.
@@ -95,7 +105,11 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs two possible command interfaces.",
                    joint.name.c_str());
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
       return Simulator::CallbackReturn::ERROR;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+      return Simulator::return_type::ERROR;
+#endif
     }
 
     if (!(joint.command_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -106,7 +120,11 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    joint.name.c_str(),
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY);
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
       return Simulator::CallbackReturn::ERROR;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+      return Simulator::return_type::ERROR;
+#endif
     }
 
     if (joint.state_interfaces.size() != 3)
@@ -114,7 +132,11 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs 3 state interfaces.",
                    joint.name.c_str());
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
       return Simulator::CallbackReturn::ERROR;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+      return Simulator::return_type::ERROR;
+#endif
     }
 
     if (!(joint.state_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -127,11 +149,19 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY,
                    hardware_interface::HW_IF_EFFORT);
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
       return Simulator::CallbackReturn::ERROR;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+      return Simulator::return_type::ERROR;
+#endif
     }
   }
 
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
   return Simulator::CallbackReturn::SUCCESS;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+  return Simulator::return_type::OK;
+#endif
 }
 
 std::vector<hardware_interface::StateInterface> Simulator::export_state_interfaces()
@@ -176,6 +206,21 @@ Simulator::prepare_command_mode_switch(const std::vector<std::string>& start_int
 
   return return_type::OK;
 }
+
+#if defined CARTESIAN_CONTROLLERS_FOXY
+Simulator::return_type Simulator::start()
+{
+  this->status_ = hardware_interface::status::STARTED;
+  return return_type::OK;
+}
+
+Simulator::return_type Simulator::stop()
+{
+  this->status_ = hardware_interface::status::STOPPED;
+  return return_type::OK;
+}
+#endif
+
 
 Simulator::return_type Simulator::read()
 {

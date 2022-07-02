@@ -15,6 +15,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(cartesian_controller_base REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -43,6 +44,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         )
 
 ament_target_dependencies(${PROJECT_NAME}
+        cartesian_controller_base
         hardware_interface
         pluginlib
         rclcpp

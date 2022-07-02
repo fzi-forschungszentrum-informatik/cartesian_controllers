@@ -1,8 +1,15 @@
-![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_action.yml/badge.svg)
+![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_foxy_action.yml/badge.svg)
+![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_galactic_action.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
+---
+
+The **ROS2** port is currently under active development [here](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2-devel). Any testing on real hardware is highly appreciated :)
+
+---
+
 # Cartesian Controllers
-This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS-control` framework.
+This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS2-control` framework.
 The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
 As a unique selling point, they use fast forward dynamics simulations of
 virtually conditioned twins of the real setup as a solver for the inverse kinematics problem.
@@ -18,23 +25,32 @@ to get an overview.
 Users may refer to `MoveIt` for end-effector motion planning, but 
 integrating a full planning stack is often unnecessary for simple applications.
 Additionally, there are a lot of use cases where direct control in task space is mandatory:
-Dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
+dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
 any form of **closed loop control with external sensors** for physical interactions with environments.
-This package provides such a controller suite for the [ROS-control](http://wiki.ros.org/ros_control) framework.
+This package provides such a controller suite for the [ROS2-control](https://control.ros.org/master/index.html) framework.
 
 ## Installation
-Switch into the `src` folder of your current ROS workspace and
+Switch into the `src` folder of your current ROS2 workspace and
 ```bash
-git clone git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
+git clone -b ros2-devel git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
 rosdep install --from-paths ./ --ignore-src -y
 cd ..
-catkin_make -DCMAKE_BUILD_TYPE=Release
+colcon build --packages-skip cartesian_controller_simulation --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
-Source your workspace again and you are ready to go.
+This builds the `cartesian_controllers` without its simulation environment.
+The simulation is mostly relevant if you are just getting to know the `cartesian_controllers` and want to inspect how things work.
+You can install it according to this [readme](cartesian_controller_simulation/README.md).
+
+Now source your workspace again and you are ready to go.
 
 ## Getting started
-In a sourced terminal, call `roslaunch cartesian_controller_examples
-examples.launch `. This will start a simulated world in which you can inspect
+This assumes you have the `cartesian_controller_simulation` package installed.
+In a sourced terminal, call
+```bash
+ros2 launch cartesian_controller_simulation simulation.launch.py
+```
+
+This will start a simulated world in which you can inspect
 and try things. Here are some quick tutorials with further details:
 - [Solver details](resources/doc/Solver_details.md)
 - [Cartesian motion controller](cartesian_motion_controller/README.md)

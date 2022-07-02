@@ -88,32 +88,32 @@ def generate_launch_description():
     # Joint states
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
     )
     cartesian_compliance_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
     )
     cartesian_force_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
     )
     cartesian_motion_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["cartesian_motion_controller", "--stopped", "-c", "/controller_manager"],
     )
     motion_control_handle_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["motion_control_handle", "--stopped", "-c", "/controller_manager"],
     )
     joint_trajectory_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner",
+        executable="spawner.py",
         arguments=["joint_trajectory_controller", "--stopped", "-c", "/controller_manager"],
     )
 
