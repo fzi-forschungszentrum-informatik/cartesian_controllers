@@ -98,7 +98,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
       "target_wrench", 10, std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
 
   m_ft_sensor_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      "m_ft_sensor_wrench", 10, std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
+      "ft_sensor_wrench", 10, std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
 
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
