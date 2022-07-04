@@ -1,21 +1,18 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.10)
 project(cartesian_controller_tests)
 
-find_package(catkin REQUIRED)
+find_package(ament_cmake REQUIRED)
 
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES cartesian_controller_tests
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
-)
 
-#############
-## Testing ##
-#############
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-
-  add_rostest(cartesian_controllers.test)
+if(BUILD_TESTING)
+  find_package(cartesian_controller_base REQUIRED)
+  find_package(cartesian_motion_controller REQUIRED)
+  find_package(cartesian_force_controller REQUIRED)
+  find_package(cartesian_compliance_controller REQUIRED)
+  find_package(cartesian_controller_handles REQUIRED)
+  find_package(cartesian_controller_simulation REQUIRED)
+  find_package(launch_testing_ament_cmake)
+  add_launch_test(integration_tests/test_startup.py)
 endif()
+
+ament_package()
