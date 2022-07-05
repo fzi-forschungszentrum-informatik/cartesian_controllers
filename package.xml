@@ -2,7 +2,7 @@
 <package format="2">
   <name>spacenav_utils</name>
   <version>0.0.0</version>
-  <description>Republish spacenav twist messages as wrench messages</description>
+  <description>Make the spacemouse a teach device for force-based teleoperation</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
