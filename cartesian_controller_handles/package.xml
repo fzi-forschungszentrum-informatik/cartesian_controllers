@@ -4,7 +4,6 @@
   <name>cartesian_controller_handles</name>
   <version>0.0.0</version>
   <description>The cartesian_controller_handles package</description>
-
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
   <license>BSD</license>
   <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 

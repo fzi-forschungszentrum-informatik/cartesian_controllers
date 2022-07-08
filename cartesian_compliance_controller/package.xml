@@ -6,6 +6,8 @@
   <description>Control your robot through Cartesian target poses and target wrenches</description>
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
   <license>BSD</license>
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -17,7 +19,6 @@
   <depend>cartesian_force_controller</depend>
   <depend>controller_interface</depend>
 
-  <!--<test_depend>ament_lint_auto</test_depend>-->
   <test_depend>ament_lint_common</test_depend>
 
   <export>
