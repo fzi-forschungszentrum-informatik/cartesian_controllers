@@ -29,7 +29,7 @@ endif()
 set(MUJOCO_INCLUDE_DIRS ${MUJOCO_DIR}/include)
 set(MUJOCO_LIBRARIES
         ${MUJOCO_DIR}/lib/libmujoco_nogl.so
-        )
+)
 
 # --------------------------------------------------------------------------------
 # Make sure that library relocation works for both build and install.
@@ -45,30 +45,30 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 if("${isSystemDir}" STREQUAL "-1")
     set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-endif("${isSystemDir}" STREQUAL "-1")
+endif()
 
 #--------------------------------------------------------------------------------
 # Build
 #--------------------------------------------------------------------------------
 add_library(${PROJECT_NAME} SHARED
         src/system_interface.cpp
-        )
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-        )
+)
 
 ament_target_dependencies(${PROJECT_NAME}
         cartesian_controller_base
         hardware_interface
         pluginlib
         rclcpp
-        )
+)
 
 target_link_libraries(${PROJECT_NAME}
         mujoco_simulator
-        )
+)
 
 pluginlib_export_plugin_description_file(hardware_interface cartesian_controller_simulation.xml)
 
@@ -76,18 +76,18 @@ pluginlib_export_plugin_description_file(hardware_interface cartesian_controller
 
 add_library(mujoco_simulator SHARED
         src/mujoco_simulator.cpp
-        )
+)
 
 target_include_directories(mujoco_simulator PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         ${MUJOCO_INCLUDE_DIRS}
-        )
+)
 
 # X11 OpenGL: link with libmujoco210.so, libglew.so, libGL.so
 target_link_libraries(mujoco_simulator PUBLIC
         ${MUJOCO_LIBRARIES}
-        )
+)
 
 
 
