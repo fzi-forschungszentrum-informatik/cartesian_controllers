@@ -199,8 +199,8 @@ std::vector<hardware_interface::CommandInterface> Simulator::export_command_inte
 }
 
 Simulator::return_type
-Simulator::prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
-                                       const std::vector<std::string>& stop_interfaces)
+Simulator::prepare_command_mode_switch([[maybe_unused]] const std::vector<std::string>& start_interfaces,
+                                       [[maybe_unused]] const std::vector<std::string>& stop_interfaces)
 {
   // TODO: Exclusive OR for position and velocity commands
 

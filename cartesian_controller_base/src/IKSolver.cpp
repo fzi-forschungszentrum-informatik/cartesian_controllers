@@ -84,7 +84,7 @@ namespace cartesian_controller_base{
       joint_pos_handles)
   {
     // Copy into internal buffers.
-    for (int i = 0; i < joint_pos_handles.size(); ++i)
+    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
     {
       // Interface type should be checked by the caller.
       // Add additional plausibility check just in case.
