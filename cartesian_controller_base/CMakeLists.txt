@@ -20,7 +20,7 @@ configure_file(include/cartesian_controller_base/ROS2VersionConfig.h.in ROS2Vers
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 add_definitions(-DEIGEN_MPL2_ONLY)
 
 find_package(ament_cmake REQUIRED)
