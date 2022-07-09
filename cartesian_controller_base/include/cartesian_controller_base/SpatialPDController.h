@@ -40,11 +40,8 @@
 #ifndef SPATIAL_PD_CONTROLLER_H_INCLUDED
 #define SPATIAL_PD_CONTROLLER_H_INCLUDED
 
-// Project
-#include <cartesian_controller_base/Utility.h>
 #include <cartesian_controller_base/PDController.h>
-
-// ROS
+#include <cartesian_controller_base/Utility.h>
 #include <rclcpp/rclcpp.hpp>
 
 namespace cartesian_controller_base

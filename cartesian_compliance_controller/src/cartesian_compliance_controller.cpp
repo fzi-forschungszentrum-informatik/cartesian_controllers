@@ -37,10 +37,9 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "cartesian_controller_base/Utility.h"
-#include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 #include "controller_interface/controller_interface.hpp"
+#include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 
 namespace cartesian_compliance_controller
 {

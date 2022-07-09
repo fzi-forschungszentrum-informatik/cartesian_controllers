@@ -37,10 +37,7 @@
  */
 //-----------------------------------------------------------------------------
 
-// this package
 #include <cartesian_controller_base/DampedLeastSquaresSolver.h>
-
-// Pluginlib
 #include <pluginlib/class_list_macros.hpp>
 
 /**
@@ -51,7 +48,7 @@
  *
  * \code{.yaml}
  * <name_of_your_controller>:
- *     type: "<type_of_your_controller>"
+ *   ros__parameters:
  *     ik_solver: "damped_least_squares"
  *     ...
  *

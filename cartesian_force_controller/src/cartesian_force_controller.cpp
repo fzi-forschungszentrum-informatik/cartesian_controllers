@@ -37,12 +37,9 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "cartesian_controller_base/Utility.h"
 #include "controller_interface/controller_interface.hpp"
 #include <cartesian_force_controller/cartesian_force_controller.h>
-
-// Other
 
 namespace cartesian_force_controller
 {

@@ -40,23 +40,20 @@
 #ifndef CARTESIAN_FORCE_CONTROLLER_H_INCLUDED
 #define CARTESIAN_FORCE_CONTROLLER_H_INCLUDED
 
-// Project
 #include "geometry_msgs/msg/wrench_stamped.hpp"
-#include <cartesian_controller_base/cartesian_controller_base.h>
 #include <cartesian_controller_base/ROS2VersionConfig.h>
-
-// ROS
+#include <cartesian_controller_base/cartesian_controller_base.h>
 #include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_force_controller
 {
 
 /**
- * @brief A ROS-control controller for Cartesian force control
+ * @brief A ROS2-control controller for Cartesian force control
  *
  * This controller implements 6-dimensional end effector force control for
  * robots with a wrist force-torque sensor.  Users command
- * geometry_msgs::WrenchStamped targets to steer the robot in task space.  The
+ * geometry_msgs::msg::WrenchStamped targets to steer the robot in task space.  The
  * controller additionally listens to the specified force-torque sensor signals
  * and computes the superposition with the target wrench.
  *
@@ -72,7 +69,6 @@ namespace cartesian_force_controller
  * real hardware, such that some experiments might be required for each use
  * case.
  *
- * The supported interface is `position` only at the moment.
  */
 class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase
 {
@@ -104,7 +100,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
 
   protected:
     /**
-     * @brief Compute the net force out of target wrench and measured sensor wrench
+     * @brief Compute the net force of target wrench and measured sensor wrench
      *
      * @return The remaining error wrench, given in robot base frame
      */

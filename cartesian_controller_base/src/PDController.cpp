@@ -39,7 +39,6 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/PDController.h>
-
 #include <utility>
 
 namespace cartesian_controller_base

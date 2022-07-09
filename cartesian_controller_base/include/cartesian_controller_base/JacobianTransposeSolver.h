@@ -40,13 +40,8 @@
 #ifndef JACOBIAN_TRANSPOSE_SOLVER_H_INCLUDED
 #define JACOBIAN_TRANSPOSE_SOLVER_H_INCLUDED
 
-// Project
 #include <cartesian_controller_base/IKSolver.h>
-
-// KDL
 #include <kdl/jacobian.hpp>
-
-// Other
 #include <memory>
 
 namespace cartesian_controller_base{

@@ -37,23 +37,17 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "controller_interface/controller_interface.hpp"
-#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
-#include <cartesian_controller_base/cartesian_controller_base.h>
-
-// KDL
-#include <cmath>
-#include <kdl/tree.hpp>
-#include <kdl_parser/kdl_parser.hpp>
-#include <kdl/jntarray.hpp>
-
-// URDF
-#include <urdf/model.h>
-#include <urdf_model/joint.h>
-
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cmath>
+#include <kdl/jntarray.hpp>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <urdf/model.h>
+#include <urdf_model/joint.h>
 
 namespace cartesian_controller_base
 {
