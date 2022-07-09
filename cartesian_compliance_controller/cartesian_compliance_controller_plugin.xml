@@ -4,7 +4,8 @@
          type="cartesian_compliance_controller::CartesianComplianceController"
          base_class_type="controller_interface::ControllerInterface">
     <description>
-      This controller implements Forward Dynamics Compliance Control (FDCC) on a set of joints.
+      Steer your robot's end-effector with Cartesian poses and force-torque vectors.
+      It's ideal for realizing in-contact motion with force profiles.
     </description>
   </class>
 
