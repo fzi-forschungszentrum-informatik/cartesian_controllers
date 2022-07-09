@@ -40,27 +40,20 @@
 #ifndef MOTION_CONTROL_HANDLE_H_INCLUDED
 #define MOTION_CONTROL_HANDLE_H_INCLUDED
 
-// ROS
-#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
-#include "rclcpp/publisher.hpp"
-#include "visualization_msgs/msg/interactive_marker_feedback.hpp"
-#include "visualization_msgs/msg/interactive_marker.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include <rclcpp/rclcpp.hpp>
-#include <interactive_markers/interactive_marker_server.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
-
-// ros_controls
-#include <controller_interface/controller_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-
-// Other
-#include <memory>
 #include "cartesian_controller_base/ROS2VersionConfig.h"
-
-// KDL
+#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "rclcpp/publisher.hpp"
+#include "visualization_msgs/msg/interactive_marker.hpp"
+#include "visualization_msgs/msg/interactive_marker_feedback.hpp"
+#include <controller_interface/controller_interface.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
+#include <interactive_markers/interactive_marker_server.hpp>
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
 
 namespace cartesian_controller_handles
 {
@@ -75,8 +68,6 @@ namespace cartesian_controller_handles
  * geometry_msgs/PoseStamped, which can be followed by motion-based Cartesian
  * controllers, such as the \ref CartesianMotionController or the \ref
  * CartesianComplianceController.
- *
- * @tparam HardwareInterface Currently only JointStateInterface is supported
  */
 class MotionControlHandle : public controller_interface::ControllerInterface
 {

@@ -41,30 +41,21 @@
 #ifndef IKSOLVER_H_INCLUDED
 #define IKSOLVER_H_INCLUDED
 
-// Project
 #include <cartesian_controller_base/Utility.h>
-
-// ros_controls
 #include <functional>
-#include <hardware_interface/loaned_state_interface.hpp>
 #include <hardware_interface/loaned_command_interface.hpp>
-
-// ros general
-#include <rclcpp/rclcpp.hpp>
-#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
-
-// other
-#include <vector>
-#include <memory>
-
-// KDL
-#include <kdl/frames.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
 #include <kdl/chain.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <vector>
 
 namespace cartesian_controller_base{
 

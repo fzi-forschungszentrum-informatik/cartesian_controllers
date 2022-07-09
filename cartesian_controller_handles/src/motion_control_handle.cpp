@@ -37,19 +37,14 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/time.hpp"
 #include "visualization_msgs/msg/detail/interactive_marker_feedback__struct.hpp"
 #include <cartesian_controller_handles/motion_control_handle.h>
-
-// KDL
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
-
-// URDF
 #include <urdf/model.h>
 
 
