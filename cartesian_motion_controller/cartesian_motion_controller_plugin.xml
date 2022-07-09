@@ -4,8 +4,8 @@
          type="cartesian_motion_controller::CartesianMotionController"
          base_class_type="controller_interface::ControllerInterface">
     <description>
-      The CartesianMotionController follows target poses.
-      The interpolation mechanism can be adjusted with parameters.
+      Steer your robot's end-effector with poses in Cartesian space.
+      Parameterize the controller between smoothness and exactness.
     </description>
   </class>
 
