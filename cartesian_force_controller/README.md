@@ -9,7 +9,7 @@ roslaunch cartesian_controller_examples examples.launch
 2) In another sourced terminal, open rqt and navigate to the *Controller Manager* plugin under *Robot Tools*.
 Select */controller_manager* as namespace and activate *my_cartesian_force_controller*.
 
-3) Publish a geometry_msgs/WrenchStamped to */my_cartesian_force_controller/target_wrench* with force x = 2 and watch the robot move.
+3) Publish a geometry_msgs/WrenchStamped to */target_wrench* with force x = 2 and watch the robot move.
 
 4) In rqt open the *Dynamic Reconfigure* plugin under *Configuration*. Play a
 little with the parameters of *my_cartesian_force_controller* (e.g. solver/error_scale) and observe the
