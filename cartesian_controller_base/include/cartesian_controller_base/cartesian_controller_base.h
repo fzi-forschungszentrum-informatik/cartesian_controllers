@@ -168,6 +168,11 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
 
     KDL::Chain m_robot_chain;
 
+    KDL::Tree m_robot_tree;
+
+    /**
+     * @brief KDL tree FK solver
+     */
     std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
 
     /**

@@ -105,8 +105,17 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
      * @return The remaining error wrench, given in robot base frame
      */
     ctrl::Vector6D        computeForceError();
+
+    /**
+     * @brief Compute the transform from the sensor_ref frame to the new_ref frame and store
+     * the result in m_ft_sensor_transform.
+     *
+     * @param sensor_ref: Force torque sensor reference frame
+     * @param new_ref: New reference frame of interest
+     */
+    void computeFtSensorTransform(const std::string& sensor_ref, const std::string& new_ref);
+
     std::string           m_new_ft_sensor_ref;
-    void setFtSensorReferenceFrame(const std::string& new_ref);
 
   private:
     ctrl::Vector6D        compensateGravity();

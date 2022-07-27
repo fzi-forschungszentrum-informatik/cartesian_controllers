@@ -58,7 +58,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return ret;
   }
 
-  auto_declare<std::string>("ft_sensor_ref_link", "");
   auto_declare<bool>("hand_frame_control", true);
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;;
@@ -72,7 +71,6 @@ controller_interface::return_type CartesianForceController::init(const std::stri
     return ret;
   }
 
-  auto_declare<std::string>("ft_sensor_ref_link", "");
   auto_declare<bool>("hand_frame_control", true);
 
   return controller_interface::return_type::OK;
@@ -172,10 +170,6 @@ ctrl::Vector6D CartesianForceController::computeForceError()
     target_wrench = m_target_wrench;
   }
 
-  // Superimpose target wrench and sensor wrench in base frame
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref) + target_wrench;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
   return m_ft_sensor_wrench + target_wrench;
 #endif
 }
@@ -205,6 +199,33 @@ void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_
   m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
 }
 
+void CartesianForceController::computeFtSensorTransform(const std::string& sensor_ref,
+  const std::string& new_ref)
+{
+  // Compute static transform from the force torque sensor to the new reference
+  // frame of interest.
+  m_new_ft_sensor_ref = new_ref;
+
+  // Joint positions should cancel out, i.e. it doesn't matter as long as they
+  // are the same for both transformations.
+  KDL::JntArray jnts(Base::m_ik_solver->getPositions());
+
+  m_ft_sensor_ref_link = sensor_ref;
+  KDL::Frame sensor_frame;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      sensor_frame,
+      m_ft_sensor_ref_link);
+
+  KDL::Frame new_sensor_frame;
+  Base::m_forward_kinematics_solver->JntToCart(
+      jnts,
+      new_sensor_frame,
+      m_new_ft_sensor_ref);
+
+  m_ft_sensor_transform = new_sensor_frame.Inverse() * sensor_frame;
+}
+
 void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
   m_target_wrench[0] = wrench->wrench.force.x;
@@ -217,7 +238,23 @@ void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::Wr
 
 void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+  // Check if frame exists in kinematic tree
+  const KDL::SegmentMap & segment_map = m_robot_tree.getSegments();
+  if (segment_map.find(wrench->header.frame_id) == segment_map.end())
+  {
+    RCLCPP_WARN(
+      get_node()->get_logger(),
+      "FT Sensor wrench frame '%s' does not exist in kinematic tree",
+      wrench->header.frame_id.c_str());
+    return;
+  }
+
+  // If needed, compute new transform from sensor frame to end effector frame
+  if (wrench->header.frame_id != m_ft_sensor_ref_link) {
+    computeFtSensorTransform(wrench->header.frame_id, Base::m_end_effector_link);
+  }
+
+  // Copy wrench values to temporary variable
   KDL::Wrench tmp;
   tmp[0] = wrench->wrench.force.x;
   tmp[1] = wrench->wrench.force.y;
@@ -226,25 +263,16 @@ void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::
   tmp[4] = wrench->wrench.torque.y;
   tmp[5] = wrench->wrench.torque.z;
 
-  // Compute how the measured wrench appears in the frame of interest.
+  // Compute how the measured wrench appears in the frame of interest
   tmp = m_ft_sensor_transform * tmp;
+  for (int i = 0; i < 6; ++i) {
+    m_ft_sensor_wrench[i] = tmp[i];
+  }
 
-  m_ft_sensor_wrench[0] = tmp[0];
-  m_ft_sensor_wrench[1] = tmp[1];
-  m_ft_sensor_wrench[2] = tmp[2];
-  m_ft_sensor_wrench[3] = tmp[3];
-  m_ft_sensor_wrench[4] = tmp[4];
-  m_ft_sensor_wrench[5] = tmp[5];
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  // We assume base frame for the measurements
-  // This is currently URe-ROS2 driver-specific (branch foxy).
-  m_ft_sensor_wrench[0] = wrench->wrench.force.x;
-  m_ft_sensor_wrench[1] = wrench->wrench.force.y;
-  m_ft_sensor_wrench[2] = wrench->wrench.force.z;
-  m_ft_sensor_wrench[3] = wrench->wrench.torque.x;
-  m_ft_sensor_wrench[4] = wrench->wrench.torque.y;
-  m_ft_sensor_wrench[5] = wrench->wrench.torque.z;
-#endif
+  // If needed, display the measured wrench in the base frame
+  if (wrench->header.frame_id != Base::m_robot_base_link) {
+    m_ft_sensor_wrench = Base::displayInBaseLink(m_ft_sensor_wrench, wrench->header.frame_id);
+  }
 }
 
 }

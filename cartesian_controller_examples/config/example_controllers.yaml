@@ -23,7 +23,6 @@ my_cartesian_force_controller:
     type: "position_controllers/CartesianForceController"
     end_effector_link: "tool0"
     robot_base_link: "base_link"
-    ft_sensor_ref_link: "sensor_link"
     joints:
     - joint1
     - joint2
@@ -44,7 +43,6 @@ my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
     end_effector_link: "tool0"    # All links below must come before this link
     robot_base_link: "base_link"
-    ft_sensor_ref_link: "sensor_link"
     compliance_ref_link: "tool0"
     target_frame_topic: "target_frame"
     joints:
