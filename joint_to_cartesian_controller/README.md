@@ -1,7 +1,7 @@
 ## Joint to Cartesian Controller
 This adapter-controller basically transforms the joint trajectory commands from
 a connected joint-based controller to target pose commands for Cartesian
-controllers. It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
+controllers. The message type the joint_trajectory_controller takes is trajectory_msgs/JointTrajectory.
 
 ## Example ##
 Below is an example entry for a controller specific configuration using the ur10 robot.
