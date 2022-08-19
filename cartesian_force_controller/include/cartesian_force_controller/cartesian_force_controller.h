@@ -107,6 +107,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector6D        compensateGravity();
 
     void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
+    void addSensorChainToRobotFK();
     void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
     bool signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 

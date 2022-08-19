@@ -69,6 +69,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  // Update robot forward kinematics if the sensor is not part of the robot kinematic chain
+  addSensorChainToRobotFK();
+
   // Make sure sensor wrenches are interpreted correctly
   setFtSensorReferenceFrame(Base::m_end_effector_link);
 
@@ -180,6 +183,53 @@ computeForceError()
   return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref)
     + target_wrench
     + compensateGravity();
+}
+
+template <class HardwareInterface>
+void CartesianForceController<HardwareInterface>::
+addSensorChainToRobotFK()
+{
+  KDL::Chain sensor_chain;
+  KDL::Chain sensor_intermediate_chain;
+
+  if (!Base::m_robot_tree.getChain(Base::m_robot_base_link,m_ft_sensor_ref_link,sensor_chain))
+  {
+    const std::string error = ""
+      "Failed to parse sensor chain from urdf model. "
+      "Are you sure that both your 'robot_base_link' and 'ft_sensor_ref_link' exist?";
+    ROS_ERROR_STREAM(error);
+    throw std::runtime_error(error);
+  }
+
+  // Get the first sensor segment that is in the robot chain
+  std::string sensor_root_segment;
+  for(std::vector<KDL::Segment>::reverse_iterator sensor_segment = sensor_chain.segments.rbegin(); sensor_segment != sensor_chain.segments.rend(); ++sensor_segment)
+  {
+    for(const auto& robot_segment: Base::m_robot_chain.segments) {
+      if(robot_segment.getName().compare(sensor_segment->getName()) == 0){
+        sensor_root_segment = sensor_segment->getName();
+        break;
+      }
+    }
+
+    if(!sensor_root_segment.empty())
+      break;
+  }
+
+  if (!Base::m_robot_tree.getChain(sensor_root_segment,m_ft_sensor_ref_link, sensor_intermediate_chain))
+  {
+    const std::string error = ""
+      "Failed to parse robot sensor intermediate chain from urdf model. "
+      "Are you sure that both your 'robot_base_link' and 'ft_sensor_ref_link' exist?";
+    ROS_ERROR_STREAM(error);
+    throw std::runtime_error(error);
+  }
+
+  // Reset solver: add sensor intermediate chain to robot chain
+  KDL::Tree tmp("not_relevant");
+  tmp.addChain(Base::m_robot_chain,"not_relevant");
+  tmp.addChain(sensor_intermediate_chain, sensor_root_segment);
+  Base::m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
 }
 
 template <class HardwareInterface>
