@@ -144,6 +144,8 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
+    KDL::Tree m_robot_tree;
+    KDL::Chain m_robot_chain;
     std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
 
     /**

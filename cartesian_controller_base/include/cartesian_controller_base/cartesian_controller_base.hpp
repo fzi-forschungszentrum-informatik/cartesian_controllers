@@ -90,8 +90,6 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   std::string robot_description;
   urdf::Model robot_model;
-  KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
 
   // Get controller specific configuration
   if (!ros::param::search("robot_description", robot_description))
@@ -121,14 +119,14 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     ROS_ERROR("Failed to parse urdf model from 'robot_description'");
     return false;
   }
-  if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
+  if (!kdl_parser::treeFromUrdfModel(robot_model,m_robot_tree))
   {
     const std::string error = ""
       "Failed to parse KDL tree from urdf model";
     ROS_ERROR_STREAM(error);
     throw std::runtime_error(error);
   }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  if (!m_robot_tree.getChain(m_robot_base_link,m_end_effector_link,m_robot_chain))
   {
     const std::string error = ""
       "Failed to parse robot chain from urdf model. "
@@ -178,9 +176,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Initialize solvers
-  m_ik_solver->init(nh, robot_chain,upper_pos_limits,lower_pos_limits);
+  m_ik_solver->init(nh, m_robot_chain,upper_pos_limits,lower_pos_limits);
   KDL::Tree tmp("not_relevant");
-  tmp.addChain(robot_chain,"not_relevant");
+  tmp.addChain(m_robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
 
   // Initialize Cartesian pd controllers
