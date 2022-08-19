@@ -75,6 +75,23 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  // Make sure compliance link is part of the robot chain
+  bool compliance_link_found = false;
+  for(std::vector<KDL::Segment>::reverse_iterator robot_segment = Base::m_robot_chain.segments.rbegin();
+      robot_segment != Base::m_robot_chain.segments.rend(); ++robot_segment)
+  {
+    if(robot_segment->getName().compare(m_compliance_ref_link) == 0){
+      compliance_link_found = true;
+      break;
+    }
+  }
+
+  if(!compliance_link_found)
+  {
+    ROS_ERROR_STREAM("The 'compliance_ref_link' MUST be part of the same robot kinematic chain");
+    return false;
+  }
+
   // Make sure sensor wrenches are interpreted correctly
   ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
 
