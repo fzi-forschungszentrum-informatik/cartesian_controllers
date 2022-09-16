@@ -88,7 +88,6 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   std::string robot_description;
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
 
   // Get controller specific configuration
   if (!nh.getParam("/robot_description",robot_description))
@@ -132,7 +131,7 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
     ROS_ERROR_STREAM(error);
     throw std::runtime_error(error);
   }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link, m_robot_chain))
   {
     const std::string error = ""
       "Failed to parse robot chain from urdf model. "
@@ -165,7 +164,7 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   m_controller_manager.reset(new controller_manager::ControllerManager(&m_controller_adapter, nh));
 
   // Initialize forward kinematics solver
-  m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(robot_chain));
+  m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(m_robot_chain));
 
   return true;
 }
