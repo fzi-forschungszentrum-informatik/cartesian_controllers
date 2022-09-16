@@ -100,6 +100,7 @@ class JointToCartesianController
 
     JointControllerAdapter     m_controller_adapter;
 
+    KDL::Chain m_robot_chain;
     std::vector<
       hardware_interface::JointStateHandle>   m_joint_handles;
 
