@@ -144,7 +144,27 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
 
+    /**
+     * @brief Check if specified links are part of the robot chain
+     *
+     * @param s Link to check for existence
+     *
+     * @return True if existent, false otherwise
+     */
+    bool robotChainContains(const std::string& s)
+    {
+      for (const auto& segment : this->m_robot_chain.segments)
+      {
+        if (segment.getName() == s)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
     KDL::Chain m_robot_chain;
+
     std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
 
     /**

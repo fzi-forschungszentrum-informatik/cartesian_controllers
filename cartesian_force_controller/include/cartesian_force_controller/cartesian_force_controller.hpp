@@ -70,19 +70,11 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Make sure sensor link is part of the robot chain
-  bool sensor_link_found = false;
-  for(std::vector<KDL::Segment>::reverse_iterator robot_segment = Base::m_robot_chain.segments.rbegin();
-      robot_segment != Base::m_robot_chain.segments.rend(); ++robot_segment)
+  if(!Base::robotChainContains(m_ft_sensor_ref_link))
   {
-    if(robot_segment->getName().compare(m_ft_sensor_ref_link) == 0){
-      sensor_link_found = true;
-      break;
-    }
-  }
-
-  if(!sensor_link_found)
-  {
-    ROS_ERROR_STREAM("The 'ft_sensor_ref_link' MUST be part of the same robot kinematic chain");
+    ROS_ERROR_STREAM(m_ft_sensor_ref_link << " is not part of the kinematic chain from "
+                                           << Base::m_robot_base_link << " to "
+                                           << Base::m_end_effector_link);
     return false;
   }
 
