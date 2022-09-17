@@ -210,6 +210,10 @@ starting(const ros::Time& time)
   // Copy joint state to internal simulation
   m_ik_solver->setStartState(m_joint_handles);
   m_ik_solver->updateKinematics();
+
+  // Provide safe command buffers with starting where we are
+  computeJointControlCmds(ctrl::Vector6D::Zero(), ros::Duration(0));
+  writeJointControlCmds();
 }
 
 template <>
