@@ -24,6 +24,14 @@
                 <color rgba="0.3 0.3 0.3 1.0"/>
         </material>
 
+        <!-- Connect to world -->
+        <link name="world" />
+        <joint name="world_joint" type="fixed">
+                <parent link="world" />
+                <child link = "base_link" />
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </joint>
+
         <link name="base_link" >
                 <visual name="joint">
                         <origin xyz="0 0 ${joint_length / 2.0}" rpy="0 0 0" />
@@ -219,6 +227,15 @@
                 </visual>
         </link>
 
+        <!-- Attach a sensor link -->
+        <joint name="sensor_link_joint" type="fixed">
+                <origin xyz="0 ${link6_length / 2.0} 0" rpy="${-pi / 2.0} 0 0"/>
+                <parent link="link6"/>
+                <child link="sensor_link"/>
+        </joint>
+        <link name="sensor_link"/>
+
+        <!-- The default end-effector -->
         <joint name="tool0_joint" type="fixed">
                 <origin xyz="0 0 ${link6_length / 2.0}" rpy="0 0 0"/>
                 <parent link="sensor_link"/>
@@ -234,21 +251,19 @@
                 </visual>
         </link>
 
-
-        <!-- Attach a sensor link -->
-        <joint name="sensor_link_joint" type="fixed">
+        <!-- Additional links for integration tests. -->
+        <joint name="invalid_sensor_link_joint" type="fixed">
                 <origin xyz="0 ${link6_length / 2.0} 0" rpy="${-pi / 2.0} 0 0"/>
                 <parent link="link6"/>
-                <child link="sensor_link"/>
+                <child link="invalid_sensor_link"/>
         </joint>
-        <link name="sensor_link"/>
+        <link name="invalid_sensor_link"/>
 
-        <!-- Connect to world -->
-        <link name="world" />
-        <joint name="world_joint" type="fixed">
-                <parent link="world" />
-                <child link = "base_link" />
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <joint name="invalid_compliance_link_joint" type="fixed">
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <parent link="sensor_link"/>
+                <child link="invalid_compliance_link"/>
         </joint>
+        <link name="invalid_compliance_link"/>
 
 </robot>
