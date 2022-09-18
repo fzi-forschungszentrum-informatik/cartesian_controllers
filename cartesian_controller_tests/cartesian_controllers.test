@@ -3,6 +3,17 @@
                 <arg name="rviz" value="false" />
         </include>
 
+        <!-- Load additional controller configuration -->
+        <rosparam file="$(find cartesian_controller_tests)/config/invalid_controllers.yaml" command="load"></rosparam>
+
+        <!-- Spawn controllers -->
+        <node name="invalid_controller_spawner" pkg="controller_manager" type="spawner"
+                args="--stopped
+                invalid_cartesian_force_controller
+                invalid_cartesian_compliance_controller
+                "
+        />
+
         <!-- Tests -->
         <test test-name="test_startup" pkg="cartesian_controller_tests" type="test_startup.py" time-limit="60.0"/>
 

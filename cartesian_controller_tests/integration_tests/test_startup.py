@@ -5,6 +5,7 @@ import time
 import rospy
 from controller_manager_msgs.srv import ListControllers
 from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest
+from controller_manager_msgs.utils import get_rosparam_controller_names
 
 PKG = 'cartesian_controller_tests'
 NAME = 'test_startup'
@@ -27,6 +28,11 @@ class IntegrationTest(unittest.TestCase):
             'my_cartesian_force_controller',
             'my_cartesian_compliance_controller',
             'my_motion_control_handle',
+        ]
+
+        self.invalid_controllers = [
+            'invalid_cartesian_force_controller',
+            'invalid_cartesian_compliance_controller',
         ]
 
         # ROS Interfaces
@@ -55,6 +61,20 @@ class IntegrationTest(unittest.TestCase):
         for name in self.our_controllers:
             self.assertTrue(self.check_state(name, 'initialized'), "{} is initialized correctly".format(name))
 
+    def test_invalid_controller_initialization(self):
+        """ Test whether the invalid controllers' initialization fails as expected
+
+        This is the case when:
+        1) The parameter server has the invalid controllers.
+           (We have previously loaded them in the test launch files and spawned them with `--stopped`).
+        2) The list of controllers managed by the controller manager does not contain the invalid controllers
+        """
+        for name in self.invalid_controllers:
+            self.assertTrue(self.check_parameter_server(name), "{} was loaded as expected".format(name))
+
+        for name in self.invalid_controllers:
+            self.assertFalse(self.check_state(name, 'initialized'), "{} initializes although it should not".format(name))
+
     def test_controller_switches(self):
         """ Test whether every controller starts, runs, and stops correctly
 
@@ -79,6 +99,13 @@ class IntegrationTest(unittest.TestCase):
         for entry in listed_controllers.controller:
             if entry.name == controller:
                 return True if entry.state == state else False
+        return False
+
+    def check_parameter_server(self, controller):
+        """ Check if the controller is in the parameter server """
+        for name in get_rosparam_controller_names("/"):
+            if name == controller:
+                return True
         return False
 
     def start_controller(self, controller):

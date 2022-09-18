@@ -1,0 +1,61 @@
+invalid_cartesian_force_controller:
+    type: "position_controllers/CartesianForceController"
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+
+    # Invalid: The sensor link is not part of the kinematic chain from
+    # robot_base_link to end_effector_link
+    ft_sensor_ref_link: "invalid_sensor_link"
+
+    joints:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+
+    pd_gains: # arbitrary
+        trans_x: {p: 0.0}
+        trans_y: {p: 0.0}
+        trans_z: {p: 0.0}
+        rot_x: {p: 0.0}
+        rot_y: {p: 0.0}
+        rot_z: {p: 0.0}
+
+invalid_cartesian_compliance_controller:
+    type: "position_controllers/CartesianComplianceController"
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "sensor_link"
+
+    # Invalid: the compliance link is not part of the kinematic chain from
+    # robot_base_link to end_effector_link
+    compliance_ref_link: "invalid_compliance_link"
+
+    joints:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+
+    # arbitrary
+    stiffness:
+        trans_x: 500
+        trans_y: 500
+        trans_z: 500
+        rot_x: 100
+        rot_y: 100
+        rot_z: 100
+
+    # arbitrary
+    pd_gains:
+        trans_x: {p: 0.0}
+        trans_y: {p: 0.0}
+        trans_z: {p: 0.0}
+        rot_x: {p: 0.0}
+        rot_y: {p: 0.0}
+        rot_z: {p: 0.0}
+

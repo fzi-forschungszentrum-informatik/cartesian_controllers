@@ -75,6 +75,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  // Make sure compliance link is part of the robot chain
+  if(!Base::robotChainContains(m_compliance_ref_link))
+  {
+    ROS_ERROR_STREAM(m_compliance_ref_link << " is not part of the kinematic chain from "
+                                           << Base::m_robot_base_link << " to "
+                                           << Base::m_end_effector_link);
+    return false;
+  }
+
   // Make sure sensor wrenches are interpreted correctly
   ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
 
