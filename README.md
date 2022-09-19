@@ -4,9 +4,11 @@
 
 ---
 
-This is the **ROS2** version of the `cartesian_controllers`. It's almost feature complete, but still lacks documentation and tutorials. In the meantime, have a look at the [cartesian_controllers_simulation](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2-devel/cartesian_controller_simulation) package for a start. Any feedback on real hardware and use cases is highly appreciated :)
+
+This is the **ROS2** version of the `cartesian_controllers`. It's almost feature complete. Checkout the individual controller READMEs and have a look at the [cartesian_controllers_simulation](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2/cartesian_controller_simulation) package for a complete example. 
 
 ---
+
 
 # Cartesian Controllers
 This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS2-control` framework.
