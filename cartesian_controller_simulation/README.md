@@ -28,14 +28,20 @@ It's a ready-to-use, pre-built library package, and we will just point to it dur
 ## Getting started
 In a sourced terminal, run
 ```bash
+export LC_NUMERIC="en_US.UTF-8"
 ros2 launch cartesian_controller_simulation simulation.launch.py
 ```
-
-## I don't see the robot in RViz
-This might be a *locals* problem. Try setting this in your shell prior to launch:
+The export might not be necessary on your system.
+It fixes an eventual *locals* problem and makes sure that you see the robot visualization correctly in RViz.
+The *launch* part will start a simulated world with a generic robot model.
+You can call
 ```bash
-export LC_NUMERIC="en_US.UTF-8"
+ros2 control list_controllers
 ```
+to get a list of controllers currently managed by the `controller_manager`.
+All of them can be activated and tested in the simulator.
+In contrast to `ROS1`, these controllers are nodes and you can also see them with `ros2 node list`.
+
 
 ## Hardware interfaces for controllers
 Exposed interfaces per joint:
