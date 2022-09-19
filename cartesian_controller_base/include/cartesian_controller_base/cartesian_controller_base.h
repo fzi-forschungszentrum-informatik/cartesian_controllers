@@ -40,33 +40,23 @@
 #ifndef CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 #define CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 
-// ROS
-#include <memory>
-#include <rclcpp/rclcpp.hpp>
-#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
-#include <geometry_msgs/msg/wrench_stamped.hpp>
+#include "ROS2VersionConfig.h"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
-
-// ros_controls
-#include <controller_interface/controller_interface.hpp>
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-
-// KDL
-#include <kdl/treefksolverpos_recursive.hpp>
-
-// Project
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
-#include "ROS2VersionConfig.h"
-
-// Pluginlib
+#include <controller_interface/controller_interface.hpp>
+#include <functional>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
+#include <hardware_interface/loaned_command_interface.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
+#include <kdl/treefksolverpos_recursive.hpp>
+#include <memory>
 #include <pluginlib/class_loader.hpp>
-
-// Other
-#include <vector>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <vector>
 
 namespace cartesian_controller_base
 {
@@ -75,12 +65,11 @@ namespace cartesian_controller_base
  * @brief Base class for each cartesian controller
  *
  * This class implements a common forward dynamics based solver for Cartesian
- * end effector error control, using the ROS-control framework.  Different
- * child class controllers will define what this error represents and should
- * call \ref computeJointControlCmds with that error.  The control commands are
- * sent to the hardware with \ref writeJointControlCmds.
+ * end effector error correction. Different child class controllers will define
+ * what this error represents and should call \ref computeJointControlCmds with
+ * that error.  The control commands are sent to the hardware with \ref
+ * writeJointControlCmds.
  *
- * Supported hardware interfaces are `position` and `velocity`.
  */
 class CartesianControllerBase : public controller_interface::ControllerInterface
 {
@@ -171,17 +160,23 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     std::string m_robot_base_link;
     int m_iterations;
 
-    std::vector<hardware_interface::LoanedStateInterface>     m_joint_state_handles;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
+      m_joint_state_pos_handles;
 
   private:
-    std::vector<hardware_interface::LoanedCommandInterface>   m_joint_cmd_handles;
+    std::vector<std::string> m_cmd_interface_types;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_pos_handles;
+    std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_vel_handles;
+
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::msg::JointTrajectoryPoint        m_simulated_joint_motion;
     SpatialPDController                               m_spatial_controller;
     ctrl::Vector6D                                    m_cartesian_input;
 
     // Against multi initialization in multi inheritance scenarios
-    bool m_already_initialized;
+    bool m_initialized = {false};
+    bool m_configured = {false};
+    bool m_active = {false};
 
     // Dynamic parameters
     double m_error_scale;

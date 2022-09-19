@@ -37,12 +37,9 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "cartesian_controller_base/Utility.h"
 #include "controller_interface/controller_interface.hpp"
 #include <cartesian_force_controller/cartesian_force_controller.h>
-
-// Other
 
 namespace cartesian_force_controller
 {
@@ -98,7 +95,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
       "target_wrench", 10, std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
 
   m_ft_sensor_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      "m_ft_sensor_wrench", 10, std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
+      "ft_sensor_wrench", 10, std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
 
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
@@ -116,6 +113,10 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  // Stop drifting by sending zero joint velocities
+  Base::computeJointControlCmds(ctrl::Vector6D::Zero(), rclcpp::Duration::from_seconds(0));
+  Base::writeJointControlCmds();
+  Base::on_deactivate(previous_state);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -127,7 +128,7 @@ controller_interface::return_type CartesianForceController::update()
 #endif
 {
   // Synchronize the internal model and the real robot
-  Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_handles);
+  Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);
 
   // Control the robot motion in such a way that the resulting net force
   // vanishes.  The internal 'simulation time' is deliberately independent of

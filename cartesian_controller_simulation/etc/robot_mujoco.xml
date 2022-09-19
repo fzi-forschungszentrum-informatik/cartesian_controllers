@@ -1,0 +1,89 @@
+<mujoco model="robot">
+        <!--
+        This file was created by first compiling a URDF from the robot.urdf.xacro and
+        then loading this in MuJoCo (via the simulate binary) to obtain the native
+        MuJoCo format. This step was helpful in getting all of the joint-link
+        transformations and the joint order right. Note that we had to replace all
+        visuals in the URDF to collisions before loading this, because MuJoCo discards
+        visuals by default.  The additional elements, such as actuators, assets, etc.
+        were added by hand later, since they can't be specified in URDF.
+        --> 
+        <compiler angle="radian"/>
+        <size njmax="500" nconmax="100"/>
+        <asset>
+                <texture type="skybox" builtin="gradient" rgb1="0.9 0.9 0.9" rgb2="0.5 0.5 0.5" width="512" height="512"/>
+                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+                <material name="matplane" reflectance="0.2" texture="texplane" texrepeat="1 1" texuniform="true"/>
+
+                <material name="joint_part1" rgba="0.525 0.713 0.662 1.0"/>
+                <material name="joint_part2" rgba="0.462 0.196 0.411 1.0"/>
+                <material name="base" rgba="0.956863 0.796078 0.631373 1.0"/>
+                <material name="tip" rgba="0.956 0.450 0.243 1.0"/>
+                <material name="link1" rgba="0.949 0.631 0.823 1.0"/>
+                <material name="link2" rgba="0.133 0.827 0.435 1.0"/>
+                <material name="link3" rgba="0.968 0.721 0.313 1.0"/>
+                <material name="link4" rgba="0.52549 0.529412 0.647059 1.0"/>
+                <material name="link5" rgba="0.478431 0.415686 0.662745 1.0"/>
+                <material name="link6" rgba="0.988 0.580 0.450 1.0"/>
+        </asset>
+        <worldbody>
+                <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+                <geom name="floor" pos="0 0 -0.0" size="0 0 1" type="plane" material="matplane"/>
+                <geom size="0.02 0.015" pos="0 0 0.015" type="cylinder" material="base"/>
+                <body name="link1" pos="0 0 0.045">
+                        <inertial pos="0 0 0.075" mass="1" diaginertia="1 1 1"/>
+                        <joint name="joint1" pos="0 0 0" axis="0 0 1" limited="true" range="-6.28319 6.28319"/>
+                        <geom size="0.02 0.015" type="cylinder" material="joint_part1"/>
+                        <geom size="0.01 0.075" pos="0 0 0.075" type="cylinder" material="link1"/>
+                        <geom size="0.02 0.015" pos="0 0 0.15" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part2"/>
+                        <body name="link2" pos="0 0.03 0.15" quat="0.707107 0 0.707107 0">
+                                <inertial pos="0 0 0.25" mass="1" diaginertia="1 1 1"/>
+                                <joint name="joint2" pos="0 0 0" axis="0 1 0" limited="true" range="-6.28319 6.28319"/>
+                                <geom size="0.02 0.015" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part1"/>
+                                <geom size="0.01 0.25" pos="0 0 0.25" type="cylinder" material="link2"/>
+                                <geom size="0.02 0.015" pos="0 0 0.5" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part2"/>
+                                <body name="link3" pos="0 -0.03 0.5">
+                                        <inertial pos="0 0 0.25" mass="1" diaginertia="1 1 1"/>
+                                        <joint name="joint3" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159"/>
+                                        <geom size="0.02 0.015" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part1"/>
+                                        <geom size="0.01 0.25" pos="0 0 0.25" type="cylinder" material="link3"/>
+                                        <geom size="0.02 0.015" pos="0 0 0.5" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part2"/>
+                                        <body name="link4" pos="0 0.03 0.5" quat="0.707107 0 0.707107 0">
+                                                <inertial pos="0 0 0.075" mass="1" diaginertia="1 1 1"/>
+                                                <joint name="joint4" pos="0 0 0" axis="0 1 0" limited="true" range="-6.28319 6.28319"/>
+                                                <geom size="0.02 0.015" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part1"/>
+                                                <geom size="0.01 0.075" pos="0 0.075 0" quat="0.707107 0.707107 0 0" type="cylinder" material="link4"/>
+                                                <geom size="0.02 0.015" pos="0 0.15 0" type="cylinder" material="joint_part2"/>
+                                                <body name="link5" pos="0 0.15 0.03">
+                                                        <inertial pos="0 0 0.05" mass="1" diaginertia="1 1 1"/>
+                                                        <joint name="joint5" pos="0 0 0" axis="0 0 1" limited="true" range="-6.28319 6.28319"/>
+                                                        <geom size="0.02 0.015" type="cylinder" material="joint_part1"/>
+                                                        <geom size="0.01 0.05" pos="0 0 0.05" type="cylinder" material="link5"/>
+                                                        <geom size="0.02 0.015" pos="0 0 0.1" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part2"/>
+                                                        <body name="link6" pos="0 0.03 0.1">
+                                                                <inertial pos="0 0.000208566 0.0248957" quat="0.850651 0.525731 0 0" mass="1.00419" diaginertia="1 1 1"/>
+                                                                <joint name="joint6" pos="0 0 0" axis="0 1 0" limited="true" range="-6.28319 6.28319"/>
+                                                                <geom size="0.02 0.015" quat="0.707107 0.707107 0 0" type="cylinder" material="joint_part1"/>
+                                                                <geom size="0.01 0.025" pos="0 0.025 0" quat="0.707107 -0.707107 0 0" type="cylinder" material="link6"/>
+                                                                <geom size="0.01" pos="0 0.05 0" quat="0.707107 -0.707107 0 0" material="tip"/>
+                                                        </body>
+                                                </body>
+                                        </body>
+                                </body>
+                        </body>
+                </body>
+        </worldbody>
+
+        <!-- Keep the order of joint creation from above. That's crucial for equally indexing joint state vectors and actuator torque vectors in the solver -->
+        <actuator>
+                <motor name="joint1" gear="1" joint="joint1"/>
+                <motor name="joint2" gear="1" joint="joint2"/>
+                <motor name="joint3" gear="1" joint="joint3"/>
+                <motor name="joint4" gear="1" joint="joint4"/>
+                <motor name="joint5" gear="1" joint="joint5"/>
+                <motor name="joint6" gear="1" joint="joint6"/>
+        </actuator>
+
+        <!-- Initial joint states for simulation -->
+        <include file="initial_joint_states.xml"/>
+</mujoco>

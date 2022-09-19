@@ -37,29 +37,157 @@
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
-
-// Project
+#include "cartesian_controller_base/Utility.h"
+#include "controller_interface/controller_interface.hpp"
 #include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 
-namespace position_controllers
+namespace cartesian_compliance_controller
 {
-  /**
-   * @brief Cartesian compliance controller that implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a position interface. 
-   */
-  typedef cartesian_compliance_controller::CartesianComplianceController<
-    hardware_interface::PositionJointInterface> CartesianComplianceController;
+
+CartesianComplianceController::CartesianComplianceController()
+// Base constructor won't be called in diamond inheritance, so call that
+// explicitly
+: Base::CartesianControllerBase(),
+  MotionBase::CartesianMotionController(),
+  ForceBase::CartesianForceController()
+{
 }
 
-namespace velocity_controllers
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_init()
 {
-  /**
-   * @brief Cartesian compliance controller that implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a velocity interface. 
-   */
-  typedef cartesian_compliance_controller::CartesianComplianceController<
-    hardware_interface::VelocityJointInterface> CartesianComplianceController;
+  using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+  if (MotionBase::on_init() != TYPE::SUCCESS || ForceBase::on_init() != TYPE::SUCCESS)
+  {
+    return TYPE::ERROR;
+  }
+
+  auto_declare<std::string>("compliance_ref_link", "");
+
+  constexpr double default_lin_stiff = 500.0;
+  constexpr double default_rot_stiff = 50.0;
+  auto_declare<double>("stiffness.trans_x", default_lin_stiff);
+  auto_declare<double>("stiffness.trans_y", default_lin_stiff);
+  auto_declare<double>("stiffness.trans_z", default_lin_stiff);
+  auto_declare<double>("stiffness.rot_x", default_rot_stiff);
+  auto_declare<double>("stiffness.rot_y", default_rot_stiff);
+  auto_declare<double>("stiffness.rot_z", default_rot_stiff);
+
+  return TYPE::SUCCESS;
+}
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+controller_interface::return_type CartesianComplianceController::init(const std::string & controller_name)
+{
+  using TYPE = controller_interface::return_type;
+  if (MotionBase::init(controller_name) != TYPE::OK || ForceBase::init(controller_name) != TYPE::OK)
+  {
+    return TYPE::ERROR;
+  }
+
+  auto_declare<std::string>("compliance_ref_link", "");
+
+  return TYPE::OK;
+}
+#endif
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_configure(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+  if (MotionBase::on_configure(previous_state) != TYPE::SUCCESS || ForceBase::on_configure(previous_state) != TYPE::SUCCESS)
+  {
+    return TYPE::ERROR;
+  }
+
+  // Make sure sensor wrenches are interpreted correctly
+  m_compliance_ref_link = get_node()->get_parameter("compliance_ref_link").as_string();
+  ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
+
+  return TYPE::SUCCESS;
 }
 
-PLUGINLIB_EXPORT_CLASS(position_controllers::CartesianComplianceController, controller_interface::ControllerBase)
-PLUGINLIB_EXPORT_CLASS(velocity_controllers::CartesianComplianceController, controller_interface::ControllerBase)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_activate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  // Base::on_activation(..) will get called twice,
+  // but that's fine.
+  using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+  if (MotionBase::on_activate(previous_state) != TYPE::SUCCESS || ForceBase::on_activate(previous_state) != TYPE::SUCCESS)
+  {
+    return TYPE::ERROR;
+  }
+  return TYPE::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_deactivate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+  if (MotionBase::on_deactivate(previous_state) != TYPE::SUCCESS || ForceBase::on_deactivate(previous_state) != TYPE::SUCCESS)
+  {
+    return TYPE::ERROR;
+  }
+  return TYPE::SUCCESS;
+}
+
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+controller_interface::return_type CartesianComplianceController::update(const rclcpp::Time& time,
+                                                                   const rclcpp::Duration& period)
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+controller_interface::return_type CartesianComplianceController::update()
+#endif
+{
+  // Synchronize the internal model and the real robot
+  Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);
+
+  // Control the robot motion in such a way that the resulting net force
+  // vanishes. This internal control needs some simulation time steps.
+  for (int i = 0; i < Base::m_iterations; ++i)
+  {
+    // The internal 'simulation time' is deliberately independent of the outer
+    // control cycle.
+    auto internal_period = rclcpp::Duration::from_seconds(0.02);
+
+    // Compute the net force
+    ctrl::Vector6D error = computeComplianceError();
+
+    // Turn Cartesian error into joint motion
+    Base::computeJointControlCmds(error,internal_period);
+  }
+
+  // Write final commands to the hardware interface
+  Base::writeJointControlCmds();
+
+  return controller_interface::return_type::OK;
+}
+
+ctrl::Vector6D CartesianComplianceController::computeComplianceError()
+{
+  ctrl::Vector6D tmp;
+  tmp[0] = get_node()->get_parameter("stiffness.trans_x").as_double();
+  tmp[1] = get_node()->get_parameter("stiffness.trans_y").as_double();
+  tmp[2] = get_node()->get_parameter("stiffness.trans_z").as_double();
+  tmp[3] = get_node()->get_parameter("stiffness.rot_x").as_double();
+  tmp[4] = get_node()->get_parameter("stiffness.rot_y").as_double();
+  tmp[5] = get_node()->get_parameter("stiffness.rot_z").as_double();
+
+  m_stiffness = tmp.asDiagonal();
+
+  ctrl::Vector6D net_force =
+
+    // Spring force in base orientation
+    Base::displayInBaseLink(m_stiffness,m_compliance_ref_link) * MotionBase::computeMotionError()
+
+    // Sensor and target force in base orientation
+    + ForceBase::computeForceError();
+
+  return net_force;
+}
+
+} // namespace
+
+
+// Pluginlib
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(cartesian_compliance_controller::CartesianComplianceController, controller_interface::ControllerInterface)

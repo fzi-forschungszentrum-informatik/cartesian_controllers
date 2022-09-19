@@ -37,18 +37,15 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "controller_interface/controller_interface.hpp"
+#include "controller_interface/helpers.hpp"
+#include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include <cartesian_controller_base/cartesian_controller_base.h>
-
-// KDL
 #include <cmath>
+#include <kdl/jntarray.hpp>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
-#include <kdl/jntarray.hpp>
-
-// URDF
 #include <urdf/model.h>
 #include <urdf_model/joint.h>
 
@@ -56,7 +53,6 @@ namespace cartesian_controller_base
 {
 
 CartesianControllerBase::CartesianControllerBase()
-: m_already_initialized(false)
 {
 }
 
@@ -64,10 +60,13 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::command_in
 {
   controller_interface::InterfaceConfiguration conf;
   conf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  conf.names.reserve(m_joint_names.size() * 1); // only position for now
-  for (const auto & joint_name : m_joint_names)
+  conf.names.reserve(m_joint_names.size() * m_cmd_interface_types.size());
+  for (const auto& type : m_cmd_interface_types)
   {
-    conf.names.push_back(joint_name + "/position");
+    for (const auto & joint_name : m_joint_names)
+    {
+      conf.names.push_back(joint_name + std::string("/").append(type));
+    }
   }
   return conf;
 }
@@ -76,7 +75,7 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
 {
   controller_interface::InterfaceConfiguration conf;
   conf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  conf.names.reserve(m_joint_names.size() * 1); // only position for now
+  conf.names.reserve(m_joint_names.size()); // Only position
   for (const auto & joint_name : m_joint_names)
   {
     conf.names.push_back(joint_name + "/position");
@@ -87,45 +86,44 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
 #if defined CARTESIAN_CONTROLLERS_GALACTIC
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_init()
 {
-  if (m_already_initialized)
+  if (!m_initialized)
   {
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    auto_declare<std::string>("ik_solver", "forward_dynamics");
+    auto_declare<std::string>("robot_description", "");
+    auto_declare<std::string>("robot_base_link", "");
+    auto_declare<std::string>("end_effector_link", "");
+    auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
+    auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
+    auto_declare<double>("solver.error_scale", 1.0);
+    auto_declare<int>("solver.iterations", 1);
+    m_initialized = true;
   }
-
-  auto_declare<std::string>("ik_solver", "forward_dynamics");
-  auto_declare<std::string>("robot_description", "");
-  auto_declare<std::string>("robot_base_link", "");
-  auto_declare<std::string>("end_effector_link", "");
-  auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-  auto_declare<double>("solver.error_scale", 1.0);
-  auto_declare<int>("solver.iterations", 1);
-
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianControllerBase::init(const std::string & controller_name)
 {
-  // Initialize lifecycle node
-  const auto ret = ControllerInterface::init(controller_name);
-  if (ret != controller_interface::return_type::OK)
+  if (!m_initialized)
   {
-    return ret;
+    // Initialize lifecycle node
+    const auto ret = ControllerInterface::init(controller_name);
+    if (ret != controller_interface::return_type::OK)
+    {
+      return ret;
+    }
+
+    auto_declare<std::string>("ik_solver", "forward_dynamics");
+    auto_declare<std::string>("robot_description", "");
+    auto_declare<std::string>("robot_base_link", "");
+    auto_declare<std::string>("end_effector_link", "");
+    auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
+    auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
+    auto_declare<double>("solver.error_scale", 1.0);
+    auto_declare<int>("solver.iterations", 1);
+
+    m_initialized = true;
   }
-
-  if (m_already_initialized)
-  {
-    return controller_interface::return_type::OK;
-  }
-
-  auto_declare<std::string>("ik_solver", "forward_dynamics");
-  auto_declare<std::string>("robot_description", "");
-  auto_declare<std::string>("robot_base_link", "");
-  auto_declare<std::string>("end_effector_link", "");
-  auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-  auto_declare<double>("solver.error_scale", 1.0);
-  auto_declare<int>("solver.iterations", 1);
-
   return controller_interface::return_type::OK;
 }
 #endif
@@ -133,6 +131,11 @@ controller_interface::return_type CartesianControllerBase::init(const std::strin
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_configure(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (m_configured)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
   // Load user specified inverse kinematics solver
   std::string ik_solver = get_node()->get_parameter("ik_solver").as_string();
   m_solver_loader.reset(new pluginlib::ClassLoader<IKSolver>(
@@ -233,7 +236,27 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(get_node());
 
-  m_already_initialized = true;
+  // Check command interfaces.
+  // We support position, velocity, or both.
+  m_cmd_interface_types = get_node()->get_parameter("command_interfaces").as_string_array();
+  if (m_cmd_interface_types.empty())
+  {
+    RCLCPP_ERROR(get_node()->get_logger(), "No command_interfaces specified");
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+  for (const auto& type : m_cmd_interface_types)
+  {
+    if (type != hardware_interface::HW_IF_POSITION && type != hardware_interface::HW_IF_VELOCITY)
+    {
+      RCLCPP_ERROR(
+        get_node()->get_logger(),
+        "Unsupported command interface: %s. Choose position or velocity",
+        type.c_str());
+      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+    }
+  }
+
+  m_configured = true;
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -241,28 +264,90 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (m_active)
+  {
+    m_joint_cmd_pos_handles.clear();
+    m_joint_cmd_vel_handles.clear();
+    m_joint_state_pos_handles.clear();
+    this->release_interfaces();
+    m_active = false;
+  }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_activate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  if (m_active)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
+  // Get command handles.
+  for (const auto& type : m_cmd_interface_types)
+  {
+    if (!controller_interface::get_ordered_interfaces(command_interfaces_,
+                                                      m_joint_names,
+                                                      type,
+                                                      (type == hardware_interface::HW_IF_POSITION)
+                                                        ? m_joint_cmd_pos_handles
+                                                        : m_joint_cmd_vel_handles))
+    {
+      RCLCPP_ERROR(node_->get_logger(),
+                   "Expected %zu '%s' command interfaces, got %zu.",
+                   m_joint_names.size(),
+                   type.c_str(),
+                   (type == hardware_interface::HW_IF_POSITION)
+                   ? m_joint_cmd_pos_handles.size()
+                   : m_joint_cmd_vel_handles.size());
+      return CallbackReturn::ERROR;
+    }
+  }
+
+  // Get state handles.
+  if (!controller_interface::get_ordered_interfaces(state_interfaces_,
+                                                    m_joint_names,
+                                                    hardware_interface::HW_IF_POSITION,
+                                                    m_joint_state_pos_handles))
+  {
+    RCLCPP_ERROR(node_->get_logger(),
+                 "Expected %zu '%s' state interfaces, got %zu.",
+                 m_joint_names.size(),
+                 hardware_interface::HW_IF_POSITION,
+                 m_joint_state_pos_handles.size());
+    return CallbackReturn::ERROR;
+  }
+
   // Copy joint state to internal simulation
-  if (!m_ik_solver->setStartState(state_interfaces_))
+  if (!m_ik_solver->setStartState(m_joint_state_pos_handles))
   {
     RCLCPP_ERROR(get_node()->get_logger(), "Could not set start state");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   };
   m_ik_solver->updateKinematics();
+  m_active = true;
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 void CartesianControllerBase::writeJointControlCmds()
 {
-  // Only position commands for now
-  for (size_t i = 0; i < m_joint_names.size(); ++i)
+  // Write all available types.
+  for (const auto& type : m_cmd_interface_types)
   {
-    command_interfaces_[i].set_value(m_simulated_joint_motion.positions[i]);
+    if (type == hardware_interface::HW_IF_POSITION)
+    {
+      for (size_t i = 0; i < m_joint_names.size(); ++i)
+      {
+        m_joint_cmd_pos_handles[i].get().set_value(m_simulated_joint_motion.positions[i]);
+      }
+    }
+    if (type == hardware_interface::HW_IF_VELOCITY)
+    {
+      for (size_t i = 0; i < m_joint_names.size(); ++i)
+      {
+        m_joint_cmd_vel_handles[i].get().set_value(m_simulated_joint_motion.velocities[i]);
+      }
+    }
   }
 }
 

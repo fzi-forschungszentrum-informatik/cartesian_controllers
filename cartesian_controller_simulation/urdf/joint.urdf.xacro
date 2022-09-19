@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+        <!-- Individual joint. -->
+        <xacro:macro name="joint_interface" params="name p d">
+                <joint name="${name}">
+                        <command_interface name="position">
+                                <param name="min">-1</param>
+                                <param name="max">1</param>
+                        </command_interface>
+                        <command_interface name="velocity">
+                                <param name="min">-1</param>
+                                <param name="max">1</param>
+                        </command_interface>
+                        <param name="p">${p}</param>
+                        <param name="d">${d}</param>
+                        <state_interface name="position"/>
+                        <state_interface name="velocity"/>
+                        <state_interface name="effort"/>
+                </joint>
+        </xacro:macro>
+
+</robot>

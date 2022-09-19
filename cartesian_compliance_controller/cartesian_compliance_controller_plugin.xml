@@ -1,20 +1,11 @@
-<library path="lib/libcartesian_compliance_controller">
+<library path="cartesian_compliance_controller">
 
-  <class name="position_controllers/CartesianComplianceController"
-         type="position_controllers::CartesianComplianceController"
-         base_class_type="controller_interface::ControllerBase">
+  <class name="cartesian_compliance_controller/CartesianComplianceController"
+         type="cartesian_compliance_controller::CartesianComplianceController"
+         base_class_type="controller_interface::ControllerInterface">
     <description>
-      The CartesianComplianceController implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a set of joints.
-      This variant sends commands to a position interface.
-    </description>
-  </class>
-
-  <class name="velocity_controllers/CartesianComplianceController"
-         type="velocity_controllers::CartesianComplianceController"
-         base_class_type="controller_interface::ControllerBase">
-    <description>
-      The CartesianComplianceController implements Forward Dynamics Compliance Control (FDCC) [Scherzinger2017] on a set of joints.
-      This variant sends commands to a velocity interface.
+      Steer your robot's end-effector with Cartesian poses and force-torque vectors.
+      It's ideal for realizing in-contact motion with force profiles.
     </description>
   </class>
 

@@ -37,10 +37,7 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include <cartesian_controller_base/SpatialPDController.h>
-
-// Other
 #include <string>
 
 namespace cartesian_controller_base

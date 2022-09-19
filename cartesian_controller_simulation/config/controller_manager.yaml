@@ -1,0 +1,186 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    cartesian_compliance_controller:
+      type: cartesian_compliance_controller/CartesianComplianceController
+
+    cartesian_force_controller:
+      type: cartesian_force_controller/CartesianForceController
+
+    cartesian_motion_controller:
+      type: cartesian_motion_controller/CartesianMotionController
+
+    motion_control_handle:
+      type: cartesian_controller_handles/MotionControlHandle
+
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+cartesian_compliance_controller:
+  ros__parameters:
+
+    # This is the tip of the robot tool that you usually use for your task.
+    # For instance, it could be the drilling bit of a screwdriver or a grinding
+    # tool.  When you specify a target_wrench, i.e. some additional forces that
+    # your robot should apply to its environment, that target_wrench gets
+    # applied in this frame.
+    end_effector_link: "tool0"
+
+    # This is usually the link directly before the first actuated joint.  All
+    # controllers will build a kinematic chain from this link up to
+    # end_effector_link.  It's also the reference frame for the superposition
+    # of error components in all controllers.
+    robot_base_link: "base_link"
+
+    # This is the URDF link of your sensor. Sensor signals are assumed to be
+    # given in this frame.  It's important that this link is located somewhere
+    # between end_effector_link and robot_base_link.  If that's not the case,
+    # the controllers won't initialize and will emit an error message.
+    ft_sensor_ref_link: "sensor_link"
+
+    # This is the link that the robot feels compliant about. It does not need
+    # to coincide with the end_effector_link, but for many use cases, this
+    # configuration is handy. When working with a screwdriver, for instance, 
+    # setting compliance_ref_link == end_effector_link makes it easy to specify
+    # downward pushing forces without generating unwanted offset moments.
+    # On the other hand, an application could benefit from yielding a little in
+    # the robot's wrist while drawing a line on a surface with a pen.
+    compliance_ref_link: "tool0"
+
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # Choose between position or velocity.  In fact, the controllers allow to
+    # set both at the same time, but not all drivers will support this.
+    # In general, position control is a little smoother due to the double
+    # time-integrated commands from the solver. If available on a robot, it
+    # should be the default.  On some drivers, the velocity interface provides
+    # faster control cycles, and hence could improve stability in
+    # contact-dominated tasks.  A drawback is that we lose one time integration
+    # step here and obtain noisier command signals in comparison to the
+    # position interface.  It's probably suitable to test both on a new robot
+    # and decide for what works best.
+    command_interfaces:
+      - position
+        #- velocity
+
+    stiffness:  # w.r.t. compliance_ref_link coordinates
+        trans_x: 500.0
+        trans_y: 500.0
+        trans_z: 500.0
+        rot_x: 20.0
+        rot_y: 20.0
+        rot_z: 20.0
+
+    solver:
+        error_scale: 0.5
+        iterations: 1
+
+    # For all controllers, these gains are w.r.t. the robot_base_link coordinates.
+    pd_gains:
+        trans_x: {p: 0.05, d: 0.005}
+        trans_y: {p: 0.05, d: 0.005}
+        trans_z: {p: 0.05, d: 0.005}
+        rot_x: {p: 1.5}
+        rot_y: {p: 1.5}
+        rot_z: {p: 1.5}
+
+cartesian_force_controller:
+  ros__parameters:
+
+    # See the cartesian_compliance_controller
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "sensor_link"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # See the cartesian_compliance_controller
+    command_interfaces:
+      - position
+        #- velocity
+
+    solver:
+        error_scale: 0.5
+
+    pd_gains:
+        trans_x: {p: 0.05}
+        trans_y: {p: 0.05}
+        trans_z: {p: 0.05}
+        rot_x: {p: 1.5}
+        rot_y: {p: 1.5}
+        rot_z: {p: 1.5}
+
+cartesian_motion_controller:
+  ros__parameters:
+
+    # See the cartesian_compliance_controller
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # See the cartesian_compliance_controller
+    command_interfaces:
+      - position
+        #- velocity
+
+    solver:
+        error_scale: 1.0
+        iterations: 10
+
+    pd_gains:
+        trans_x: {p: 1.0}
+        trans_y: {p: 1.0}
+        trans_z: {p: 1.0}
+        rot_x: {p: 0.5}
+        rot_y: {p: 0.5}
+        rot_z: {p: 0.5}
+
+motion_control_handle:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "tool0"
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+

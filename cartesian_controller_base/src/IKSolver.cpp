@@ -37,21 +37,14 @@
  */
 //-----------------------------------------------------------------------------
 
-// this package
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include <algorithm>
 #include <cartesian_controller_base/IKSolver.h>
-
-// other
+#include <functional>
+#include <kdl/framevel.hpp>
+#include <kdl/jntarrayvel.hpp>
 #include <map>
 #include <sstream>
-#include <algorithm>
-
-// KDL
-#include <kdl/jntarrayvel.hpp>
-#include <kdl/framevel.hpp>
-
-// DEBUG
-
 
 namespace cartesian_controller_base{
 
@@ -79,35 +72,42 @@ namespace cartesian_controller_base{
 
 
   bool IKSolver::setStartState(
-      const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
+    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+      joint_pos_handles)
   {
     // Copy into internal buffers.
-    for (int i = 0; i < joint_state_handles.size(); ++i)
+    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
     {
-      if (joint_state_handles[i].get_interface_name() == hardware_interface::HW_IF_POSITION)
+      // Interface type should be checked by the caller.
+      // Add additional plausibility check just in case.
+      if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
       {
-        m_current_positions(i)      = joint_state_handles[i].get_value();
-        m_current_velocities(i)     = 0.0;
-        m_current_accelerations(i)  = 0.0;
-        m_last_positions(i)         = m_current_positions(i);
-        m_last_velocities(i)        = m_current_velocities(i);
+        m_current_positions(i)     = joint_pos_handles[i].get().get_value();
+        m_current_velocities(i)    = 0.0;
+        m_current_accelerations(i) = 0.0;
+        m_last_positions(i)        = m_current_positions(i);
+        m_last_velocities(i)       = m_current_velocities(i);
       }
-      else return false;
+      else
+      {
+        return false;
+      }
     }
     return true;
   }
 
 
   void IKSolver::synchronizeJointPositions(
-    const std::vector<hardware_interface::LoanedStateInterface>& joint_state_handles)
+    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+      joint_pos_handles)
   {
-    for (size_t i = 0; i < joint_state_handles.size(); ++i)
+    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
     {
-      // TODO: We need both joint positions and velocities.
-      // Get both from the system_interface.
-      if (joint_state_handles[i].get_interface_name() == hardware_interface::HW_IF_POSITION)
+      // Interface type should be checked by the caller.
+      // Add additional plausibility check just in case.
+      if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
       {
-        m_current_positions(i) = joint_state_handles[i].get_value();
+        m_current_positions(i) = joint_pos_handles[i].get().get_value();
         m_last_positions(i)    = m_current_positions(i);
       }
     }

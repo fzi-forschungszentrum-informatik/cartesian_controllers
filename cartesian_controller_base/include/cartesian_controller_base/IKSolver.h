@@ -41,29 +41,21 @@
 #ifndef IKSOLVER_H_INCLUDED
 #define IKSOLVER_H_INCLUDED
 
-// Project
 #include <cartesian_controller_base/Utility.h>
-
-// ros_controls
-#include <hardware_interface/loaned_state_interface.hpp>
+#include <functional>
 #include <hardware_interface/loaned_command_interface.hpp>
-
-// ros general
-#include <rclcpp/rclcpp.hpp>
-#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
-
-// other
-#include <vector>
-#include <memory>
-
-// KDL
-#include <kdl/frames.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
 #include <kdl/chain.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <vector>
 
 namespace cartesian_controller_base{
 
@@ -124,18 +116,23 @@ class IKSolver
     const KDL::JntArray& getPositions() const;
 
     //! Set initial joint configuration
-    bool setStartState(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
+    bool setStartState(
+      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+        joint_pos_handles);
 
     /**
      * @brief Synchronize joint positions with the real robot
      *
      * Call this periodically in the controller's update() function.
-     * The internal model's joint velocity is not sychronized. Derived IK
-     * solvers should implement how to keep or reset those values.
+     * The internal model's joint velocity is not sychronized. This makes the
+     * solver more stable. Derived IK solvers should implement how to keep or
+     * reset those values.
      *
-     * @param joint_handles Read handles to the joints.
+     * @param joint_pos_handles Read handles to the joint positions.
      */
-    void synchronizeJointPositions(const std::vector<hardware_interface::LoanedStateInterface>& joint_handles);
+    void synchronizeJointPositions(
+      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
+        joint_pos_handles);
 
     /**
      * @brief Initialize the solver

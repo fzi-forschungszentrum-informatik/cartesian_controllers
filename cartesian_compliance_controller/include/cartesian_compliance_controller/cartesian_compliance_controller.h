@@ -40,20 +40,17 @@
 #ifndef CARTESIAN_COMPLIANCE_CONTROLLER_H_INCLUDED
 #define CARTESIAN_COMPLIANCE_CONTROLLER_H_INCLUDED
 
-// Project
+#include <cartesian_controller_base/ROS2VersionConfig.h>
 #include <cartesian_controller_base/cartesian_controller_base.h>
-#include <cartesian_motion_controller/cartesian_motion_controller.h>
 #include <cartesian_force_controller/cartesian_force_controller.h>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <cartesian_compliance_controller/ComplianceControllerConfig.h>
+#include <cartesian_motion_controller/cartesian_motion_controller.h>
+#include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_compliance_controller
 {
 
 /**
- * @brief A ROS-control controller for Cartesian compliance control
+ * @brief A ROS2-control controller for Cartesian compliance control
  *
  * This controller is the combination of the \ref CartesianMotionController and
  * the \ref CartesianForceController.  Users can use this controller to track
@@ -62,40 +59,51 @@ namespace cartesian_compliance_controller
  * and target wrenches in parallel.
  * While the PD gains determine the controllers responsiveness, users can
  * additionally set a 6-dimensional stiffness for this controller, relating
- * target pose offset to the robot's current position.
+ * the target pose offset to reaction forces with the environment.
  *
  * Note that the target wrench is superimposed with this stiffness, meaning that
  * the target wrench is fully compensated at some point by the virtual stiffness.
- * An common application is the tracking of a moving target in close proximity
- * to a surface, and applying additional forces to that surface.
- * To compensate bigger offsets, users can set a low stiffness for the axes
+ * A common application is the tracking of a moving target in close proximity
+ * to a surface, and applying an additional force profile to that surface.
+ * To compensate for bigger offsets, users can set a low stiffness for the axes
  * where the additional forces are applied.
  *
- * @tparam HardwareInterface The interface to support. Either PositionJointInterface or VelocityJointInterface
  */
-template <class HardwareInterface>
 class CartesianComplianceController
-: public cartesian_motion_controller::CartesianMotionController<HardwareInterface>
-, public cartesian_force_controller::CartesianForceController<HardwareInterface>
+: public cartesian_motion_controller::CartesianMotionController
+, public cartesian_force_controller::CartesianForceController
 {
   public:
     CartesianComplianceController();
 
-    bool init(HardwareInterface* hw, ros::NodeHandle& nh);
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+    virtual controller_interface::return_type init(const std::string & controller_name) override;
+#endif
 
-    void starting(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    void stopping(const ros::Time& time);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    void update(const ros::Time& time, const ros::Duration& period);
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+        const rclcpp_lifecycle::State & previous_state) override;
 
-    typedef cartesian_controller_base::CartesianControllerBase<HardwareInterface> Base;
-    typedef cartesian_motion_controller::CartesianMotionController<HardwareInterface> MotionBase;
-    typedef cartesian_force_controller::CartesianForceController<HardwareInterface> ForceBase;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC
+    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#elif defined CARTESIAN_CONTROLLERS_FOXY
+    controller_interface::return_type update() override;
+#endif
+
+    using Base = cartesian_controller_base::CartesianControllerBase;
+    using MotionBase = cartesian_motion_controller::CartesianMotionController;
+    using ForceBase = cartesian_force_controller::CartesianForceController;
 
   private:
     /**
-     * @brief Compute the net force out of target wrench and stiffness-related pose offset
+     * @brief Compute the net force of target wrench and stiffness-related pose offset
      *
      * @return The remaining error wrench, given in robot base frame
      */
@@ -104,18 +112,8 @@ class CartesianComplianceController
     ctrl::Matrix6D        m_stiffness;
     std::string           m_compliance_ref_link;
 
-    // Dynamic reconfigure for stiffness
-    typedef cartesian_compliance_controller::ComplianceControllerConfig
-      ComplianceConfig;
-
-    void dynamicReconfigureCallback(ComplianceConfig& config, uint32_t level);
-
-    std::shared_ptr<dynamic_reconfigure::Server<ComplianceConfig> > m_dyn_conf_server;
-    dynamic_reconfigure::Server<ComplianceConfig>::CallbackType m_callback_type;
 };
 
 }
-
-#include <cartesian_compliance_controller/cartesian_compliance_controller.hpp>
 
 #endif
