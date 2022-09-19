@@ -28,24 +28,10 @@ The interpolation behavior can be tweaked by the following parameters:
 
 ## Getting Started
 We assume that you have the `cartesian_controller_simulation` package installed.
-1) In a sourced terminal, call
-   ```bash
-   export LC_NUMERIC="en_US.UTF-8"
-   ros2 launch cartesian_controller_simulation simulation.launch.py
-   ```
+1) Start the simulation environment as described [here](./../cartesian_controller_simulation/README.md).
 
-   The export might not be necessary on your system.
-   It fixes an eventual *locals* problem and makes sure that you see the robot visualization correctly in RViz.
-   The *launch* part will start a simulated world with a generic robot model.
-   You can call
-   ```bash
-   ros2 control list_controllers
-   ```
-   to get a list of controllers currently managed by the `controller_manager`.
-   All of them can be activated and tested in the simulator.
-   In contrast to `ROS1`, these controllers are nodes and you can also see them with `ros2 node list`.
-
-2) Now we activate the `cartesian_motion_controller` and a [graphical handle](../cartesian_controller_handles/README.md) for drag-drop interaction:
+2) Now we activate the `cartesian_motion_controller` and a
+   [graphical handle](../cartesian_controller_handles/README.md) for drag-drop interaction:
    ```bash
    ros2 control switch_controllers --start cartesian_motion_controller motion_control_handle
    ```
