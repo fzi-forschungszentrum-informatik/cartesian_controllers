@@ -4,7 +4,9 @@
 
 ---
 
-This is the **ROS2** version of the `cartesian_controllers`. It's almost feature complete, but still lacks documentation and tutorials. In the meantime, have a look at the [cartesian_controllers_simulation](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2-devel/cartesian_controller_simulation) package for a start. Any feedback on real hardware and use cases is highly appreciated :)
+This is the **ROS2** version of the `cartesian_controllers`.
+Checkout each controller's updated README.md with detailed explanations.
+Any issue, PR, or feedback on *your* special robot and use case is highly appreciated :)
 
 ---
 
