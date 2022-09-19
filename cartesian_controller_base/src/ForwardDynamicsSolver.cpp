@@ -37,20 +37,13 @@
  */
 //-----------------------------------------------------------------------------
 
-// this package
-#include <cartesian_controller_base/ForwardDynamicsSolver.h>
-
-// other
-#include <map>
-#include <sstream>
 #include <algorithm>
-
-// KDL
-#include <kdl/jntarrayvel.hpp>
+#include <cartesian_controller_base/ForwardDynamicsSolver.h>
 #include <kdl/framevel.hpp>
-
-// Pluginlib
+#include <kdl/jntarrayvel.hpp>
+#include <map>
 #include <pluginlib/class_list_macros.hpp>
+#include <sstream>
 
 
 /**
@@ -61,7 +54,7 @@
  *
  * \code{.yaml}
  * <name_of_your_controller>:
- *     type: "<type_of_your_controller>"
+ *   ros__parameters:
  *     ik_solver: "forward_dynamics"
  *     ...
  *

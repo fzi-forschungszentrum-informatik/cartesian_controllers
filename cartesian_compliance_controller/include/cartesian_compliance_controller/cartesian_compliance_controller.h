@@ -40,20 +40,17 @@
 #ifndef CARTESIAN_COMPLIANCE_CONTROLLER_H_INCLUDED
 #define CARTESIAN_COMPLIANCE_CONTROLLER_H_INCLUDED
 
-// Project
-#include <cartesian_controller_base/cartesian_controller_base.h>
-#include <cartesian_motion_controller/cartesian_motion_controller.h>
-#include <cartesian_force_controller/cartesian_force_controller.h>
 #include <cartesian_controller_base/ROS2VersionConfig.h>
-
-// ROS
+#include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cartesian_force_controller/cartesian_force_controller.h>
+#include <cartesian_motion_controller/cartesian_motion_controller.h>
 #include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_compliance_controller
 {
 
 /**
- * @brief A ROS-control controller for Cartesian compliance control
+ * @brief A ROS2-control controller for Cartesian compliance control
  *
  * This controller is the combination of the \ref CartesianMotionController and
  * the \ref CartesianForceController.  Users can use this controller to track
@@ -62,13 +59,13 @@ namespace cartesian_compliance_controller
  * and target wrenches in parallel.
  * While the PD gains determine the controllers responsiveness, users can
  * additionally set a 6-dimensional stiffness for this controller, relating
- * target pose offset to the robot's current position.
+ * the target pose offset to reaction forces with the environment.
  *
  * Note that the target wrench is superimposed with this stiffness, meaning that
  * the target wrench is fully compensated at some point by the virtual stiffness.
- * An common application is the tracking of a moving target in close proximity
- * to a surface, and applying additional forces to that surface.
- * To compensate bigger offsets, users can set a low stiffness for the axes
+ * A common application is the tracking of a moving target in close proximity
+ * to a surface, and applying an additional force profile to that surface.
+ * To compensate for bigger offsets, users can set a low stiffness for the axes
  * where the additional forces are applied.
  *
  */
@@ -106,7 +103,7 @@ class CartesianComplianceController
 
   private:
     /**
-     * @brief Compute the net force out of target wrench and stiffness-related pose offset
+     * @brief Compute the net force of target wrench and stiffness-related pose offset
      *
      * @return The remaining error wrench, given in robot base frame
      */

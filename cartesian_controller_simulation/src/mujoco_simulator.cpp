@@ -42,18 +42,18 @@
 
 namespace cartesian_controller_simulation {
 
-MuJoCoSimulator::MuJoCoSimulator(){};
+MuJoCoSimulator::MuJoCoSimulator(){}
 
 void MuJoCoSimulator::controlCB(const mjModel* m, mjData* d)
 {
   getInstance().controlCBImpl(m, d);
 }
 
-void MuJoCoSimulator::controlCBImpl(const mjModel* m, mjData* d)
+void MuJoCoSimulator::controlCBImpl([[maybe_unused]] const mjModel* m, mjData* d)
 {
   command_mutex.lock();
 
-  for (auto i = 0; i < pos_cmd.size(); ++i)
+  for (size_t i = 0; i < pos_cmd.size(); ++i)
   {
     // Joint-level impedance control
     d->ctrl[i] = stiff[i] * (pos_cmd[i] - d->qpos[i]) +            // stiffness

@@ -1,67 +1,108 @@
 # Cartesian Motion Controller
-This package provides a controller for following Cartesian target poses.
 
-This type of controller automatically interpolates between two target poses.
-The amount of how much it interpolates can be set with
-* the PD gains individually for each Cartesian axis
-* the error_scale for all axes alike
-* the number of iterations per control cycle.
+This controller is a flexible and versatile default for Cartesian motion without contact.
+The primary use case is approaching and tracking moving targets in the robots workspace.
+One of the advantages is that the controller interpolates for you, i.e. you do
+not need to densely sample intermediate poses towards your targets.
 
-As an example, the *CartesianMotionController* can be given target poses,
-that pop up somewhere with a relatively low frequency.
-Depending on how responsive the system is, users can obtain anything in between
-fast jumps or smooth, directed motion, depending on their use case.
+As an example, the `CartesianMotionController` can be given sparsely sampled target poses
+with a relatively low frequency.
+Depending on their use case, users can obtain anything in between
+smooth, directed motion, or fast jumps to these target poses.
+If the desired Cartesian trajectories are sampled more high-frequently, the
+controller can achieve good tracking for more precise tasks.
+
+The interpolation behavior can be tweaked by the following parameters:
+* The `p` and `d` gains determine the responsiveness in each individual Cartesian axis. The higher these
+  values, the faster does the robot *drive* to the given target pose.
+  Proportional gains (`p`) are normally sufficient and you'll probably not need
+  a `d` gain for most use cases.
+* The `error_scale` achieves this behavior uniformly for all axes. It
+  post-scales the computed error from the controller gains (by multiplication) and is a little
+  easier to adjust with a single parameter. The idea is
+  to first weigh the different Cartesian axes with the controller gains and adjust the
+  *overall* responsiveness with this parameter.
+* The number of internal `iterations` per robot control cycle. The higher this
+  value, the more does the controller become an inverse kinematics solver for accurate tracking.
+
 
 ## Getting Started
-1) In a sourced terminal, run
-```bash
-roslaunch cartesian_controller_examples examples.launch
-```
-2) In another sourced terminal, open rqt and navigate to the *Controller Manager* plugin under *Robot Tools*.
-Select */controller_manager* as namespace and activate *my_cartesian_motion_controller*. Also activate
-*my_motion_control_handle*.
+We assume that you have the `cartesian_controller_simulation` package installed.
+1) Start the simulation environment as described [here](./../cartesian_controller_simulation/README.md).
 
-3) Switch to the RViz window and tick the box *Interactive Markers*. Use the interactive marker to guide the end effector of the robot. The robot should follow slowely.
+2) Now we activate the `cartesian_motion_controller` and a
+   [graphical handle](../cartesian_controller_handles/README.md) for drag-drop interaction:
+   ```bash
+   ros2 control switch_controllers --start cartesian_motion_controller motion_control_handle
+   ```
 
-4) In rqt open the *Dynamic Reconfigure* plugin under *Configuration*. Play a
-little with the parameters of *my_cartesian_motion_controller* (e.g. solver/error_scale) and observe the
-changes in RViz  using the interactive marker as handle.
+   This activates an interactive marker for moving the robot's end-effector.
+   Drag the marker by its handles. The robot should smoothly follow your lead.
+
+3) Next, open `rqt` in a new, sourced terminal to change some of the controller's parameters:
+   ```bash
+   rqt
+   ```
+   Open the *Dynamic Reconfigure* plugin under *Plugins/Configuration* and
+   select the *cartesian_motion_controller*. Play a little with the parameters
+   (e.g. `solver/error_scale` and `solver/iterations`) and observe the changes
+   in RViz  using the interactive marker as handle.
+
+This concludes our small tutorial of using the `cartesian_motion_controller`.
+The approach of steering the robot with the graphical handle is a good first step when working with real robot hardware.
+It lets you check if everything runs as expected and allows you to adapt the parameters as desired.
+
+When controlling your robot in special use cases, you would normally write
+custom scripts that continuously publish the controller's target pose by
+sampling from desired Cartesian trajectory profiles.
+
 
 ## Example Configuration
-Below is an example entry for a controller specific configuration. Also see cartesian_controller_examples/config/example_controllers.yaml for further tips.
+Below is an example `controller_manager.yaml` for a controller specific configuration. Also see [the simulation config](../cartesian_controller_simulation/config/controller_manager.yaml) for further information.
 ```yaml
-my_cartesian_motion_controller:
-    type: "position_controllers/CartesianMotionController"
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    cartesian_motion_controller:
+      type: cartesian_motion_controller/CartesianMotionController
+
+    # More controller instances here
+    # ...
+
+
+cartesian_motion_controller:
+  ros__parameters:
     end_effector_link: "tool0"
     robot_base_link: "base_link"
-    target_frame_topic: "target_frame"
     joints:
-    - joint1
-    - joint2
-    - joint3
-    - joint4
-    - joint5
-    - joint6
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+
+    # Choose: position or velocity.
+    command_interfaces:
+      - position
+        #- velocity
+
+    solver:
+        error_scale: 1.0
+        iterations: 10
 
     pd_gains:
-        trans_x: {p: 10.0}
-        trans_y: {p: 10.0}
-        trans_z: {p: 10.0}
-        rot_x: {p: 1.0}
-        rot_y: {p: 1.0}
-        rot_z: {p: 1.0}
+        trans_x: {p: 1.0}
+        trans_y: {p: 1.0}
+        trans_z: {p: 1.0}
+        rot_x: {p: 0.5}
+        rot_y: {p: 0.5}
+        rot_z: {p: 0.5}
+
+
+# More controller specifications here
+# ...
+
 ```
 
-The controller configuration must be loaded to the ros parameter server and is accessed by the controller manager when looking for configuration for the loaded controller *my_cartesian_motion_controller*.
-
-## Tips
-Note, that the maximal joint velocities of the robot usually represent the
-limiting factor for speed.
-If you notice that increasing *error_scale* does
-not make the robot move as fast as you would like, then probably the joint
-velocity limits in your ROS controlled hardware interface are already reached for this motion.
-Reaching these limits on individual joints also leads to a distortion of the
-Cartesian path.
-Also note that when using this controller in inverse kinematics mode (very high gains), then
-you must also publish high-frequently sampled targets in order to avoid jumps on joint
-control level.

@@ -41,7 +41,6 @@
 #ifndef PD_CONTROLLER_H_INCLUDED
 #define PD_CONTROLLER_H_INCLUDED
 
-// ROS
 #include <rclcpp/rclcpp.hpp>
 
 namespace cartesian_controller_base

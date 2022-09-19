@@ -41,22 +41,17 @@
 #ifndef FORWARD_DYNAMICS_SOLVER_H_INCLUDED
 #define FORWARD_DYNAMICS_SOLVER_H_INCLUDED
 
-// Project
-#include <cartesian_controller_base/Utility.h>
 #include <cartesian_controller_base/IKSolver.h>
-
-// other
-#include <memory>
-#include <vector>
-
-// KDL
-#include <kdl/frames.hpp>
+#include <cartesian_controller_base/Utility.h>
 #include <kdl/chain.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+#include <memory>
+#include <vector>
 
 namespace cartesian_controller_base{
 

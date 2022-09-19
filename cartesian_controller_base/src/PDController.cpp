@@ -39,6 +39,7 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/PDController.h>
+#include <utility>
 
 namespace cartesian_controller_base
 {
@@ -56,7 +57,7 @@ PDController::~PDController()
 void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node> handle)
 {
   m_params = params;
-  m_handle = handle;
+  m_handle = std::move(handle);
 
   auto auto_declare = [this](const std::string& s)
   {
@@ -64,10 +65,7 @@ void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node>
     {
       return m_handle->declare_parameter<double>(s, 0.0);
     }
-    else
-    {
-      return m_handle->get_parameter(s).as_double();
-    }
+    return m_handle->get_parameter(s).as_double();
   };
 
   auto_declare(m_params + ".p");
@@ -77,7 +75,7 @@ void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node>
 
 double PDController::operator()(const double& error, const rclcpp::Duration& period)
 {
-  if (period == rclcpp::Duration(0.0))
+  if (period == rclcpp::Duration::from_seconds(0.0))
   {
     return 0.0;
   }

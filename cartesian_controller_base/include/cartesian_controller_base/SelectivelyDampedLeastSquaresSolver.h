@@ -28,9 +28,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-// -- BEGIN LICENSE BLOCK -----------------------------------------------------
-// -- END LICENSE BLOCK -------------------------------------------------------
-
 //-----------------------------------------------------------------------------
 /*!\file    SelectivelyDampedLeastSquaresSolver.h
  *
@@ -43,10 +40,7 @@
 #ifndef SELECTIVELY_DAMPED_LEAST_SQUARES_SOLVER_H_INCLUDED
 #define SELECTIVELY_DAMPED_LEAST_SQUARES_SOLVER_H_INCLUDED
 
-// Project
 #include <cartesian_controller_base/IKSolver.h>
-
-// KDL
 #include <kdl/jacobian.hpp>
 #include <memory>
 

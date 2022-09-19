@@ -37,15 +37,12 @@
  */
 //-----------------------------------------------------------------------------
 
-// Project
 #include "cartesian_controller_base/Utility.h"
 #include "controller_interface/controller_interface.hpp"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
-#include <cartesian_motion_controller/cartesian_motion_controller.h>
-
-// Other
 #include <algorithm>
+#include <cartesian_motion_controller/cartesian_motion_controller.h>
 
 namespace cartesian_motion_controller
 {

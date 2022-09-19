@@ -81,7 +81,7 @@ public:
   using return_type = hardware_interface::return_type;
   using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-  RCLCPP_SHARED_PTR_DEFINITIONS(Simulator);
+  RCLCPP_SHARED_PTR_DEFINITIONS(Simulator)
 
 #if defined CARTESIAN_CONTROLLERS_GALACTIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;

@@ -40,34 +40,23 @@
 #ifndef CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 #define CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 
-// ROS
-#include <functional>
-#include <memory>
-#include <rclcpp/rclcpp.hpp>
-#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
-#include <geometry_msgs/msg/wrench_stamped.hpp>
+#include "ROS2VersionConfig.h"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
-
-// ros_controls
-#include <controller_interface/controller_interface.hpp>
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-
-// KDL
-#include <kdl/treefksolverpos_recursive.hpp>
-
-// Project
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
-#include "ROS2VersionConfig.h"
-
-// Pluginlib
+#include <controller_interface/controller_interface.hpp>
+#include <functional>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
+#include <hardware_interface/loaned_command_interface.hpp>
+#include <hardware_interface/loaned_state_interface.hpp>
+#include <kdl/treefksolverpos_recursive.hpp>
+#include <memory>
 #include <pluginlib/class_loader.hpp>
-
-// Other
-#include <vector>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <vector>
 
 namespace cartesian_controller_base
 {
@@ -76,12 +65,11 @@ namespace cartesian_controller_base
  * @brief Base class for each cartesian controller
  *
  * This class implements a common forward dynamics based solver for Cartesian
- * end effector error control, using the ROS-control framework.  Different
- * child class controllers will define what this error represents and should
- * call \ref computeJointControlCmds with that error.  The control commands are
- * sent to the hardware with \ref writeJointControlCmds.
+ * end effector error correction. Different child class controllers will define
+ * what this error represents and should call \ref computeJointControlCmds with
+ * that error.  The control commands are sent to the hardware with \ref
+ * writeJointControlCmds.
  *
- * Supported hardware interfaces are `position` and `velocity`.
  */
 class CartesianControllerBase : public controller_interface::ControllerInterface
 {

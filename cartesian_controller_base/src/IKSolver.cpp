@@ -37,22 +37,14 @@
  */
 //-----------------------------------------------------------------------------
 
-// this package
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include <algorithm>
 #include <cartesian_controller_base/IKSolver.h>
-
-// other
 #include <functional>
+#include <kdl/framevel.hpp>
+#include <kdl/jntarrayvel.hpp>
 #include <map>
 #include <sstream>
-#include <algorithm>
-
-// KDL
-#include <kdl/jntarrayvel.hpp>
-#include <kdl/framevel.hpp>
-
-// DEBUG
-
 
 namespace cartesian_controller_base{
 
@@ -84,7 +76,7 @@ namespace cartesian_controller_base{
       joint_pos_handles)
   {
     // Copy into internal buffers.
-    for (int i = 0; i < joint_pos_handles.size(); ++i)
+    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
     {
       // Interface type should be checked by the caller.
       // Add additional plausibility check just in case.
