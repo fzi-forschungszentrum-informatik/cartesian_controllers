@@ -71,7 +71,7 @@ constexpr char HW_IF_DAMPING[]   = "damping";
  * controller_manager coordinated library.
  *
  */
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 class Simulator : public hardware_interface::SystemInterface
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 class Simulator : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
@@ -83,7 +83,7 @@ public:
 
   RCLCPP_SHARED_PTR_DEFINITIONS(Simulator)
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
   return_type configure(const hardware_interface::HardwareInfo& info) override;
@@ -96,15 +96,21 @@ public:
   return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                           const std::vector<std::string>& stop_interfaces) override;
 
+
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+  return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+  return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+
+#elif defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_FOXY
+  return_type read() override;
+  return_type write() override;
+#endif
+
 #if defined CARTESIAN_CONTROLLERS_FOXY
   return_type start() override;
-
   return_type stop() override;
 #endif
 
-  return_type read() override;
-
-  return_type write() override;
 
 private:
   // Command buffers for the controllers

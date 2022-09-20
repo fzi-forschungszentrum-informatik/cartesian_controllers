@@ -139,7 +139,11 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+  bool SelectivelyDampedLeastSquaresSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+#else
   bool SelectivelyDampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
+#endif
                                       const KDL::Chain& chain,
                                       const KDL::JntArray& upper_pos_limits,
                                       const KDL::JntArray& lower_pos_limits)

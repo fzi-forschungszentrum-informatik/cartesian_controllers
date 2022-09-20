@@ -52,7 +52,7 @@ CartesianMotionController::CartesianMotionController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianMotionController::on_init()
 {
   const auto ret = Base::on_init();
@@ -114,7 +114,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 controller_interface::return_type CartesianMotionController::update(const rclcpp::Time& time,
                                                                    const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY
@@ -194,8 +194,8 @@ void CartesianMotionController::targetFrameCallback(const geometry_msgs::msg::Po
 {
   if (target->header.frame_id != Base::m_robot_base_link)
   {
-    auto& clock = *node_->get_clock();
-    RCLCPP_WARN_THROTTLE(node_->get_logger(),
+    auto& clock = *get_node()->get_clock();
+    RCLCPP_WARN_THROTTLE(get_node()->get_logger(),
         clock, 3000,
         "Got target pose in wrong reference frame. Expected: %s but got %s",
         Base::m_robot_base_link.c_str(),

@@ -41,6 +41,7 @@
 #ifndef FORWARD_DYNAMICS_SOLVER_H_INCLUDED
 #define FORWARD_DYNAMICS_SOLVER_H_INCLUDED
 
+#include "rclcpp/node.hpp"
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/Utility.h>
 #include <kdl/chain.hpp>
@@ -102,7 +103,11 @@ class ForwardDynamicsSolver : public IKSolver
      *
      * @return True, if everything went well
      */
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+#else
     bool init(std::shared_ptr<rclcpp::Node> nh,
+#endif
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits) override;
