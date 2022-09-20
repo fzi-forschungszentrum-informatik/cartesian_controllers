@@ -110,9 +110,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return TYPE::ERROR;
   }
 
-  // Make sure sensor wrenches are interpreted correctly
-  ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
-
   return TYPE::SUCCESS;
 }
 

@@ -97,9 +97,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 
-  // Make sure sensor wrenches are interpreted correctly
-  setFtSensorReferenceFrame(Base::m_end_effector_link);
-
   m_target_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
       "target_wrench", 10, std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
 
@@ -171,32 +168,6 @@ ctrl::Vector6D CartesianForceController::computeForceError()
   }
 
   return m_ft_sensor_wrench + target_wrench;
-#endif
-}
-
-void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_ref)
-{
-  // Compute static transform from the force torque sensor to the new reference
-  // frame of interest.
-  m_new_ft_sensor_ref = new_ref;
-
-  // Joint positions should cancel out, i.e. it doesn't matter as long as they
-  // are the same for both transformations.
-  KDL::JntArray jnts(Base::m_ik_solver->getPositions());
-
-  KDL::Frame sensor_ref;
-  Base::m_forward_kinematics_solver->JntToCart(
-      jnts,
-      sensor_ref,
-      m_ft_sensor_ref_link);
-
-  KDL::Frame new_sensor_ref;
-  Base::m_forward_kinematics_solver->JntToCart(
-      jnts,
-      new_sensor_ref,
-      m_new_ft_sensor_ref);
-
-  m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
 }
 
 void CartesianForceController::computeFtSensorTransform(const std::string& sensor_ref,
