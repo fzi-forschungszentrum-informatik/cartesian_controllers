@@ -1,9 +1,0 @@
-<launch>
-        <include file="$(find cartesian_controller_examples)/launch/examples.launch">
-                <arg name="rviz" value="false" />
-        </include>
-
-        <!-- Tests -->
-        <test test-name="test_startup" pkg="cartesian_controller_tests" type="test_startup.py" time-limit="60.0"/>
-
-</launch>
