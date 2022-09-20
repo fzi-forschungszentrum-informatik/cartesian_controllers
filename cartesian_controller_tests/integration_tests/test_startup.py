@@ -48,6 +48,11 @@ class IntegrationTest(unittest.TestCase):
             'cartesian_compliance_controller',
             'motion_control_handle',
         ]
+        cls.invalid_controllers = [
+            'invalid_cartesian_force_controller',
+            'invalid_cartesian_compliance_controller',
+        ]
+
 
     @classmethod
     def tearDownClass(cls):
@@ -75,6 +80,16 @@ class IntegrationTest(unittest.TestCase):
         """
         for name in self.our_controllers:
             self.assertTrue(self.check_state(name, 'inactive'), f"{name} is initialized correctly")
+
+    def test_invalid_controller_initialization(self):
+        """ Test whether the invalid controllers' initialization fails as expected
+
+        We check if the list of all controllers currently managed by the
+        controller manager contains our controllers and if they have `state:
+        finalized`.
+        """
+        for name in self.invalid_controllers:
+            self.assertTrue(self.check_state(name, 'finalized'), f"{name} initializes although it should not.")
 
     def test_controller_switches(self):
         """ Test whether every controller starts, runs, and stops correctly

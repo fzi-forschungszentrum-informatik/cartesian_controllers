@@ -116,6 +116,16 @@ def generate_launch_description():
         executable="spawner.py",
         arguments=["joint_trajectory_controller", "--stopped", "-c", "/controller_manager"],
     )
+    invalid_cartesian_compliance_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["invalid_cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
+    )
+    invalid_cartesian_force_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["invalid_cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
+    )
 
     # TF tree
     robot_state_publisher = Node(
@@ -146,6 +156,8 @@ def generate_launch_description():
         cartesian_motion_controller_spawner,
         motion_control_handle_spawner,
         joint_trajectory_controller_spawner,
+        invalid_cartesian_compliance_controller_spawner,
+        invalid_cartesian_force_controller_spawner,
         robot_state_publisher,
         rviz
     ]

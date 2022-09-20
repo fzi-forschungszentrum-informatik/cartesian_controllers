@@ -99,8 +99,18 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return TYPE::ERROR;
   }
 
-  // Make sure sensor wrenches are interpreted correctly
+  // Make sure compliance link is part of the robot chain
   m_compliance_ref_link = get_node()->get_parameter("compliance_ref_link").as_string();
+  if(!Base::robotChainContains(m_compliance_ref_link))
+  {
+    RCLCPP_ERROR_STREAM(get_node()->get_logger(),
+                        m_compliance_ref_link << " is not part of the kinematic chain from "
+                                              << Base::m_robot_base_link << " to "
+                                              << Base::m_end_effector_link);
+    return TYPE::ERROR;
+  }
+
+  // Make sure sensor wrenches are interpreted correctly
   ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
 
   return TYPE::SUCCESS;
