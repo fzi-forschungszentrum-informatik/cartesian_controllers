@@ -100,6 +100,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   }
 
   // Make sure compliance link is part of the robot chain
+  m_compliance_ref_link = get_node()->get_parameter("compliance_ref_link").as_string();
   if(!Base::robotChainContains(m_compliance_ref_link))
   {
     RCLCPP_ERROR_STREAM(get_node()->get_logger(),
@@ -110,7 +111,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   }
 
   // Make sure sensor wrenches are interpreted correctly
-  m_compliance_ref_link = get_node()->get_parameter("compliance_ref_link").as_string();
   ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
 
   return TYPE::SUCCESS;

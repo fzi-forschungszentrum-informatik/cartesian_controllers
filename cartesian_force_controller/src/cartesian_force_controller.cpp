@@ -89,6 +89,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   }
 
   // Make sure sensor link is part of the robot chain
+  m_ft_sensor_ref_link = get_node()->get_parameter("ft_sensor_ref_link").as_string();
   if(!Base::robotChainContains(m_ft_sensor_ref_link))
   {
     RCLCPP_ERROR_STREAM(get_node()->get_logger(),
@@ -189,7 +190,6 @@ void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_
   // are the same for both transformations.
   KDL::JntArray jnts(Base::m_ik_solver->getPositions());
 
-  m_ft_sensor_ref_link = get_node()->get_parameter("ft_sensor_ref_link").as_string();
   KDL::Frame sensor_ref;
   Base::m_forward_kinematics_solver->JntToCart(
       jnts,
