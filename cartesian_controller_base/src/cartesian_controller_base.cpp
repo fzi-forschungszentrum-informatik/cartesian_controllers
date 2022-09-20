@@ -153,7 +153,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   // Get kinematics specific configuration
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
 
   m_robot_description = get_node()->get_parameter("robot_description").as_string();
   if (m_robot_description.empty())
@@ -185,7 +184,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to parse KDL tree from urdf model");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,m_robot_chain))
   {
     const std::string error = ""
       "Failed to parse robot chain from urdf model. "
@@ -226,9 +225,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   }
 
   // Initialize solvers
-  m_ik_solver->init(get_node(), robot_chain,upper_pos_limits,lower_pos_limits);
+  m_ik_solver->init(get_node(),m_robot_chain,upper_pos_limits,lower_pos_limits);
   KDL::Tree tmp("not_relevant");
-  tmp.addChain(robot_chain,"not_relevant");
+  tmp.addChain(m_robot_chain,"not_relevant");
   m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
   m_iterations = get_node()->get_parameter("solver.iterations").as_int();
   m_error_scale = get_node()->get_parameter("solver.error_scale").as_double();

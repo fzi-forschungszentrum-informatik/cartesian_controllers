@@ -88,6 +88,16 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return ret;
   }
 
+  // Make sure sensor link is part of the robot chain
+  if(!Base::robotChainContains(m_ft_sensor_ref_link))
+  {
+    RCLCPP_ERROR_STREAM(get_node()->get_logger(),
+                        m_ft_sensor_ref_link << " is not part of the kinematic chain from "
+                                             << Base::m_robot_base_link << " to "
+                                             << Base::m_end_effector_link);
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+
   // Make sure sensor wrenches are interpreted correctly
   setFtSensorReferenceFrame(Base::m_end_effector_link);
 
