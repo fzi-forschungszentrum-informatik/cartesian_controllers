@@ -123,7 +123,11 @@ namespace cartesian_controller_base{
   }
 
 
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+  bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+#else
   bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp::Node> nh,
+#endif
                                    const KDL::Chain& chain,
                                    const KDL::JntArray& upper_pos_limits,
                                    const KDL::JntArray& lower_pos_limits)

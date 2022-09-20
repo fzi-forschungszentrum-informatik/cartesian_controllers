@@ -41,7 +41,7 @@
 #define CARTESIAN_CONTROLLER_BASE_H_INCLUDED
 
 #include "ROS2VersionConfig.h"
-#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
@@ -81,7 +81,7 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
 
     virtual controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
     virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
     virtual controller_interface::return_type init(const std::string & controller_name) override;
