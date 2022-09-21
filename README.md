@@ -15,7 +15,10 @@ This package provides a set of Cartesian `motion`, `force` and `compliance contr
 The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
 As a unique selling point, they use fast forward dynamics simulations of
 virtually conditioned twins of the real setup as a solver for the inverse kinematics problem.
-They are designed to trade smooth and stable behavior for accuracy where
+Integrating from joint accelerations to joint velocities and joint positions
+gives them a delay-free, noise suppressing, and an inherently more stable contact behavior than conventional
+*Admittance* controllers.
+The controllers from this package are designed to trade smooth and stable behavior for accuracy where
 appropriate, and behave physically plausible for targets outside the robots reach.
 The package is for users who require interfaces to direct task space control
 without the need for collision checking.
@@ -28,7 +31,7 @@ Users may refer to `MoveIt` for end-effector motion planning, but
 integrating a full planning stack is often unnecessary for simple applications.
 Additionally, there are a lot of use cases where direct control in task space is mandatory:
 dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
-any form of **closed loop control with external sensors** for physical interactions with environments.
+any form of **closed loop control with external sensors** for physical interactions with environments, such as **Machine Learning** applications.
 This package provides such a controller suite for the [ROS2-control](https://control.ros.org/master/index.html) framework.
 
 ## Installation
