@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>spacenav_utils</name>
+  <name>cartesian_controller_utilities</name>
   <version>0.0.0</version>
   <description>Make the spacemouse a teach device for force-based teleoperation</description>
 
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/spacenav_utils</url> -->
+  <!-- <url type="website">http://wiki.ros.org/cartesian_controller_utitilies</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
