@@ -27,13 +27,11 @@ int main(int argc, char * argv[])
   auto simulator = std::thread(rackki_learning::MuJoCoSimulator::simulate);
   simulator.detach();
 
-  auto node = rackki_learning::MuJoCoSimulator::getInstance().getNode();
-
-  while (!node) // initialized
+  while (!rackki_learning::MuJoCoSimulator::ready())
   {
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
-  rclcpp::spin(node);
+  rclcpp::spin(rackki_learning::MuJoCoSimulator::getNode());
   rclcpp::shutdown();
   return 0;
 }

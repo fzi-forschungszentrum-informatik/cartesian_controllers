@@ -153,6 +153,7 @@ int MuJoCoSimulator::simulateImpl()
                                           rclcpp::NodeOptions().allow_undeclared_parameters(true));
   /* m_driver_state_publisher = */
   /*   m_node->create_publisher<sensor_msgs::msg::JointState>("robot_driver/controlled_variables", 3); */
+  m_ready = true;
 
   // Fetch parameters directly from launch file
   auto model_xml = m_node->declare_parameter<std::string>("mujoco_model");

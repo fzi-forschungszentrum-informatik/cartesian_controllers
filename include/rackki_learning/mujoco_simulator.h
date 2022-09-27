@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -49,6 +50,13 @@ private:
 
   // For topic communication with ROS2
   std::shared_ptr<rclcpp::Node> m_node;
+  std::atomic_bool m_ready = false;
+
+  static MuJoCoSimulator& getInstance()
+  {
+    static MuJoCoSimulator simulator;
+    return simulator;
+  }
 
 public:
   // Modern singleton approach
@@ -58,13 +66,9 @@ public:
   MuJoCoSimulator& operator=(MuJoCoSimulator&&) = delete;
 
   // Use this in ROS2 code
-  static MuJoCoSimulator& getInstance()
-  {
-    static MuJoCoSimulator simulator;
-    return simulator;
-  }
+  static bool ready() {return getInstance().m_ready;};
+  static std::shared_ptr<rclcpp::Node> getNode() {return getInstance().m_node;};
 
-  std::shared_ptr<rclcpp::Node> getNode() {return m_node;};
 
   // MuJoCo data structures
   mjModel* m = NULL; // MuJoCo model
