@@ -13,23 +13,27 @@
 
                 <mesh name="passive_component" file="passive_component.stl"/>
                 <mesh name="active_component" file="active_component.stl"/>
-                <material name="passive_component" rgba="0.525 0.713 0.662 1.0"/>
+                <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
                 <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
         </asset>
         <worldbody>
                 <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
-                <geom name="floor" pos="0 0 -0.0" size="0 0 1" type="plane" material="matplane"/>
+                <geom name="floor" pos="0 0 -0.10" size="0 0 1" type="plane" material="matplane"/>
 
                 <!-- Fixed with the world -->
-                <body name="passive_component" pos="0 0 0.5" quat="0 0 0 1">
+                <body name="passive_component" pos="0 0 0.0" quat="1 0 0 0">
                         <geom type="mesh" mesh="passive_component" material="passive_component"/>
                 </body>
 
                 <!-- Controllable with user commands -->
-                <body name="active_component" pos="0 0 0.1">
+                <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
                         <freejoint name="free_joint"/>
                         <geom type="mesh" mesh="active_component" material="active_component"/>
                 </body>
         </worldbody>
+
+        <!-- Initial object poses for simulation -->
+        <include file="initial_states.xml"/>
+
 </mujoco>
