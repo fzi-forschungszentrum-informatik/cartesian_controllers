@@ -103,6 +103,7 @@ controller_interface::InterfaceConfiguration
 MotionControlHandle::command_interface_configuration() const
 {
   controller_interface::InterfaceConfiguration conf;
+  conf.type = controller_interface::interface_configuration_type::NONE;
   return conf;
 }
 
