@@ -9,18 +9,45 @@ force and motion control input device for teleoperation with the `cartesian_cont
 - **Motion control**: Turn `geometry_msgs/Twist` messages into a `geometry_msgs/PoseStamped` to smoothly steer the robot via its `target_frame`.
 - **Button commands**: Define custom commands for the spacenav buttons with ROS command line instructions. You can trigger events, such as calling ROS services and publish to topics.
 
+## Install
+We need some additional system dependencies
+```bash
+sudo apt install libspnav-dev spacenavd
+```
+and the package for the space mouse driver. Install that for your ROS distribution, for instance with
+```bash
+sudo apt install ros-noetic-spacenav-node
+```
+
+We also need these Python dependencies for the scripts:
+```bash
+pip3 install numpy numpy-quaternion
+```
+
 ## Usage
-Load the spacenav device with
+Launch the spacenav device with
 ```bash
 roslaunch cartesian_controller_utilities spacenav.launch
 ```
-Depending on your use case, call one (or several) of these:
+
+There are additional `.launch` files for each use case:
+
+### Force control
+Start the simulation and the force controller as described [here](../cartesian_force_controller/README.md).
+In a sourced terminal, call
 ```bash
 roslaunch cartesian_controller_utilities spacenav_to_wrench.launch
-roslaunch cartesian_controller_utilities spacenav_to_pose.launch
-roslaunch cartesian_controller_utilities buttons_events.launch
 ```
-Also check the configuration parameters in each `.launch` file.
+You can now steer the robot's end-effector with the space mouse.
+There's a parameter to change the coordinate frame for control: In rqt open the *Dynamic Reconfigure* plugin under *Configuration*,
+navigate to *my_cartesian_force_controller* and untick the box for `hand_frame_control`. You now steer the robot in the controller's `robot_base_link` coordinates.
+
+
+### Motion control
+
+
+### Button commands
+
 
 ## Disable GUI control in Gazebo
 When working with the 3DConnexion as a force control input device, you probably don't want to control gazebo's camera at the same time. Remember your kernel drivers still treat your force control thing as a space mouse, which is used by gazebo by default. To switch this behavior off add the following lines to the *~/.gazebo/gui.ini* file:
