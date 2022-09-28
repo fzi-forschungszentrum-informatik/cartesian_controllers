@@ -13,7 +13,7 @@ button_sleep: 1.0
 button_cmds :
         [
                 # button 0
-                "rosbag record /my_topic -o my_bag __name:=my_baggi",
+                "rosbag record /spacenav/twist -o my_bag __name:=my_baggi",
                 # button 1
                 "rosnode kill my_baggi"
         ]

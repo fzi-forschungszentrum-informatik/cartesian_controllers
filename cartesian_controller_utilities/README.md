@@ -47,6 +47,24 @@ navigate to *my_cartesian_force_controller* and untick the box for `hand_frame_c
 
 
 ### Button commands
+The space mouse's buttons are extremely handy for triggering custom events during teleoperation.
+You can [program both buttons](etc/button_cmds.yaml) with everything that's a valid (ROS) command on the command line.
+In this example, we record the `spacenav/twist` topic into a rosbag and use the two buttons for *starting* and *stoping*, respectively.
+In a source terminal, call
+```bash
+roslaunch cartesian_controller_utilities buttons_events.launch
+```
+Now press the space mouse's buttons. You should see output in the terminal, similar to this
+```bash
+[ INFO] [1664405519.123808556]: Subscribing to /spacenav/twist
+[ INFO] [1664405519.127026898]: Recording to 'my_bag_2022-09-29-00-51-59.bag'.
+killing /my_baggi
+[ WARN] [1664405521.716811690]: Shutdown request received.
+[ WARN] [1664405521.716849606]: Reason given for shutdown: [user request]
+killed
+```
+Per default, the rosbags will end up in `~/.ros`.
+A practical use case would be recording the `target_frame` during teleoperation for motion replay with the [cartesian_motion_controller](../cartesian_motion_controller/README.md).
 
 
 ## Disable GUI control in Gazebo
