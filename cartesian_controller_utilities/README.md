@@ -1,13 +1,12 @@
 # Cartesian Controller Utilities
-A helper package with additional functionality for the `spacenav_node`.
 
-This package turns the *spacenav_node* from the
+This package turns the 3DConnexion (*spacenav_node*) from the
 [joystick_drivers](https://github.com/ros-drivers/joystick_drivers) into a
 force and motion control input device for teleoperation with the `cartesian_controllers`:
 
 - **Force control**: Re-publish `geometry_msgs/Twist` messages as `geometry_msgs/WrenchStamped` messages to intuitively control the `target_wrench`.
 - **Motion control**: Turn `geometry_msgs/Twist` messages into a `geometry_msgs/PoseStamped` to smoothly steer the robot via its `target_frame`.
-- **Button commands**: Define custom commands for the spacenav buttons with ROS command line instructions. You can trigger events, such as calling ROS services and publish to topics.
+- **Button commands**: Define custom commands for the space mouse buttons with ROS command line instructions. You can trigger events, such as calling ROS services and publish to topics.
 
 ## Install
 We need some additional system dependencies
@@ -24,15 +23,7 @@ We also need these Python dependencies for the scripts:
 pip3 install numpy numpy-quaternion
 ```
 
-## Usage
-Launch the spacenav device with
-```bash
-roslaunch cartesian_controller_utilities spacenav.launch
-```
-
-There are additional `.launch` files for each use case:
-
-### Force control
+## Force control
 Start the simulation and the force controller as described [here](../cartesian_force_controller/README.md).
 In a sourced terminal, call
 ```bash
@@ -43,11 +34,22 @@ There's a parameter to change the coordinate frame for control: In rqt open the 
 navigate to *my_cartesian_force_controller* and untick the box for `hand_frame_control`. You now steer the robot in the controller's `robot_base_link` coordinates.
 
 
-### Motion control
+## Motion control
+Start the simulation and the compliance controller as described [here](../cartesian_compliance_controller/README.md).
+In a sourced terminal, call
+```bash
+roslaunch cartesian_controller_utilities spacenav_to_pose.launch
+```
+You can now steer the robot's `target_frame` with the space mouse.
+The publisher makes sure that we always start from the current end-effector pose.
+We use the `cartesian_compliance_controller` in this example, because it's
+suitable for teleoperation that involves contact with the environment and is
+thus more versatile than the `cartesian_motion_controller`.
+You can take this example and adjust the setting for your own robot manipulator.
 
 
-### Button commands
-The space mouse's buttons are extremely handy for triggering custom events during teleoperation.
+## Button commands
+The space mouse's buttons are extremely handy for triggering custom events during teleoperation, such as opening and closing grippers.
 You can [program both buttons](etc/button_cmds.yaml) with everything that's a valid (ROS) command on the command line.
 In this example, we record the `spacenav/twist` topic into a rosbag and use the two buttons for *starting* and *stoping*, respectively.
 In a source terminal, call
