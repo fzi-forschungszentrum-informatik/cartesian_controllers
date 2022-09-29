@@ -279,6 +279,12 @@ template <class HardwareInterface>
 bool CartesianForceController<HardwareInterface>::
 signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 {
+  // Get latest joint positions in case we are not running
+  if (!Base::isRunning())
+  {
+    Base::m_ik_solver->setStartState(Base::m_joint_handles);
+  }
+
   // Compute current gravity effects in sensor frame
   ctrl::Vector6D tmp = Base::displayInTipLink(m_weight_force,m_ft_sensor_ref_link);
   tmp.tail<3>() = m_center_of_mass.cross(tmp.head<3>()); // M = r x F
