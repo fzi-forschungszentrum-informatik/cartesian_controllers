@@ -32,13 +32,16 @@ my_cartesian_force_controller:
     - joint5
     - joint6
 
+    solver:
+        error_scale: 0.5
+
     pd_gains:
         trans_x: {p: 0.05}
         trans_y: {p: 0.05}
         trans_z: {p: 0.05}
-        rot_x: {p: 0.01}
-        rot_y: {p: 0.01}
-        rot_z: {p: 0.01}
+        rot_x: {p: 1.5}
+        rot_y: {p: 1.5}
+        rot_z: {p: 1.5}
 
 ```
 

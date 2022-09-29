@@ -47,17 +47,20 @@ my_cartesian_compliance_controller:
         trans_x: 500
         trans_y: 500
         trans_z: 500
-        rot_x: 100
-        rot_y: 100
-        rot_z: 100
+        rot_x: 20
+        rot_y: 20
+        rot_z: 20
+
+    solver:
+        error_scale: 0.5
 
     pd_gains:
         trans_x: {p: 0.05}
         trans_y: {p: 0.05}
         trans_z: {p: 0.05}
-        rot_x: {p: 0.01}
-        rot_y: {p: 0.01}
-        rot_z: {p: 0.01}
+        rot_x: {p: 1.50}
+        rot_y: {p: 1.50}
+        rot_z: {p: 1.50}
 ```
 
 A minimal example can be found in *cartesian_controller_examples* of this meta package.

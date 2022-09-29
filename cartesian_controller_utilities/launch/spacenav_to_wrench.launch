@@ -1,0 +1,17 @@
+<launch>
+        <!-- Spacenav driver node -->
+        <node pkg="spacenav_node" type="spacenav_node" name="spacenav_node" output="screen">
+                <param name="zero_when_static" value="true"/>
+                <param name="static_count_threshold" value="30"/>
+                <rosparam param="linear_scale">[50,50,50]</rosparam>
+                <rosparam param="angular_scale">[5,5,5]</rosparam>
+        </node>
+
+        <!-- Republish twists as wrenches -->
+        <node name="spacenav_to_wrench" pkg="cartesian_controller_utilities" type="converter.py" output="screen">
+                <param name="twist_topic" value="/spacenav/twist"/>
+                <param name="wrench_topic" value="/target_wrench"/>
+                <param name="frame_id" value="world"/>
+                <param name="publishing_rate" value="50"/>
+        </node>
+</launch>
