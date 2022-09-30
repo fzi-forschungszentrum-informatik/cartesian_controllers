@@ -103,15 +103,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     tool["com_z"] = 0;
   }
   // In sensor frame
-  m_center_of_mass = ctrl::Vector3D(tool["com_x"],tool["com_y"],tool["com_z"]);
+  m_center_of_mass = KDL::Vector(tool["com_x"], tool["com_y"], tool["com_z"]);
 
   // In base frame
-  m_weight_force.head<3>() = tool["mass"] * ctrl::Vector3D(gravity["x"],gravity["y"],gravity["z"]);
-  m_weight_force.tail<3>() = ctrl::Vector3D::Zero();  // Update in control cycle
-  m_grav_comp_during_taring = -m_weight_force;
+  m_weight_force.force = tool["mass"] * KDL::Vector(gravity["x"], gravity["y"], gravity["z"]);
+  m_weight_force.torque = KDL::Vector::Zero();  // Update in control cycle
+  m_grav_comp_during_taring = m_weight_force;
 
-  m_target_wrench.setZero();
-  m_ft_sensor_wrench.setZero();
+  m_target_wrench = KDL::Wrench::Zero();
+  m_ft_sensor_wrench = KDL::Wrench::Zero();
 
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
@@ -175,20 +175,31 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
-  ctrl::Vector6D target_wrench;
+  KDL::Wrench target_wrench;
   if (m_hand_frame_control) // Assume end-effector frame by convention
   {
-    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
+    target_wrench = Base::displayInBaseLink(m_target_wrench, Base::m_end_effector_link);
   }
   else // Default to robot base frame
   {
     target_wrench = m_target_wrench;
   }
 
+  // Compute how the measured wrench appears in the frame of interest.
+  KDL::Wrench ft_sensor_wrench = m_ft_sensor_wrench;
+  compensateGravity(ft_sensor_wrench);
+  ft_sensor_wrench = m_ft_sensor_transform * ft_sensor_wrench;
+
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref)
-    + target_wrench
-    + compensateGravity();
+  KDL::Wrench error_wrench = Base::displayInBaseLink(ft_sensor_wrench, m_new_ft_sensor_ref) + target_wrench;
+
+  // Reassign
+  ctrl::Vector6D error_vector;
+  for (int i = 0; i < 6; ++i)
+  {
+    error_vector[i] = error_wrench[i];
+  }
+  return error_vector;
 }
 
 template <class HardwareInterface>
@@ -219,25 +230,18 @@ setFtSensorReferenceFrame(const std::string& new_ref)
 }
 
 template <class HardwareInterface>
-ctrl::Vector6D CartesianForceController<HardwareInterface>::
-compensateGravity()
+void CartesianForceController<HardwareInterface>::
+compensateGravity(KDL::Wrench& ft_sensor_wrench)
 {
-  ctrl::Vector6D compensating_force = ctrl::Vector6D::Zero();
-
   // Compute actual gravity effects in sensor frame
-  ctrl::Vector6D tmp = Base::displayInTipLink(m_weight_force,m_ft_sensor_ref_link);
-  tmp.tail<3>() = m_center_of_mass.cross(tmp.head<3>()); // M = r x F
-
-  // Display in base link
-  m_weight_force = Base::displayInBaseLink(tmp,m_ft_sensor_ref_link);
+  KDL::Wrench tmp = Base::displayInTipLink(m_weight_force, m_ft_sensor_ref_link);
+  tmp.torque = m_center_of_mass * tmp.force; // M = r x F
 
   // Add actual gravity compensation
-  compensating_force -= m_weight_force;
+  ft_sensor_wrench -= tmp;
 
   // Remove deprecated terms from moment of taring
-  compensating_force -= m_grav_comp_during_taring;
-
-  return compensating_force;
+  ft_sensor_wrench += m_grav_comp_during_taring;
 }
 
 template <class HardwareInterface>
@@ -256,23 +260,12 @@ template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench)
 {
-  KDL::Wrench tmp;
-  tmp[0] = wrench.wrench.force.x;
-  tmp[1] = wrench.wrench.force.y;
-  tmp[2] = wrench.wrench.force.z;
-  tmp[3] = wrench.wrench.torque.x;
-  tmp[4] = wrench.wrench.torque.y;
-  tmp[5] = wrench.wrench.torque.z;
-
-  // Compute how the measured wrench appears in the frame of interest.
-  tmp = m_ft_sensor_transform * tmp;
-
-  m_ft_sensor_wrench[0] = tmp[0];
-  m_ft_sensor_wrench[1] = tmp[1];
-  m_ft_sensor_wrench[2] = tmp[2];
-  m_ft_sensor_wrench[3] = tmp[3];
-  m_ft_sensor_wrench[4] = tmp[4];
-  m_ft_sensor_wrench[5] = tmp[5];
+  m_ft_sensor_wrench[0] = wrench.wrench.force.x;
+  m_ft_sensor_wrench[1] = wrench.wrench.force.y;
+  m_ft_sensor_wrench[2] = wrench.wrench.force.z;
+  m_ft_sensor_wrench[3] = wrench.wrench.torque.x;
+  m_ft_sensor_wrench[4] = wrench.wrench.torque.y;
+  m_ft_sensor_wrench[5] = wrench.wrench.torque.z;
 }
 
 template <class HardwareInterface>
@@ -286,15 +279,12 @@ signalTaringCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Respons
   }
 
   // Compute current gravity effects in sensor frame
-  ctrl::Vector6D tmp = Base::displayInTipLink(m_weight_force,m_ft_sensor_ref_link);
-  tmp.tail<3>() = m_center_of_mass.cross(tmp.head<3>()); // M = r x F
+  KDL::Wrench tmp = Base::displayInTipLink(m_weight_force, m_ft_sensor_ref_link);
+  tmp.torque = m_center_of_mass * tmp.force; // M = r x F
 
   // Taring the sensor is like adding a virtual force that exactly compensates
   // the weight force.
-  tmp = -tmp;
-
-  // Display in base link
-  m_grav_comp_during_taring = Base::displayInBaseLink(tmp,m_ft_sensor_ref_link);
+  m_grav_comp_during_taring = tmp;
 
   res.message = "Got it.";
   res.success = true;
