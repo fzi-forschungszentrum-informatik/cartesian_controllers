@@ -1,4 +1,4 @@
-name: CI
+name: Melodic
 
 on: [push, pull_request]
 
