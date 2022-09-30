@@ -104,7 +104,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     void setFtSensorReferenceFrame(const std::string& new_ref);
 
   private:
-    ctrl::Vector6D        compensateGravity();
+    void                  compensateGravity(KDL::Wrench& ft_sensor_wrench);
 
     void targetWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
     void ftSensorWrenchCallback(const geometry_msgs::WrenchStamped& wrench);
@@ -113,11 +113,11 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ros::ServiceServer    m_signal_taring_server;
     ros::Subscriber       m_target_wrench_subscriber;
     ros::Subscriber       m_ft_sensor_wrench_subscriber;
-    ctrl::Vector6D        m_target_wrench;
-    ctrl::Vector6D        m_ft_sensor_wrench;
-    ctrl::Vector6D        m_weight_force;
-    ctrl::Vector6D        m_grav_comp_during_taring;
-    ctrl::Vector3D        m_center_of_mass;
+    KDL::Wrench           m_target_wrench;
+    KDL::Wrench           m_ft_sensor_wrench;
+    KDL::Wrench           m_weight_force;
+    KDL::Wrench           m_grav_comp_during_taring;
+    KDL::Vector           m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
     KDL::Frame            m_ft_sensor_transform;
 
