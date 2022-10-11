@@ -20,6 +20,20 @@ namespace rackki_learning {
 
 MuJoCoSimulator::MuJoCoSimulator() {}
 
+void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
+{
+  if (command_mutex.try_lock())
+  {
+    m_target_wrench[0] = wrench->wrench.force.x;
+    m_target_wrench[1] = wrench->wrench.force.y;
+    m_target_wrench[2] = wrench->wrench.force.z;
+    m_target_wrench[3] = wrench->wrench.torque.x;
+    m_target_wrench[4] = wrench->wrench.torque.y;
+    m_target_wrench[5] = wrench->wrench.torque.z;
+    command_mutex.unlock();
+  }
+}
+
 void MuJoCoSimulator::keyboardCB(GLFWwindow* window, int key, int scancode, int act, int mods)
 {
   getInstance().keyboardCBImpl(window, key, scancode, act, mods);
@@ -131,13 +145,21 @@ void MuJoCoSimulator::controlCB(const mjModel* m, mjData* d)
 
 void MuJoCoSimulator::controlCBImpl(const mjModel* m, mjData* d)
 {
-  // TODO:
   command_mutex.lock();
 
   // Realize damping via MuJoCo's passive joint forces.
-  m->dof_damping[0] = 0.0;
+  m->dof_damping[0] = 0.0; //TODO
 
-  d->ctrl[0] = 0.0;
+  // Each of MuJoCo's bodies has a 6-dim force-torque vector in `xfrc_applied`.
+  // By our convention, the controllable body is the last body specified.
+  const int last_body = 6 * (m->nbody - 1);
+
+  // Apply external force-torque vector
+  for (size_t i = 0; i < m_target_wrench.size(); ++i)
+  {
+    d->xfrc_applied[last_body + i] = m_target_wrench[i];
+  }
+
   command_mutex.unlock();
 }
 
@@ -151,8 +173,12 @@ int MuJoCoSimulator::simulateImpl()
   // Initialize ROS2 node
   m_node = std::make_shared<rclcpp::Node>("simulator",
                                           rclcpp::NodeOptions().allow_undeclared_parameters(true));
-  /* m_driver_state_publisher = */
-  /*   m_node->create_publisher<sensor_msgs::msg::JointState>("robot_driver/controlled_variables", 3); */
+
+  m_target_wrench_subscriber = m_node->create_subscription<geometry_msgs::msg::WrenchStamped>(
+    "/target_wrench",
+    3,
+    std::bind(&MuJoCoSimulator::targetWrenchCallback, this, std::placeholders::_1));
+
   m_ready = true;
 
   // Fetch parameters directly from launch file

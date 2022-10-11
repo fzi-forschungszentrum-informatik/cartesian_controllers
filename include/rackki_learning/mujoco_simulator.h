@@ -23,7 +23,7 @@
 #include "GLFW/glfw3.h"
 #include "mujoco.h"
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/joint_state.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace rackki_learning {
 
@@ -70,6 +70,11 @@ public:
   static std::shared_ptr<rclcpp::Node> getNode() {return getInstance().m_node;};
 
 
+  // ROS2 input and output topics
+  rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
+  void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
+
+
   // MuJoCo data structures
   mjModel* m = NULL; // MuJoCo model
   mjData* d  = NULL; // MuJoCo data
@@ -86,8 +91,7 @@ public:
   double lasty       = 0;
 
   // Buffers for data exchange with ROS2
-  std::vector<double> pos_cmd;
-  std::vector<double> pos_state;
+  std::vector<double> m_target_wrench = {0, 0, 0, 0, 0, 0};
 
   // Safety guards for buffers
   std::mutex command_mutex;
