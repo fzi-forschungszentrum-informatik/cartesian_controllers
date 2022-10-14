@@ -9,6 +9,7 @@ from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
+import os
 import time
 import rclpy
 from rclpy.node import Node
@@ -85,11 +86,15 @@ class IntegrationTest(unittest.TestCase):
         """ Test whether the invalid controllers' initialization fails as expected
 
         We check if the list of all controllers currently managed by the
-        controller manager contains our controllers and if they have `state:
-        finalized`.
+        controller manager contains our controllers and if they have the
+        expected state.
         """
+        if os.environ['ROS_DISTRO'] == 'humble':
+            expected_state = 'unconfigured'
+        else:  # galactic, foxy
+            expected_state = 'finalized'
         for name in self.invalid_controllers:
-            self.assertTrue(self.check_state(name, 'finalized'), f"{name} initializes although it should not.")
+            self.assertTrue(self.check_state(name, expected_state), f"{name} initializes although it should not.")
 
     def test_controller_switches(self):
         """ Test whether every controller starts, runs, and stops correctly

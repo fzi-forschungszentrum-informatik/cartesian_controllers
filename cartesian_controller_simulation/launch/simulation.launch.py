@@ -43,6 +43,13 @@ from launch.substitutions import Command, FindExecutable, LaunchConfiguration, P
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+import os
+distro = os.environ['ROS_DISTRO']
+if distro == 'humble' or distro == 'galactic':
+    spawner = "spawner"
+else:  # foxy
+    spawner = "spawner.py"
+
 
 def generate_launch_description():
     # Declare arguments
@@ -79,51 +86,57 @@ def generate_launch_description():
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
         #prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="both",
+        remappings=[
+            ('motion_control_handle/target_frame', 'target_frame'),
+            ('cartesian_motion_controller/target_frame', 'target_frame'),
+            ('cartesian_compliance_controller/target_frame', 'target_frame'),
+            ('cartesian_force_controller/target_wrench', 'target_wrench'),
+            ('cartesian_compliance_controller/target_wrench', 'target_wrench'),
+            ('cartesian_force_controller/ft_sensor_wrench', 'ft_sensor_wrench'),
+            ('cartesian_compliance_controller/ft_sensor_wrench', 'ft_sensor_wrench'),
+            ]
     )
 
     # Joint states
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
     )
     cartesian_compliance_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
     )
     cartesian_force_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
     )
     cartesian_motion_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["cartesian_motion_controller", "--stopped", "-c", "/controller_manager"],
     )
     motion_control_handle_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["motion_control_handle", "--stopped", "-c", "/controller_manager"],
     )
     joint_trajectory_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["joint_trajectory_controller", "--stopped", "-c", "/controller_manager"],
     )
     invalid_cartesian_compliance_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["invalid_cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
     )
     invalid_cartesian_force_controller_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable=spawner,
         arguments=["invalid_cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
     )
 

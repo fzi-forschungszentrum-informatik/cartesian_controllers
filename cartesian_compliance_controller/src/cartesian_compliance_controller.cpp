@@ -53,7 +53,7 @@ CartesianComplianceController::CartesianComplianceController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_init()
 {
   using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -140,7 +140,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return TYPE::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 controller_interface::return_type CartesianComplianceController::update(const rclcpp::Time& time,
                                                                    const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY

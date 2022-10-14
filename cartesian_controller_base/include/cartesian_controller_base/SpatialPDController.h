@@ -42,7 +42,7 @@
 
 #include <cartesian_controller_base/PDController.h>
 #include <cartesian_controller_base/Utility.h>
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace cartesian_controller_base
 {
@@ -58,7 +58,11 @@ class SpatialPDController
   public:
     SpatialPDController();
 
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> params);
+#else
     bool init(std::shared_ptr<rclcpp::Node> params);
+#endif
 
     /**
      * @brief Call operator for one control cycle
