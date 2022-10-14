@@ -66,11 +66,10 @@ class JointControllerAdapter : public hardware_interface::RobotHW
 {
   public:
 
-    JointControllerAdapter();
+    JointControllerAdapter(std::vector<hardware_interface::JointStateHandle>& handles, ros::NodeHandle& nh);
     ~JointControllerAdapter();
 
-    bool init(const std::vector<hardware_interface::JointStateHandle>& handles, ros::NodeHandle& nh);
-
+    void read();
     void write(KDL::JntArray& positions);
 
   private:
@@ -85,7 +84,8 @@ class JointControllerAdapter : public hardware_interface::RobotHW
 
     joint_limits_interface::PositionJointSoftLimitsInterface m_limits_interface;
 
-    std::vector<hardware_interface::JointHandle>                        m_joint_handles;
+    std::vector<hardware_interface::JointStateHandle>&                  m_joint_state_handles;
+    std::vector<hardware_interface::JointHandle>                        m_joint_cmd_handles;
     std::vector<joint_limits_interface::PositionJointSoftLimitsHandle>  m_limits_handles;
 
     std::vector<double> m_cmd;

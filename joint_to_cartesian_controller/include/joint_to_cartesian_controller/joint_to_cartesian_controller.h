@@ -55,6 +55,9 @@
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 
+#include <memory>
+#include <thread>
+
 namespace joint_to_cartesian_controller
 {
 
@@ -98,11 +101,14 @@ class JointToCartesianController
     std::vector<std::string>   m_joint_names;
     ros::Publisher             m_pose_publisher;
 
-    JointControllerAdapter     m_controller_adapter;
+    std::unique_ptr<JointControllerAdapter> m_controller_adapter;
+    std::thread m_adapter_thread;
+    std::mutex m_mutex;
+
 
     KDL::Chain m_robot_chain;
     std::vector<
-      hardware_interface::JointStateHandle>   m_joint_handles;
+      hardware_interface::JointStateHandle>   m_joint_state_handles;
 
     std::shared_ptr<
       KDL::ChainFkSolverPos_recursive>        m_fk_solver;

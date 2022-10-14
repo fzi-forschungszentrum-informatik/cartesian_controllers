@@ -37,22 +37,15 @@
  */
 //-----------------------------------------------------------------------------
 
-// Pluginlib
-#include <pluginlib/class_list_macros.h>
-
-// Project
-#include <joint_to_cartesian_controller/joint_to_cartesian_controller.h>
+#include "ros/duration.h"
+#include "ros/rate.h"
 #include <cartesian_controller_base/Utility.h>
-
-// KDL
+#include <joint_to_cartesian_controller/joint_to_cartesian_controller.h>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
-
-// URDF
+#include <memory>
+#include <pluginlib/class_list_macros.h>
 #include <urdf/model.h>
-
-// Other
-#include <map>
 
 namespace cartesian_controllers
 {
@@ -152,16 +145,37 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   // Get the joint handles to use in the control loop
   for (size_t i = 0; i < m_joint_names.size(); ++i)
   {
-    m_joint_handles.push_back(hw->getHandle(m_joint_names[i]));
+    m_joint_state_handles.push_back(hw->getHandle(m_joint_names[i]));
   }
 
   // Adjust joint buffers
-  m_positions.data = ctrl::VectorND::Zero(m_joint_handles.size());
-  m_velocities.data = ctrl::VectorND::Zero(m_joint_handles.size());
+  m_positions.data = ctrl::VectorND::Zero(m_joint_state_handles.size());
+  m_velocities.data = ctrl::VectorND::Zero(m_joint_state_handles.size());
 
   // Initialize controller adapter and according manager
-  m_controller_adapter.init(m_joint_handles,nh);
-  m_controller_manager.reset(new controller_manager::ControllerManager(&m_controller_adapter, nh));
+  m_controller_adapter = std::make_unique<JointControllerAdapter>(m_joint_state_handles,nh);
+  m_controller_manager.reset(new controller_manager::ControllerManager(m_controller_adapter.get(), nh));
+
+  // Process adapter callbacks even when we are not running
+  m_adapter_thread = std::thread([this] {
+    constexpr int frequency = 100;
+    auto rate               = ros::Rate(frequency);
+    ros::AsyncSpinner spinner(2);
+    spinner.start();
+    while (ros::ok())
+    {
+      m_controller_adapter->read();
+      m_controller_manager->update(ros::Time::now(), rate.expectedCycleTime());
+      if (m_mutex.try_lock())
+      {
+        m_controller_adapter->write(m_positions);
+        m_mutex.unlock();
+      }
+      rate.sleep();
+    }
+    spinner.stop();
+  });
+  m_adapter_thread.detach();  // gracefully die when our node shuts down.
 
   // Initialize forward kinematics solver
   m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(m_robot_chain));
@@ -171,11 +185,6 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
 
 void JointToCartesianController::starting(const ros::Time& time)
 {
-  // Get current joint positions from hardware
-  for (size_t i = 0; i < m_joint_handles.size(); ++i)
-  {
-    m_positions(i) = m_joint_handles[i].getPosition();
-  }
 }
 
 void JointToCartesianController::stopping(const ros::Time& time)
@@ -184,33 +193,27 @@ void JointToCartesianController::stopping(const ros::Time& time)
 
 void JointToCartesianController::update(const ros::Time& time, const ros::Duration& period)
 {
-  // Note: The connected joint-based controller gets the feedback directly from
-  // the joint state handles of this joint_to_cartesian_controller. So,
-  // there's no need for a read() function.
+  if (m_mutex.try_lock())
+  {
+    // Solve forward kinematics
+    KDL::Frame frame;
+    m_fk_solver->JntToCart(m_positions,frame);
 
-  // Update connected joint controller
-  m_controller_manager->update(time,period);
-
-  // Get commanded positions
-  m_controller_adapter.write(m_positions);
-
-  // Solve forward kinematics
-  KDL::Frame frame;
-  m_fk_solver->JntToCart(m_positions,frame);
-
-  // Publish end-effector pose
-  geometry_msgs::PoseStamped target_pose = geometry_msgs::PoseStamped();
-  target_pose.header.stamp = ros::Time::now();
-  target_pose.header.frame_id = m_robot_base_link;
-  target_pose.pose.position.x = frame.p.x();
-  target_pose.pose.position.y = frame.p.y();
-  target_pose.pose.position.z = frame.p.z();
-  frame.M.GetQuaternion(
-      target_pose.pose.orientation.x,
-      target_pose.pose.orientation.y,
-      target_pose.pose.orientation.z,
-      target_pose.pose.orientation.w);
-  m_pose_publisher.publish(target_pose);
+    // Publish end-effector pose
+    geometry_msgs::PoseStamped target_pose = geometry_msgs::PoseStamped();
+    target_pose.header.stamp = ros::Time::now();
+    target_pose.header.frame_id = m_robot_base_link;
+    target_pose.pose.position.x = frame.p.x();
+    target_pose.pose.position.y = frame.p.y();
+    target_pose.pose.position.z = frame.p.z();
+    frame.M.GetQuaternion(
+        target_pose.pose.orientation.x,
+        target_pose.pose.orientation.y,
+        target_pose.pose.orientation.z,
+        target_pose.pose.orientation.w);
+    m_pose_publisher.publish(target_pose);
+    m_mutex.unlock();
+  }
 }
 
 }
