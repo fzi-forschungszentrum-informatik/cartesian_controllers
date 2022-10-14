@@ -61,7 +61,7 @@ MotionControlHandle::on_activate(const rclcpp_lifecycle::State& previous_state)
   if (!controller_interface::get_ordered_interfaces(
         state_interfaces_, m_joint_names, hardware_interface::HW_IF_POSITION, m_joint_handles))
   {
-    RCLCPP_ERROR(node_->get_logger(),
+    RCLCPP_ERROR(get_node()->get_logger(),
                  "Expected %zu '%s' state interfaces, got %zu.",
                  m_joint_names.size(),
                  hardware_interface::HW_IF_POSITION,
@@ -83,7 +83,7 @@ MotionControlHandle::on_deactivate(const rclcpp_lifecycle::State& previous_state
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 controller_interface::return_type MotionControlHandle::update(const rclcpp::Time& time,
                                                               const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY
@@ -103,6 +103,7 @@ controller_interface::InterfaceConfiguration
 MotionControlHandle::command_interface_configuration() const
 {
   controller_interface::InterfaceConfiguration conf;
+  conf.type = controller_interface::interface_configuration_type::NONE;
   return conf;
 }
 
@@ -120,7 +121,7 @@ MotionControlHandle::state_interface_configuration() const
 }
 
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_init()
 {
@@ -140,7 +141,7 @@ controller_interface::return_type MotionControlHandle::init(const std::string& c
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
   return controller_interface::return_type::OK;

@@ -87,7 +87,11 @@ class JacobianTransposeSolver : public IKSolver
      *
      * \return True, if everything went well
      */
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
+#else
     bool init(std::shared_ptr<rclcpp::Node> /*nh*/,
+#endif
               const KDL::Chain& chain,
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits) override;

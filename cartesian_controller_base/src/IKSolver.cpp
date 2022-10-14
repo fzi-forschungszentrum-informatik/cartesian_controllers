@@ -38,6 +38,7 @@
 //-----------------------------------------------------------------------------
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include "rclcpp/node.hpp"
 #include <algorithm>
 #include <cartesian_controller_base/IKSolver.h>
 #include <functional>
@@ -114,7 +115,11 @@ namespace cartesian_controller_base{
   }
 
 
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+  bool IKSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
+#else
   bool IKSolver::init(std::shared_ptr<rclcpp::Node> /*nh*/,
+#endif
                       const KDL::Chain& chain,
                       const KDL::JntArray& upper_pos_limits,
                       const KDL::JntArray& lower_pos_limits)

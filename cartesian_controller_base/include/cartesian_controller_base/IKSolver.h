@@ -41,6 +41,8 @@
 #ifndef IKSOLVER_H_INCLUDED
 #define IKSOLVER_H_INCLUDED
 
+#include "rclcpp/node.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include <cartesian_controller_base/Utility.h>
 #include <functional>
 #include <hardware_interface/loaned_command_interface.hpp>
@@ -144,7 +146,11 @@ class IKSolver
      *
      * @return True, if everything went well
      */
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+    virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+#else
     virtual bool init(std::shared_ptr<rclcpp::Node> nh,
+#endif
                       const KDL::Chain& chain,
                       const KDL::JntArray& upper_pos_limits,
                       const KDL::JntArray& lower_pos_limits);

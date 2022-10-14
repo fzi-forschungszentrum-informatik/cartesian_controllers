@@ -83,7 +83,7 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
   return conf;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_init()
 {
   if (!m_initialized)
@@ -292,7 +292,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
                                                         ? m_joint_cmd_pos_handles
                                                         : m_joint_cmd_vel_handles))
     {
-      RCLCPP_ERROR(node_->get_logger(),
+      RCLCPP_ERROR(get_node()->get_logger(),
                    "Expected %zu '%s' command interfaces, got %zu.",
                    m_joint_names.size(),
                    type.c_str(),
@@ -309,7 +309,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
                                                     hardware_interface::HW_IF_POSITION,
                                                     m_joint_state_pos_handles))
   {
-    RCLCPP_ERROR(node_->get_logger(),
+    RCLCPP_ERROR(get_node()->get_logger(),
                  "Expected %zu '%s' state interfaces, got %zu.",
                  m_joint_names.size(),
                  hardware_interface::HW_IF_POSITION,

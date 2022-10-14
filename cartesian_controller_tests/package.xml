@@ -16,6 +16,7 @@
   <test_depend>cartesian_compliance_controller</test_depend> 
   <test_depend>cartesian_controller_handles</test_depend> 
   <test_depend>cartesian_controller_simulation</test_depend> 
+  <test_depend>controller_manager_msgs</test_depend> 
   <test_depend>launch_testing_ament_cmake</test_depend>
 
 

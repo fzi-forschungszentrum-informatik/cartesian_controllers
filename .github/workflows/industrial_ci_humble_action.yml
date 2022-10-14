@@ -1,0 +1,20 @@
+name: Humble
+
+on: [push, pull_request]
+
+
+jobs:
+  industrial_ci:
+    env:
+      BEFORE_BUILD_TARGET_WORKSPACE: '.github/script/install_mujoco.sh'
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - {ROS_DISTRO: humble, ROS_REPO: testing}
+          - {ROS_DISTRO: humble, ROS_REPO: main}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{matrix.env}}
