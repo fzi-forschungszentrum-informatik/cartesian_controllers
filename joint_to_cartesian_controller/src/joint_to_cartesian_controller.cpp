@@ -156,7 +156,11 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   m_controller_adapter = std::make_unique<JointControllerAdapter>(m_joint_state_handles,nh);
   m_controller_manager.reset(new controller_manager::ControllerManager(m_controller_adapter.get(), nh));
 
-  // Process adapter callbacks even when we are not running
+  // Process adapter callbacks even when we are not running.
+  // This allows to interact with the adapter's controller manager without
+  // freezes.  We use an idealized update rate since we republish joint
+  // commands as Cartesian targets. The cartesian_controllers will interpolate
+  // these targets for the robot driver's real control rate.
   m_adapter_thread = std::thread([this] {
     constexpr int frequency = 100;
     auto rate               = ros::Rate(frequency);
