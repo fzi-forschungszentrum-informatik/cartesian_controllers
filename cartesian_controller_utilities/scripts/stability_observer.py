@@ -36,15 +36,17 @@ class StabilityObserver(object):
 
         # We measure our computation rate for performance
         self.calls = 0
-        self.rate = 0
+        self.rate = 500 # nominal sensor rate
         self.thread = threading.Thread(target=self.measure, daemon=True)
         self.thread.start()
 
     def measure(self):
         """ Compute our computation rate in Hz """
         while True:
-            time.sleep(1) # sec
-            self.rate = self.calls / 1.0
+            t = 0.1 # sec
+            time.sleep(t)
+            new_rate = self.calls / t
+            self.rate = (self.rate + new_rate) / 2.0 # mean filter
             self.calls = 0
 
     def sensor_cb(self, data):
@@ -62,21 +64,22 @@ class StabilityObserver(object):
 
         # Amplitude spectrum.
         # We are interested only in the first half (= positive frequencies).
-        result = np.abs(np.fft.fftn(self.data))
-        result = result[0:int(self.N / 2)]
+        amplitude_spec = np.abs(np.fft.fftn(self.data))
+        amplitude_spec = amplitude_spec[0:int(self.N / 2)]
 
-        # Get us the index where the frequencies are greater than the cross over frequency.
-        timestep = 1.0 / 500 # sensor
+        # Compute the index where the frequencies are greater than the cross over frequency.
+        # This is an analytical computation and does not depend on the actual data.
+        timestep = 1.0 / self.rate # sensor
         freq = np.fft.fftfreq(self.N, d=timestep)
         index = next(x[0] for x in enumerate(freq) if x[1] > self.wc)
 
         # Sum of magnitudes of the high frequency components
         axis = 2  # of sensor measurements
-        high_mag = np.sum(result[index:, axis])
+        high_mag = np.sum(amplitude_spec[index:, axis])
 
         # Sum of magnitudes of all frequency components
-        all_mag = np.sum(result[:, axis])
-        sys.stdout.write(f"\t{self.rate} Hz\t\rstability index: {high_mag / all_mag}")
+        all_mag = np.sum(amplitude_spec[:, axis])
+        sys.stdout.write(f"\t{self.rate:.1f} Hz\t\rstability index: {high_mag / all_mag:.3f}")
         sys.stdout.flush()
 
 
