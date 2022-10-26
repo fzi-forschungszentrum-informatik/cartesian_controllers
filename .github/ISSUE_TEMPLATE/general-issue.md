@@ -15,6 +15,7 @@ A clear and concise description of what the problem is.
  - **Commit**: What's the output of `git rev-parse HEAD` in the `cartesian_controllers` package?
  - **OS**: What's your Operating System?
  - **ROS version**: What's your ROS1/2 version?
+ - **Robot**: What robot are you working on?
 
 
 **To Reproduce**
