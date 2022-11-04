@@ -74,7 +74,6 @@ PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesi
 namespace cartesian_controller_base{
 
   ForwardDynamicsSolver::ForwardDynamicsSolver()
-    : m_min(0.01)
   {
   }
 
@@ -85,7 +84,8 @@ namespace cartesian_controller_base{
         const ctrl::Vector6D& net_force)
   {
 
-    // Compute joint space inertia matrix
+    // Compute joint space inertia matrix with actualized link masses
+    buildGenericModel();
     m_jnt_space_inertia_solver->JntToMass(m_current_positions,m_jnt_space_inertia);
 
     // Compute joint jacobian
@@ -147,7 +147,7 @@ namespace cartesian_controller_base{
     m_jnt_space_inertia.resize(m_number_joints);
 
     // Set the initial value if provided at runtime, else use default value.
-    m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.01);
+    m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.1);
 
     RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver initialized");
     RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver has control over %i joints", m_number_joints);

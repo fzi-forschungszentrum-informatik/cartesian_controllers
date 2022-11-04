@@ -133,7 +133,7 @@ class ForwardDynamicsSolver : public IKSolver
      * more does the end-effector (which has a unit mass of 1.0) dominate dynamic
      * behavior. Near singularities, a bigger value leads to smoother motion.
      */
-    double m_min;
+    std::atomic<double> m_min = 0.1;
 };
 
 
