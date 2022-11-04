@@ -82,7 +82,6 @@ PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesi
 namespace cartesian_controller_base{
 
   ForwardDynamicsSolver::ForwardDynamicsSolver()
-    : m_min(0.01)
   {
   }
 
@@ -93,7 +92,8 @@ namespace cartesian_controller_base{
         const ctrl::Vector6D& net_force)
   {
 
-    // Compute joint space inertia matrix
+    // Compute joint space inertia matrix with actualized link masses
+    buildGenericModel();
     m_jnt_space_inertia_solver->JntToMass(m_current_positions,m_jnt_space_inertia);
 
     // Compute joint jacobian
