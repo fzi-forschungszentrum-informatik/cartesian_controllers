@@ -34,6 +34,9 @@ class StabilityObserver(object):
         self.data = np.zeros((self.N, dim)).tolist()
         self.sensor_sub = rospy.Subscriber('/wrench', WrenchStamped, self.sensor_cb)
 
+        # Online recursive stability index according to [1].
+        self.I_s = 0
+
         # We measure our computation rate for performance
         self.calls = 0
         self.rate = 500 # nominal sensor rate
@@ -79,7 +82,22 @@ class StabilityObserver(object):
 
         # Sum of magnitudes of all frequency components
         all_mag = np.sum(amplitude_spec[:, axis])
-        sys.stdout.write(f"\t{self.rate:.1f} Hz\t\rstability index: {high_mag / all_mag:.3f}")
+
+        # Stability indices and parameters from [1]. See p. 7.
+        I_w = high_mag / all_mag
+        f_max = 100 # Newton
+        h = 0.99 # lambda
+        f_window = 25
+        p = min(f_window, len(self.data))
+        f_h = np.array(self.data)[-p:, axis]  # The last p values, one Cartesian axis for testing
+        I_frms = np.sqrt(1/p * np.sum(np.square(f_h))) / f_max
+
+        # Final stability index
+        self.I_s = I_w * I_frms + h * self.I_s
+
+
+        # Debug output
+        sys.stdout.write(f"\t{self.rate:.1f} Hz\t\rstability index: {self.I_s:.3f}")
         sys.stdout.flush()
 
 
