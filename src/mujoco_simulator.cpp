@@ -299,20 +299,4 @@ int MuJoCoSimulator::simulateImpl()
   return 0;
 }
 
-// TODO: Make this the control callback
-/* void MuJoCoSimulator::write(const std::vector<double>& pos, */
-/*                             const std::vector<double>& vel, */
-/*                             const std::vector<double>& eff, */
-/*                             const std::vector<double>& p_gain, */
-/*                             const std::vector<double>& i_gain, */
-/*                             const std::vector<double>& d_gain) */
-/* { */
-/*   // Realtime in ROS2-control is more important than fresh data exchange. */
-/*   if (command_mutex.try_lock()) */
-/*   { */
-/*     pos_cmd = pos; */
-/*     command_mutex.unlock(); */
-/*   } */
-/* } */
-
 } // namespace rackki_learning
