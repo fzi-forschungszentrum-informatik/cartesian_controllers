@@ -12,6 +12,8 @@
 
 
 #include "rackki_learning/mujoco_simulator.h"
+#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
+#include "geometry_msgs/msg/detail/twist_stamped__struct.hpp"
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -22,6 +24,7 @@ MuJoCoSimulator::MuJoCoSimulator() {}
 
 void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+  // Synchronize target wrenches with state feedback.
   if (command_mutex.try_lock())
   {
     m_target_wrench[0] = wrench->wrench.force.x;
@@ -30,6 +33,37 @@ void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamp
     m_target_wrench[3] = wrench->wrench.torque.x;
     m_target_wrench[4] = wrench->wrench.torque.y;
     m_target_wrench[5] = wrench->wrench.torque.z;
+
+    // Indices into the data vectors
+    int p = m_active_body * 3;  // position [x,y,z]
+    int r = m_active_body * 4;  // rotation quaternion [w,x,y,z]
+    int v = m_active_body * 6;  // velocity [rot, lin]
+
+    // Object pose w.r.t. the assembly goal.
+    auto pose_msg = geometry_msgs::msg::PoseStamped();
+    pose_msg.header.frame_id = "world";
+    pose_msg.header.stamp = m_node->now();
+    pose_msg.pose.position.x = d->xpos[p + 0];
+    pose_msg.pose.position.y = d->xpos[p + 1];
+    pose_msg.pose.position.z = d->xpos[p + 2];
+    pose_msg.pose.orientation.w = d->xquat[r + 0];
+    pose_msg.pose.orientation.x = d->xquat[r + 1];
+    pose_msg.pose.orientation.y = d->xquat[r + 2];
+    pose_msg.pose.orientation.z = d->xquat[r + 3];
+    m_feedback_pose_publisher->publish(pose_msg);
+
+    // Object twist w.r.t. the assembly goal.
+    auto twist_msg = geometry_msgs::msg::TwistStamped();
+    twist_msg.header.frame_id = "world";
+    twist_msg.header.stamp = m_node->now();
+    twist_msg.twist.angular.x = d->cvel[v + 0];
+    twist_msg.twist.angular.y = d->cvel[v + 1];
+    twist_msg.twist.angular.z = d->cvel[v + 2];
+    twist_msg.twist.linear.x = d->cvel[v + 3];
+    twist_msg.twist.linear.y = d->cvel[v + 4];
+    twist_msg.twist.linear.z = d->cvel[v + 5];
+    m_feedback_twist_publisher->publish(twist_msg);
+
     command_mutex.unlock();
   }
 }
@@ -150,14 +184,11 @@ void MuJoCoSimulator::controlCBImpl(const mjModel* m, mjData* d)
   // Realize damping via MuJoCo's passive joint forces.
   m->dof_damping[0] = 0.0; //TODO
 
-  // Each of MuJoCo's bodies has a 6-dim force-torque vector in `xfrc_applied`.
-  // By our convention, the controllable body is the last body specified.
-  const int last_body = 6 * (m->nbody - 1);
-
-  // Apply external force-torque vector
+  // Apply external force-torque vector.
   for (size_t i = 0; i < m_target_wrench.size(); ++i)
   {
-    d->xfrc_applied[last_body + i] = m_target_wrench[i];
+    constexpr int xfrc_dim = 6;
+    d->xfrc_applied[m_active_body * xfrc_dim + i] = m_target_wrench[i];
   }
 
   command_mutex.unlock();
@@ -173,13 +204,6 @@ int MuJoCoSimulator::simulateImpl()
   // Initialize ROS2 node
   m_node = std::make_shared<rclcpp::Node>("simulator",
                                           rclcpp::NodeOptions().allow_undeclared_parameters(true));
-
-  m_target_wrench_subscriber = m_node->create_subscription<geometry_msgs::msg::WrenchStamped>(
-    "/target_wrench",
-    3,
-    std::bind(&MuJoCoSimulator::targetWrenchCallback, this, std::placeholders::_1));
-
-  m_ready = true;
 
   // Fetch parameters directly from launch file
   auto model_xml = m_node->declare_parameter<std::string>("mujoco_model");
@@ -211,6 +235,36 @@ int MuJoCoSimulator::simulateImpl()
 
   // Set initial state with the keyframe mechanism from xml
   mju_copy(d->qpos, m->key_qpos, m->nq);
+
+  // Identify the active assembly component.
+  std::string convention = "active_component";
+  for (int i = 0; i < m->nbody; ++i)
+  {
+    auto name = std::string(&m->names[m->name_bodyadr[i]]);
+    if (name == convention)
+    {
+      m_active_body = i;
+    }
+  }
+  if (!m_active_body)
+  {
+    mju_error_s("Error in model xml: We need a body named %s", convention.c_str());
+    return 2;
+  }
+
+  // ROS2 communication
+  m_feedback_pose_publisher =
+    m_node->create_publisher<geometry_msgs::msg::PoseStamped>("/feedback_pose", 3);
+
+  m_feedback_twist_publisher =
+    m_node->create_publisher<geometry_msgs::msg::TwistStamped>("/feedback_twist", 3);
+
+  m_target_wrench_subscriber = m_node->create_subscription<geometry_msgs::msg::WrenchStamped>(
+    "/target_wrench",
+    3,
+    std::bind(&MuJoCoSimulator::targetWrenchCallback, this, std::placeholders::_1));
+
+  m_ready = true;
 
   // init GLFW
   if (!glfwInit())
@@ -253,23 +307,6 @@ int MuJoCoSimulator::simulateImpl()
     while (d->time - simstart < 1.0 / 60.0)
     {
       mj_step(m, d);
-
-      // TODO: Publish object pose and twist w.r.t. assembly goal.
-      /* std::vector<std::string> joint_names; */
-      /* joint_names.reserve(m->nu); */
-      /* for (int i = 0; i < m->nu; ++i) */
-      /* { */
-      /*   joint_names.emplace_back(std::string(&m->names[m->name_actuatoradr[i]])); */
-      /* } */
-
-      /* // Controlled variables */
-      /* auto controlled_variables         = sensor_msgs::msg::JointState(); */
-      /* controlled_variables.header.stamp = m_node->now(); */
-      /* controlled_variables.name         = joint_names; */
-      /* controlled_variables.position     = pos_state; */
-      /* controlled_variables.velocity     = vel_state; */
-      /* controlled_variables.effort       = eff_state; */
-      /* m_driver_state_publisher->publish(controlled_variables); */
     }
 
     // get framebuffer viewport

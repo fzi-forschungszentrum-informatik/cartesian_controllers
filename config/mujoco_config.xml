@@ -28,7 +28,7 @@
                         <geom type="mesh" mesh="passive_component" material="passive_component"/>
                 </body>
 
-                <!-- Controllable with user commands. By convention the last body specified. -->
+                <!-- Controllable with user commands. -->
                 <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
                         <freejoint name="free_joint"/>

@@ -22,8 +22,11 @@
 
 #include "GLFW/glfw3.h"
 #include "mujoco.h"
+#include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 
 namespace rackki_learning {
 
@@ -71,9 +74,13 @@ public:
 
 
   // ROS2 input and output topics
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr m_feedback_pose_publisher;
+  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr m_feedback_twist_publisher;
   rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
   void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
 
+  // Identifier for the active assembly component
+  int m_active_body = 0;
 
   // MuJoCo data structures
   mjModel* m = NULL; // MuJoCo model
