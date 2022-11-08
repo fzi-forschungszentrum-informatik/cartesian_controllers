@@ -33,17 +33,22 @@ namespace rackki_learning {
 /**
  * @brief MuJoCo's physics engine with rendering and basic window mouse interaction
  *
- * A MuJoCo-based simulator for teleoperation and data generation
+ * A MuJoCo-based simulator for teleoperation and data generation.
  *
- * TODO:
- * It's implemented as a singleton class, which circumvents the problem of
+ * We use this simulator to demonstrate assembly by teleoperation with a simple
+ * teach device.  The assembly consists of two objects: the active component
+ * that we actively steer with a target_wrench, and the passive component that
+ * is everything else in the environment.
+ * The idea is to record human behavior (= target_wrench) while steering the
+ * active component together with the active component's state feedback (pose,
+ * twist) and obtain datasets for machine learning.
+ *
+ * The simulator is implemented as a singleton class, which circumvents the problem of
  * using OpenGL-related global function pointers for rendering.
- * Most of the code is currently left as-is and we mostly add the necessary
- * enhancements for data exchange with the ROS2-control thread.
  *
  * User code interfaces this class by getting an instance and calling static
  * functions on it.  It's designed to run with an independent simulation rate,
- * disjoint from ROS2-control in a separate thread.
+ * disjoint from ROS2 in a separate thread.
  *
  */
 class MuJoCoSimulator
