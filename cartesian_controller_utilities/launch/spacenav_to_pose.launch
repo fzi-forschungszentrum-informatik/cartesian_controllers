@@ -1,0 +1,18 @@
+<launch>
+        <!-- Spacenav driver node -->
+        <node pkg="spacenav_node" type="spacenav_node" name="spacenav_node" output="screen">
+                <param name="zero_when_static" value="true"/>
+                <param name="static_count_threshold" value="30"/>
+                <rosparam param="linear_scale">[0.5,0.5,0.5]</rosparam>
+                <rosparam param="angular_scale">[2,2,2]</rosparam>
+        </node>
+
+        <!-- Numerically integrate twists into a pose -->
+        <node name="spacenav_to_pose" pkg="cartesian_controller_utilities" type="pose.py" output="screen">
+                <param name="twist_topic" value="/spacenav/twist"/>
+                <param name="pose_topic" value="/target_frame"/>
+                <param name="frame_id" value="base_link"/>
+                <param name="end_effector" value="tool0"/>
+                <param name="publishing_rate" value="100"/>
+        </node>
+</launch>

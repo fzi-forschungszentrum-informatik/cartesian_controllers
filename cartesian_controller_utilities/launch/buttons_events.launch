@@ -1,0 +1,10 @@
+<launch>
+        <!-- Spacenav driver node -->
+        <node pkg="spacenav_node" type="spacenav_node" name="spacenav_node" output="screen"/>
+
+        <!-- Link pressed buttons to actions -->
+        <node name="spacenav_buttons" pkg="cartesian_controller_utilities" type="buttons.py" output="screen">
+                <param name="joystick_topic" value="/spacenav/joy"/>
+                <rosparam command="load" file="$(find cartesian_controller_utilities)/etc/button_cmds.yaml" ></rosparam>
+        </node>
+</launch>
