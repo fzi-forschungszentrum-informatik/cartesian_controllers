@@ -4,7 +4,7 @@
 
 ---
 
-**ROS2** support is [here](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2-devel).
+**ROS2** support is [here](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros2).
 
 ---
 
