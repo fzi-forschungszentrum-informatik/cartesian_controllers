@@ -41,7 +41,7 @@ Switch into the `src` folder of your current ROS2 workspace and
 git clone -b ros2-devel git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
 rosdep install --from-paths ./ --ignore-src -y
 cd ..
-colcon build --packages-skip cartesian_controller_simulation --cmake-args -DCMAKE_BUILD_TYPE=Release
+colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 This builds the `cartesian_controllers` without its simulation environment.
 The simulation is mostly relevant if you are just getting to know the `cartesian_controllers` and want to inspect how things work.
