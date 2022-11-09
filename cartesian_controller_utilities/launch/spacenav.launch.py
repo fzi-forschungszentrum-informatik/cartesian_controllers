@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 ################################################################################
 # Copyright 2022 FZI Research Center for Information Technology
 #
@@ -30,66 +29,28 @@
 ################################################################################
 
 # -----------------------------------------------------------------------------
-# \file    buttons.py
+# \file    spacenav.launch.py
 #
 # \author  Stefan Scherzinger <scherzin@fzi.de>
 # \date    2022/11/09
 #
 # -----------------------------------------------------------------------------
 
-# ROS related
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import Joy
 
-# Other
-import subprocess
-import numpy as np
+from launch import LaunchDescription
+from launch_ros.actions import Node
 
-class buttons(Node):
-    """ React to button events """
+def generate_launch_description():
+    spacenav_node = Node(
+        package="spacenav",
+        executable="spacenav_node",
+        parameters=[
+            {"zero_when_static": True},
+            {"static_count_threshold": 30},
+            {"linear_scale": [50,50,50]},
+            {"angular_scale": [5,5,5]},
+        ],
+        output="both",
+    )
 
-    def __init__(self):
-        super().__init__('spacenav_buttons')
-
-        self.repeat_same_button = self.declare_parameter('repeat_same_button', False).value
-        self.button_sleep = self.declare_parameter('button_sleep', 0.1).value
-        self.button_cmds = self.declare_parameter('button_cmds', ['']).value
-        self.cmd_dirs = self.declare_parameter('cmd_dirs', ['']).value
-        self.last_button_cmds = None
-
-        self.joystick_topic = self.declare_parameter('joystick_topic', '').value
-        self.sub = self.create_subscription(Joy, self.joystick_topic, self.event_callback, 1)
-
-    def event_callback(self,data):
-        # Have some buttons been repeatedly pressed?
-        if self.last_button_cmds and any(np.bitwise_and(data.buttons,self.last_button_cmds)):
-            return
-        for idx, val in enumerate(data.buttons):
-            if val == 1:
-                exec_dir = self.cmd_dirs[idx]
-                if not exec_dir:    # Empty string
-                    exec_dir = None
-                subprocess.Popen(
-                    self.button_cmds[idx],
-                    stdin=subprocess.PIPE,
-                    cwd=exec_dir,
-                    shell=True)
-                # Prevent pressing the same buttons in a row
-                if not self.repeat_same_button:
-                    self.last_button_cmds = data.buttons
-                rospy.sleep(self.button_sleep)
-
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    node = buttons()
-    rclpy.spin(node)
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    return LaunchDescription([spacenav_node])

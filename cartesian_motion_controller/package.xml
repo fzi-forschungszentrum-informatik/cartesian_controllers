@@ -6,8 +6,8 @@
   <description>The cartesian_motion_controller package</description>
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
   <license>BSD</license>
-  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 
-  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
 
   <depend>rclcpp</depend>
   <depend>cartesian_controller_base</depend>

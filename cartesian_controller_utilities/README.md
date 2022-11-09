@@ -13,12 +13,8 @@ We need some additional system dependencies
 ```bash
 sudo apt install libspnav-dev spacenavd
 ```
-and the package for the space mouse driver. Install that for your ROS distribution, for instance with
-```bash
-sudo apt install ros-noetic-spacenav-node
-```
 
-We also need these Python dependencies for the scripts:
+and these Python dependencies for the scripts:
 ```bash
 pip3 install numpy numpy-quaternion
 ```
