@@ -23,7 +23,7 @@ pip3 install numpy numpy-quaternion
 Start the simulation and the force controller as described [here](../cartesian_force_controller/README.md).
 In a sourced terminal, call
 ```bash
-roslaunch cartesian_controller_utilities spacenav_to_wrench.launch
+ros2 launch cartesian_controller_utilities spacenav_to_wrench.launch.py
 ```
 You can now steer the robot's end-effector with the space mouse.
 There's a parameter to change the coordinate frame for control: In rqt open the *Dynamic Reconfigure* plugin under *Configuration*,
