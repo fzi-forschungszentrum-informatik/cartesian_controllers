@@ -34,7 +34,7 @@ navigate to *my_cartesian_force_controller* and untick the box for `hand_frame_c
 Start the simulation and the compliance controller as described [here](../cartesian_compliance_controller/README.md).
 In a sourced terminal, call
 ```bash
-roslaunch cartesian_controller_utilities spacenav_to_pose.launch
+ros2 launch cartesian_controller_utilities spacenav_to_pose.launch.py
 ```
 You can now steer the robot's `target_frame` with the space mouse.
 The publisher makes sure that we always start from the current end-effector pose.
