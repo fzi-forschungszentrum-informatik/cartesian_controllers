@@ -46,6 +46,8 @@ from geometry_msgs.msg import PoseStamped
 import tf2_ros
 import sys
 import time
+import threading
+import os
 
 
 class converter(Node):
@@ -63,32 +65,36 @@ class converter(Node):
         self.pose_topic = self.declare_parameter('pose_topic', 'my_pose').value
         self.frame_id = self.declare_parameter('frame_id', 'base_link').value
         self.end_effector = self.declare_parameter('end_effector', 'tool0').value
-        period = 1.0 / self.declare_parameter('publishing_rate', 100).value
-        self.timer = self.create_timer(period, self.publish)
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         self.rot = np.quaternion(0, 0, 0, 1)
         self.pos = [0, 0, 0]
 
-        # Start where we are
-        if not self.startup():
-            sys.exit(0)
-
         self.pub = self.create_publisher(PoseStamped, self.pose_topic, 3)
         self.sub = self.create_subscription(Twist, self.twist_topic, self.twist_cb, 1)
         self.last = time.time()
 
+        self.startup_done = False
+        period = 1.0 / self.declare_parameter('publishing_rate', 100).value
+        self.timer = self.create_timer(period, self.publish)
+
+        self.thread = threading.Thread(target=self.startup, daemon=True)
+        self.thread.start()
+
     def startup(self):
+        """ Make sure to start at the robot's current pose """
+        # Wait until we entered spinning in the main thread.
+        time.sleep(1)
         try:
             start = self.tf_buffer.lookup_transform(
                 target_frame=self.frame_id, source_frame=self.end_effector,
-                time=rclpy.time.Time(), timeout=rclpy.time.Duration(seconds=1))
+                time=rclpy.time.Time())
 
         except (tf2_ros.InvalidArgumentException, tf2_ros.LookupException,
                 tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
-            print(e)
-            return False
+            print(f"Startup failed: {e}")
+            os._exit(1)
 
         self.pos[0] = start.transform.translation.x
         self.pos[1] = start.transform.translation.y
@@ -97,7 +103,7 @@ class converter(Node):
         self.rot.y = start.transform.rotation.y
         self.rot.z = start.transform.rotation.z
         self.rot.w = start.transform.rotation.w
-        return True
+        self.startup_done = True
 
 
 
@@ -125,18 +131,20 @@ class converter(Node):
         self.rot = q[-1]  # the last one is after dt passed
 
     def publish(self):
-        msg = PoseStamped()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = self.frame_id
-        msg.pose.position.x = self.pos[0]
-        msg.pose.position.y = self.pos[1]
-        msg.pose.position.z = self.pos[2]
-        msg.pose.orientation.x = self.rot.x
-        msg.pose.orientation.y = self.rot.y
-        msg.pose.orientation.z = self.rot.z
-        msg.pose.orientation.w = self.rot.w
-
+        if not self.startup_done:
+            return
         try:
+            msg = PoseStamped()
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.frame_id = self.frame_id
+            msg.pose.position.x = self.pos[0]
+            msg.pose.position.y = self.pos[1]
+            msg.pose.position.z = self.pos[2]
+            msg.pose.orientation.x = self.rot.x
+            msg.pose.orientation.y = self.rot.y
+            msg.pose.orientation.z = self.rot.z
+            msg.pose.orientation.w = self.rot.w
+
             self.pub.publish(msg)
         except:
             # Swallow 'publish() to closed topic' error.
