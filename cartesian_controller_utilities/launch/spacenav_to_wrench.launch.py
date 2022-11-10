@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 ################################################################################
 # Copyright 2022 FZI Research Center for Information Technology
 #
@@ -30,68 +29,41 @@
 ################################################################################
 
 # -----------------------------------------------------------------------------
-# \file    converter.py
+# \file    spacenav_to_wrench.launch.py
 #
 # \author  Stefan Scherzinger <scherzin@fzi.de>
-# \date    2022/11/09
+# \date    2022/11/10
 #
 # -----------------------------------------------------------------------------
 
-import rclpy
-import sys
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from geometry_msgs.msg import WrenchStamped
+
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    spacenav_node = Node(
+        package="spacenav",
+        executable="spacenav_node",
+        parameters=[
+            {"zero_when_static": True},
+            {"static_count_threshold": 30},
+            {"linear_scale": [50,50,50]},
+            {"angular_scale": [5,5,5]},
+        ],
+        output="both",
+    )
+
+    converter_node = Node(
+        package="cartesian_controller_utilities",
+        executable="converter.py",
+        parameters=[
+            {"twist_topic": "/spacenav/twist"},
+            {"wrench_topic": "/target_wrench"},
+            {"frame_id": "world"},
+            {"publishing_rate": 50},
+        ],
+        output="both",
+    )
 
 
-class converter(Node):
-    """ Convert Twist messages to WrenchStamped """
-
-    def __init__(self):
-        super().__init__('converter')
-
-        self.twist_topic = self.declare_parameter('twist_topic', 'my_twist').value
-        self.wrench_topic = self.declare_parameter('wrench_topic', 'my_wrench').value
-        self.frame_id = self.declare_parameter('frame_id', 'world').value
-        period = 1.0 / self.declare_parameter('publishing_rate', 100).value
-        self.timer = self.create_timer(period, self.publish)
-
-        self.buffer = WrenchStamped()
-
-        self.pub = self.create_publisher(WrenchStamped, self.wrench_topic, 3)
-        self.sub = self.create_subscription(Twist, self.twist_topic, self.twist_cb, 1)
-
-
-    def twist_cb(self,data):
-        self.buffer.header.stamp     = self.get_clock().now().to_msg()
-        self.buffer.header.frame_id  = self.frame_id
-        self.buffer.wrench.force.x   = data.linear.x
-        self.buffer.wrench.force.y   = data.linear.y
-        self.buffer.wrench.force.z   = data.linear.z
-        self.buffer.wrench.torque.x  = data.angular.x
-        self.buffer.wrench.torque.y  = data.angular.y
-        self.buffer.wrench.torque.z  = data.angular.z
-
-
-    def publish(self):
-        try:
-            self.pub.publish(self.buffer)
-        except:
-            # Swallow 'publish() to closed topic' error.
-            # This rarely happens on killing this node.
-            pass
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = converter()
-    rclpy.spin(node)
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit(0)
-    except Exception as e:
-        print(e)
-        sys.exit(1)
+    return LaunchDescription([spacenav_node, converter_node])
