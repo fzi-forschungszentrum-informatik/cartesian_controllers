@@ -85,12 +85,12 @@ def main(args=None):
     rclpy.init(args=args)
     node = converter()
     rclpy.spin(node)
-    rclpy.shutdown()
 
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
+        rclpy.shutdown()
         sys.exit(0)
     except Exception as e:
         print(e)
