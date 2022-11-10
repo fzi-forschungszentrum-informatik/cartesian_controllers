@@ -37,7 +37,6 @@
 #
 # -----------------------------------------------------------------------------
 
-# ROS related
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
@@ -91,5 +90,8 @@ def main(args=None):
 if __name__ == '__main__':
     try:
         main()
-    except:
-        pass
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
