@@ -11,7 +11,7 @@ force and motion control input device for teleoperation with the `cartesian_cont
 ## Install
 We need some additional system dependencies
 ```bash
-sudo apt install libspnav-dev spacenavd
+sudo apt install libspnav-dev spacenavd screen
 ```
 
 and these Python dependencies for the scripts:
