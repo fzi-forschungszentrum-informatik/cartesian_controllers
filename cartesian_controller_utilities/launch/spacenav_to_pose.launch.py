@@ -49,9 +49,9 @@ def generate_launch_description():
             {"linear_scale/x": 0.5},
             {"linear_scale/y": 0.5},
             {"linear_scale/z": 0.5},
-            {"angular_scale/x": 2.0},
-            {"angular_scale/y": 2.0},
-            {"angular_scale/z": 2.0},
+            {"angular_scale/x": 1.0},
+            {"angular_scale/y": 1.0},
+            {"angular_scale/z": 1.0},
         ],
         output="both",
     )
