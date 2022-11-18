@@ -46,6 +46,12 @@ def generate_launch_description():
         [FindPackageShare("cartesian_controller_utilities"), "etc", "button_cmds.yaml"]
     )
 
+    spacenav_node = Node(
+        package="spacenav",
+        executable="spacenav_node",
+        output="both",
+    )
+
     button_node = Node(
         package="cartesian_controller_utilities",
         executable="buttons.py",
@@ -56,4 +62,4 @@ def generate_launch_description():
         output="both",
     )
 
-    return LaunchDescription([button_node])
+    return LaunchDescription([spacenav_node, button_node])

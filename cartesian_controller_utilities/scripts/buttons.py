@@ -40,10 +40,10 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
-
-# Other
 import subprocess
 import numpy as np
+import sys
+import time
 
 class buttons(Node):
     """ React to button events """
@@ -77,7 +77,7 @@ class buttons(Node):
                 # Prevent pressing the same buttons in a row
                 if not self.repeat_same_button:
                     self.last_button_cmds = data.buttons
-                rospy.sleep(self.button_sleep)
+                time.sleep(self.button_sleep)
 
 
 def main(args=None):

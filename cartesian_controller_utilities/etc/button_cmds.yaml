@@ -15,9 +15,9 @@ spacenav_buttons:
     button_cmds :
             [
                     # button 0
-                    "rosbag record /spacenav/twist -o my_bag __name:=my_baggi",
+                    "echo 'start recording' && screen -d -m ros2 bag record topics /spacenav/twist",
                     # button 1
-                    "rosnode kill my_baggi"
+                    "echo 'stop recording' && screen -X stuff '^C'"
             ]
     
     # Directories where the commands are executed
