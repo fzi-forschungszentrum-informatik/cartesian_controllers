@@ -19,6 +19,14 @@ and these Python dependencies for the scripts:
 pip3 install numpy numpy-quaternion
 ```
 
+We also need a custom version of the `joystick_drivers` (one that correctly reports the button events).
+Until pending PRs are merged upstream there, you'll find the package [here](https://github.com/stefanscherzinger/joystick_drivers).
+Navigate into your `src` folder in your workspace,
+```bash
+git clone -b ros2 https://github.com/stefanscherzinger/joystick_drivers.git
+```
+and build the workspace as usual.
+
 ## Force control
 Start the simulation and the force controller as described [here](../cartesian_force_controller/README.md).
 In a sourced terminal, call
