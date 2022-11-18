@@ -58,7 +58,7 @@ You can [program both buttons](etc/button_cmds.yaml) with everything that's a va
 In this example, we record the `spacenav/twist` topic into a rosbag and use the two buttons for *starting* and *stoping*, respectively.
 In a source terminal, call
 ```bash
-ros2 launch cartesian_controller_utilities buttons_events.launch.py
+ros2 launch cartesian_controller_utilities spacenav_buttons.launch.py
 ```
 Now press the space mouse's buttons. You should see output in the terminal, similar to this
 ```bash
