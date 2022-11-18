@@ -1,0 +1,30 @@
+# Define button commands in this file
+spacenav_buttons:
+  ros__parameters:
+
+    # If set to False, a button cannot be pressed twice in a row.
+    # Can be used to force alternation between to buttons, e.g. when doing `start recording`
+    # - `stop recording` tasks.
+    repeat_same_button : False
+    
+    # Minimum duration in seconds to pass between two buttons pressed.
+    # Can be used to control the rate of pressing.
+    button_sleep: 1.0
+    
+    # Define which commands to execute on pressing buttons
+    button_cmds :
+            [
+                    # button 0
+                    "echo 'start recording' && screen -d -m ros2 bag record topics /spacenav/twist",
+                    # button 1
+                    "echo 'stop recording' && screen -X stuff '^C'"
+            ]
+    
+    # Directories where the commands are executed
+    cmd_dirs :
+            [
+                    # command 0
+                    "",
+                    # command 1
+                    ""
+            ]

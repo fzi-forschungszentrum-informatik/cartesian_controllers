@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cartesian_controller_utilities</name>
+  <version>0.1.0</version>
+  <description>Make the spacemouse a teach device for contact-based teleoperation</description>
+  <maintainer email="scherzin@fzi.de">Stefan Scherzinger</maintainer>
+  <license>BSD</license>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
