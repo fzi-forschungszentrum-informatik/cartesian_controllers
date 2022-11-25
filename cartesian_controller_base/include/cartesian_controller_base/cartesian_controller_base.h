@@ -44,6 +44,9 @@
 #include <ros/node_handle.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <realtime_tools/realtime_publisher.h>
 
 // ros_controls
 #include <controller_interface/controller.h>
@@ -179,6 +182,23 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     int m_iterations;
     std::vector<hardware_interface::JointHandle>      m_joint_handles;
 
+    /**
+     * Whether or not to publish the controller's current end-effector pose and
+     * twist.
+     */
+    std::atomic<bool> m_publish_state_feedback = false;
+
+    /**
+     * @brief Publish the controller's end-effector pose and twist
+     *
+     * The data are w.r.t. the specified robot base link.
+     * If this function is called after `computeJointControlCmds()` has
+     * been called, then the controller's internal state represents the state
+     * right after the error computation, and corresponds to the new target
+     * state that will be send to the actuators in this control cycle.
+     */
+    void publishStateFeedback();
+
   private:
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
@@ -196,6 +216,12 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     std::shared_ptr<dynamic_reconfigure::Server<ControllerConfig> > m_dyn_conf_server;
     dynamic_reconfigure::Server<ControllerConfig>::CallbackType m_callback_type;
+
+    realtime_tools::RealtimePublisherSharedPtr<geometry_msgs::PoseStamped>
+      m_feedback_pose_publisher;
+    realtime_tools::RealtimePublisherSharedPtr<geometry_msgs::TwistStamped>
+      m_feedback_twist_publisher;
+
 };
 
 }

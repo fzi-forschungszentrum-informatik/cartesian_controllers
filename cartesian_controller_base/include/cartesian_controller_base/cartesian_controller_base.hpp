@@ -185,6 +185,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(nh);
 
+  // Controller-internal state publishing
+  m_feedback_pose_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::PoseStamped> >(
+      nh, "current_pose", 3);
+
+  m_feedback_twist_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped> >(
+      nh, "current_twist", 3);
+
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
   // the according names exist.
@@ -220,6 +229,11 @@ template <>
 void CartesianControllerBase<hardware_interface::PositionJointInterface>::
 writeJointControlCmds()
 {
+  if (m_publish_state_feedback)
+  {
+    publishStateFeedback();
+  }
+
   // Take position commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
@@ -231,6 +245,11 @@ template <>
 void CartesianControllerBase<hardware_interface::VelocityJointInterface>::
 writeJointControlCmds()
 {
+  if (m_publish_state_feedback)
+  {
+    publishStateFeedback();
+  }
+
   // Take velocity commands
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
@@ -348,10 +367,51 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
 
 template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
+publishStateFeedback()
+{
+  // End-effector pose
+  auto pose = m_ik_solver->getEndEffectorPose();
+  if (m_feedback_pose_publisher->trylock()){
+    m_feedback_pose_publisher->msg_.header.stamp = ros::Time::now();
+    m_feedback_pose_publisher->msg_.header.frame_id = m_robot_base_link;
+    m_feedback_pose_publisher->msg_.pose.position.x = pose.p.x();
+    m_feedback_pose_publisher->msg_.pose.position.y = pose.p.y();
+    m_feedback_pose_publisher->msg_.pose.position.z = pose.p.z();
+
+    pose.M.GetQuaternion(
+        m_feedback_pose_publisher->msg_.pose.orientation.x,
+        m_feedback_pose_publisher->msg_.pose.orientation.y,
+        m_feedback_pose_publisher->msg_.pose.orientation.z,
+        m_feedback_pose_publisher->msg_.pose.orientation.w
+        );
+
+    m_feedback_pose_publisher->unlockAndPublish();
+  }
+
+  // End-effector twist
+  auto twist = m_ik_solver->getEndEffectorVel();
+  if (m_feedback_twist_publisher->trylock()){
+    m_feedback_twist_publisher->msg_.header.stamp = ros::Time::now();
+    m_feedback_twist_publisher->msg_.header.frame_id = m_robot_base_link;
+    m_feedback_twist_publisher->msg_.twist.linear.x = twist[0];
+    m_feedback_twist_publisher->msg_.twist.linear.y = twist[1];
+    m_feedback_twist_publisher->msg_.twist.linear.z = twist[2];
+    m_feedback_twist_publisher->msg_.twist.angular.x = twist[3];
+    m_feedback_twist_publisher->msg_.twist.angular.y = twist[4];
+    m_feedback_twist_publisher->msg_.twist.angular.z = twist[5];
+
+    m_feedback_twist_publisher->unlockAndPublish();
+  }
+
+}
+
+template <class HardwareInterface>
+void CartesianControllerBase<HardwareInterface>::
 dynamicReconfigureCallback(ControllerConfig& config, uint32_t level)
 {
   m_error_scale = config.error_scale;
   m_iterations = config.iterations;
+  m_publish_state_feedback = config.publish_state_feedback;
 }
 
 } // namespace
