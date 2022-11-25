@@ -43,7 +43,7 @@
 // other
 #include <map>
 #include <sstream>
-#include <boost/algorithm/clamp.hpp>
+#include <algorithm>
 #include <eigen_conversions/eigen_kdl.h>
 
 // KDL
@@ -153,7 +153,7 @@ namespace cartesian_controller_base{
         // Joint marked as continuous.
         continue;
       }
-      m_current_positions(i) = boost::algorithm::clamp(
+      m_current_positions(i) = std::clamp(
           m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
     }
   }
