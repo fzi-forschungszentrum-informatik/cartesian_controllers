@@ -43,7 +43,6 @@
 // other
 #include <map>
 #include <sstream>
-#include <boost/algorithm/clamp.hpp>
 #include <eigen_conversions/eigen_kdl.h>
 
 // KDL
@@ -154,8 +153,10 @@ namespace cartesian_controller_base{
     // Connect dynamic reconfigure and overwrite the default values with values
     // on the parameter server. This is done automatically if parameters with
     // the according names exist.
-    m_callback_type = boost::bind(
-        &ForwardDynamicsSolver::dynamicReconfigureCallback, this, _1, _2);
+    m_callback_type = std::bind(&ForwardDynamicsSolver::dynamicReconfigureCallback,
+                                this,
+                                std::placeholders::_1,
+                                std::placeholders::_2);
 
     m_dyn_conf_server.reset(
         new dynamic_reconfigure::Server<IKConfig>(

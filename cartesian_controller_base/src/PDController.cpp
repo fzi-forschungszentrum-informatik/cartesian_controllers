@@ -67,8 +67,8 @@ void PDController::init(const std::string& name_space)
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
   // the according names exist.
-  m_callback_type = boost::bind(
-      &PDController::dynamicReconfigureCallback, this, _1, _2);
+  m_callback_type = std::bind(
+    &PDController::dynamicReconfigureCallback, this, std::placeholders::_1, std::placeholders::_2);
 
   m_dyn_conf_server.reset(
       new dynamic_reconfigure::Server<PDGainsConfig>(
