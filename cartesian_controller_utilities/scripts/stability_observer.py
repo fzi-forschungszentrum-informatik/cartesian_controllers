@@ -84,7 +84,7 @@ class StabilityObserver(object):
         all_mag = np.sum(amplitude_spec[:, axis])
 
         # Stability indices and parameters from [1]. See p. 7.
-        I_w = high_mag / all_mag
+        I_w = high_mag / all_mag if all_mag else 0.0
         f_max = 100 # Newton
         h = 0.99 # lambda
         f_window = 25
