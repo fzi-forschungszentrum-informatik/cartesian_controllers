@@ -44,12 +44,16 @@ class StabilityObserver(object):
         self.thread.start()
 
     def measure(self):
-        """ Compute our computation rate in Hz """
+        """ Compute our computation rate in Hz
+
+        We need a non-zero lower rate for algorithmic stability reasons.
+        """
         while True:
             t = 0.1 # sec
+            min_rate = 10e-5 # Hz
             time.sleep(t)
             new_rate = self.calls / t
-            self.rate = (self.rate + new_rate) / 2.0 # mean filter
+            self.rate = max(min_rate, (self.rate + new_rate) / 2.0) # mean filter
             self.calls = 0
 
     def sensor_cb(self, data):
@@ -71,10 +75,15 @@ class StabilityObserver(object):
         amplitude_spec = amplitude_spec[0:int(self.N / 2)]
 
         # Compute the index where the frequencies are greater than the cross over frequency.
-        # This is an analytical computation and does not depend on the actual data.
+        # The frequency spectrum is defined by the sensor rate and the sample count.
         timestep = 1.0 / self.rate # sensor
         freq = np.fft.fftfreq(self.N, d=timestep)
-        index = next(x[0] for x in enumerate(freq) if x[1] > self.wc)
+        if max(freq) > self.wc:
+            index = next(x[0] for x in enumerate(freq) if x[1] > self.wc)
+        else:
+            # Frequency spectrum still insufficient.
+            # We seem to be resuming after a pause and need to build up the sensor rate.
+            index = -1
 
         # Sum of magnitudes of the high frequency components
         axis = 2  # of sensor measurements
