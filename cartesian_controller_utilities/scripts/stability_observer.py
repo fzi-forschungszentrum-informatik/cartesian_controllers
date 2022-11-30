@@ -106,8 +106,8 @@ class StabilityObserver(object):
 
 
         # Debug output
-        sys.stdout.write(f"\t{self.rate:.1f} Hz\t\rstability index: {self.I_s:.3f}")
-        sys.stdout.flush()
+        print(f" {self.rate:.1f} Hz  stability index: {self.I_s:.3f}", end='\r', flush=True)
+        #print(f" {self.rate:.1f} Hz  I_w: {I_w:.3f}", end='\r', flush=True)
 
 
 
