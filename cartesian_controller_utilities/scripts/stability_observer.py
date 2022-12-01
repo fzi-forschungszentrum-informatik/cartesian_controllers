@@ -71,13 +71,16 @@ class StabilityObserver(object):
 
         # Amplitude spectrum.
         # We are interested only in the first half (= positive frequencies).
+        # Also drop the 0th element that holds the sum over all signals.
         amplitude_spec = np.abs(np.fft.fftn(self.data))
-        amplitude_spec = amplitude_spec[0:int(self.N / 2)]
+        amplitude_spec = amplitude_spec[1:int(self.N / 2)]
 
         # Compute the index where the frequencies are greater than the cross over frequency.
         # The frequency spectrum is defined by the sensor rate and the sample count.
+        # Like with the amplitudes, we select only the relevant frequencies.
         timestep = 1.0 / self.rate # sensor
         freq = np.fft.fftfreq(self.N, d=timestep)
+        freq = freq[1:int(self.N / 2)]
         if max(freq) > self.wc:
             index = next(x[0] for x in enumerate(freq) if x[1] > self.wc)
         else:
