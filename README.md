@@ -24,13 +24,13 @@ need both [GLFW](https://www.glfw.org/) and [GLEW](http://glew.sourceforge.net/)
 It's a ready-to-use, pre-built library package, and we will just point to it during the build.
    ```bash
    cd $HOME
-   wget https://github.com/deepmind/mujoco/releases/download/2.1.1/mujoco-2.1.1-linux-x86_64.tar.gz
-   tar -xf mujoco-2.1.1-linux-x86_64.tar.gz
+   wget https://github.com/deepmind/mujoco/releases/download/2.3.1/mujoco-2.3.1-linux-x86_64.tar.gz
+   tar -xf mujoco-2.3.1-linux-x86_64.tar.gz
    ```
 
 3. Switch to the *root* of your ROS2 workspace and build the package (*standalone*) with
    ```bash
-   colcon build --cmake-args "-DMUJOCO_DIR=$HOME/mujoco-2.1.1"  --packages-select rackki_learning
+   colcon build --cmake-args "-DMUJOCO_DIR=$HOME/mujoco-2.3.1"  --packages-select rackki_learning
    ```
 
 ## Getting started

@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "GLFW/glfw3.h"
-#include "mujoco.h"
+#include "mujoco/mujoco.h"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
