@@ -5,10 +5,10 @@
         for further data processing. The recorded datasets can be used for Imitation Learning and (Offline) Reinforcement Learning.
         -->
         <compiler angle="radian"/>
-        <size njmax="500" nconmax="100"/>
         <option>
-                <flag gravity="disable" />
+                <flag gravity="disable" override="enable"/>
         </option>
+        <option o_solimp="0.9 0.99 0.0001" o_solref="0.001 1"/>
 
         <!--
         Allow to pass six additional parameters to each joint.
