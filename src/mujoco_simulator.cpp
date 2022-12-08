@@ -181,8 +181,14 @@ void MuJoCoSimulator::controlCBImpl(const mjModel* m, mjData* d)
 {
   command_mutex.lock();
 
-  // Realize damping via MuJoCo's passive joint forces.
-  m->dof_damping[0] = 0.0; //TODO
+  constexpr size_t cart_dim = 6; // 3 translation, 3 rotation
+
+  for (size_t i = 0; i < cart_dim; ++i)
+  {
+    // Damp each of the free joint's dimensions individually with a
+    // user-specified value.
+    m->dof_damping[i] = m->jnt_user[i];
+  }
 
   // Apply external force-torque vector.
   for (size_t i = 0; i < m_target_wrench.size(); ++i)

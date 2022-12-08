@@ -9,7 +9,14 @@
         <option>
                 <flag gravity="disable" />
         </option>
+
+        <!--
+        Allow to pass six additional parameters to each joint.
+        For the free joint, they mean damping in [x, y, z, rotx, roty, rotz]
+        -->
+        <size nuser_jnt="6" />
         <asset>
+
                 <texture type="skybox" builtin="gradient" rgb1="0.9 0.9 0.9" rgb2="0.5 0.5 0.5" width="512" height="512"/>
                 <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
                 <material name="matplane" reflectance="0.2" texture="texplane" texrepeat="1 1" texuniform="true"/>
@@ -31,7 +38,7 @@
                 <!-- Controllable with user commands. -->
                 <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
-                        <freejoint name="free_joint"/>
+                        <joint name="free_joint" type="free" user="1000 1000 1000 10 10 10"/>
                         <geom type="mesh" mesh="active_component" material="active_component"/>
                 </body>
         </worldbody>
