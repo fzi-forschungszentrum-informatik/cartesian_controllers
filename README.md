@@ -12,7 +12,7 @@ Any issue, PR, or feedback on *your* special robot and use case is highly apprec
 ---
 
 # Cartesian Controllers
-This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ROS2-control` framework.
+This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ros2_control` framework.
 The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
 As a unique selling point, they use fast forward dynamics simulations of
 virtually conditioned twins of the real setup as a solver for the inverse kinematics problem.
@@ -33,7 +33,7 @@ integrating a full planning stack is often unnecessary for simple applications.
 Additionally, there are a lot of use cases where direct control in task space is mandatory:
 dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
 any form of **closed loop control with external sensors** for physical interactions with environments, such as **Machine Learning** applications.
-This package provides such a controller suite for the [ROS2-control](https://control.ros.org/master/index.html) framework.
+This package provides such a controller suite for the [ros2_control](https://control.ros.org/master/index.html) framework.
 
 ## Installation
 Switch into the `src` folder of your current ROS2 workspace and
