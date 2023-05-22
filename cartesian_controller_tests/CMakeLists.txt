@@ -14,6 +14,7 @@ if(BUILD_TESTING)
   find_package(controller_manager_msgs REQUIRED)
   find_package(launch_testing_ament_cmake)
   add_launch_test(integration_tests/test_startup.py)
+  add_launch_test(integration_tests/test_nans.py)
 endif()
 
 ament_package()
