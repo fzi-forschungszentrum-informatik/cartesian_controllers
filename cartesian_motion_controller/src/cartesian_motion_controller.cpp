@@ -43,6 +43,7 @@
 #include "rclcpp/duration.hpp"
 #include <algorithm>
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
+#include <cmath>
 
 namespace cartesian_motion_controller
 {
@@ -194,6 +195,19 @@ computeMotionError()
 
 void CartesianMotionController::targetFrameCallback(const geometry_msgs::msg::PoseStamped::SharedPtr target)
 {
+  if (std::isnan(target->pose.position.x) || std::isnan(target->pose.position.y) ||
+      std::isnan(target->pose.position.z) || std::isnan(target->pose.orientation.x) ||
+      std::isnan(target->pose.orientation.y) || std::isnan(target->pose.orientation.z) ||
+      std::isnan(target->pose.orientation.w))
+  {
+    auto& clock = *get_node()->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(get_node()->get_logger(),
+                                clock,
+                                3000,
+                                "NaN detected in target pose. Ignoring input.");
+    return;
+  }
+
   if (target->header.frame_id != Base::m_robot_base_link)
   {
     auto& clock = *get_node()->get_clock();

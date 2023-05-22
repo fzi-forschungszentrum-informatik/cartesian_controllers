@@ -40,6 +40,7 @@
 #include "cartesian_controller_base/Utility.h"
 #include "controller_interface/controller_interface.hpp"
 #include <cartesian_force_controller/cartesian_force_controller.h>
+#include <cmath>
 
 namespace cartesian_force_controller
 {
@@ -212,6 +213,18 @@ void CartesianForceController::setFtSensorReferenceFrame(const std::string& new_
 
 void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+  if (std::isnan(wrench->wrench.force.x) || std::isnan(wrench->wrench.force.y) ||
+      std::isnan(wrench->wrench.force.z) || std::isnan(wrench->wrench.torque.x) ||
+      std::isnan(wrench->wrench.torque.y) || std::isnan(wrench->wrench.torque.z))
+  {
+    auto& clock = *get_node()->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(get_node()->get_logger(),
+                                clock,
+                                3000,
+                                "NaN detected in target wrench. Ignoring input.");
+    return;
+  }
+
   m_target_wrench[0] = wrench->wrench.force.x;
   m_target_wrench[1] = wrench->wrench.force.y;
   m_target_wrench[2] = wrench->wrench.force.z;
@@ -222,6 +235,19 @@ void CartesianForceController::targetWrenchCallback(const geometry_msgs::msg::Wr
 
 void CartesianForceController::ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+  if (std::isnan(wrench->wrench.force.x) || std::isnan(wrench->wrench.force.y) ||
+      std::isnan(wrench->wrench.force.z) || std::isnan(wrench->wrench.torque.x) ||
+      std::isnan(wrench->wrench.torque.y) || std::isnan(wrench->wrench.torque.z))
+  {
+    auto& clock = *get_node()->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(get_node()->get_logger(),
+                                clock,
+                                3000,
+                                "NaN detected in force-torque sensor wrench. Ignoring input.");
+    return;
+  }
+
+
 #if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
   KDL::Wrench tmp;
   tmp[0] = wrench->wrench.force.x;
