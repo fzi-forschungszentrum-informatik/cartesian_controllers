@@ -39,7 +39,7 @@ Unfortunately, there won't exist ideal parameters for every use case and robot.
 So, for your specific application, you will be tweaking the PD gains at some point.
 
 ### Solver parameters
-The common solver has two parameters:
+The common solver has several parameters:
 * **iterations**: The number of internally simulated cycles per control cycle.
   Increasing this number will give the solver more iterations to approach the given target.
   A value of `10` is a good default for the `CartesianMotionController` and the `CartesianComplianceController`.
@@ -51,11 +51,39 @@ The common solver has two parameters:
   Use this parameter to find the right range
   for your PD gains. It's handy to use the slider in dynamic reconfigure for this.
 
+* **publish_state_feedback**: A boolean flag whether to publish the
+  controller-internal state. This is helpful for comparing the controllers'
+  feedback against the given target reference during parameter tweaking. If
+  `true`, each controller will publish its end-effector pose and twist on the local topics `current_pose` and
+  `current_twist`, respectively. You can easily find them in a sourced terminal with
+  ```bash
+  ros2 topic list | grep current
+  ```
+
+All solver parameters can be set online via `dynamic_reconfigure` in the controllers'
+`solver` namespace, or at startup via the controller's `.yaml` configuration
+file, e.g. with
+```yaml
+my_cartesian_controller:
+  ros__parameters:
+
+    # link and joints specification here
+    # ...
+
+    solver:
+        error_scale: 0.5
+        iterations: 5
+        publish_state_feedback: True
+
+    # Further specification
+    # ...
+```
+
 ## Performance
 As a default, please build the cartesian_controllers in release mode:
 
 ```bash
-catkin_make -DCMAKE_BUILD_TYPE=Release
+colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 The forward dynamics implementation heavily relies on
 orocos_kinematics_dynamics (KDL), which use Eigen for linear algebra.

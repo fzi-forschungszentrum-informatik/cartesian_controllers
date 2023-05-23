@@ -39,6 +39,8 @@
 
 #include "controller_interface/controller_interface.hpp"
 #include "controller_interface/helpers.hpp"
+#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
+#include "geometry_msgs/msg/detail/twist_stamped__struct.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include <cartesian_controller_base/cartesian_controller_base.h>
@@ -96,6 +98,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
     auto_declare<double>("solver.error_scale", 1.0);
     auto_declare<int>("solver.iterations", 1);
+    auto_declare<bool>("solver.publish_state_feedback", false);
     m_initialized = true;
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
@@ -121,6 +124,7 @@ controller_interface::return_type CartesianControllerBase::init(const std::strin
     auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
     auto_declare<double>("solver.error_scale", 1.0);
     auto_declare<int>("solver.iterations", 1);
+    auto_declare<bool>("solver.publish_state_feedback", false);
 
     m_initialized = true;
   }
@@ -255,6 +259,17 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     }
   }
 
+  // Controller-internal state publishing
+  m_feedback_pose_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::PoseStamped> >(
+      get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
+        std::string(get_node()->get_name()) + "/current_pose", 3));
+
+  m_feedback_twist_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::TwistStamped> >(
+      get_node()->create_publisher<geometry_msgs::msg::TwistStamped>(
+        std::string(get_node()->get_name()) + "/current_twist", 3));
+
   m_configured = true;
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
@@ -335,6 +350,11 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 
 void CartesianControllerBase::writeJointControlCmds()
 {
+  if (get_node()->get_parameter("solver.publish_state_feedback").as_bool())
+  {
+    publishStateFeedback();
+  }
+
   // Write all available types.
   for (const auto& type : m_cmd_interface_types)
   {
@@ -455,5 +475,44 @@ ctrl::Vector6D CartesianControllerBase::displayInTipLink(const ctrl::Vector6D& v
 
   return out;
 }
+
+void CartesianControllerBase::publishStateFeedback()
+{
+  // End-effector pose
+  auto pose = m_ik_solver->getEndEffectorPose();
+  if (m_feedback_pose_publisher->trylock()){
+    m_feedback_pose_publisher->msg_.header.stamp = get_node()->now();
+    m_feedback_pose_publisher->msg_.header.frame_id = m_robot_base_link;
+    m_feedback_pose_publisher->msg_.pose.position.x = pose.p.x();
+    m_feedback_pose_publisher->msg_.pose.position.y = pose.p.y();
+    m_feedback_pose_publisher->msg_.pose.position.z = pose.p.z();
+
+    pose.M.GetQuaternion(
+        m_feedback_pose_publisher->msg_.pose.orientation.x,
+        m_feedback_pose_publisher->msg_.pose.orientation.y,
+        m_feedback_pose_publisher->msg_.pose.orientation.z,
+        m_feedback_pose_publisher->msg_.pose.orientation.w
+        );
+
+    m_feedback_pose_publisher->unlockAndPublish();
+  }
+
+  // End-effector twist
+  auto twist = m_ik_solver->getEndEffectorVel();
+  if (m_feedback_twist_publisher->trylock()){
+    m_feedback_twist_publisher->msg_.header.stamp = get_node()->now();
+    m_feedback_twist_publisher->msg_.header.frame_id = m_robot_base_link;
+    m_feedback_twist_publisher->msg_.twist.linear.x = twist[0];
+    m_feedback_twist_publisher->msg_.twist.linear.y = twist[1];
+    m_feedback_twist_publisher->msg_.twist.linear.z = twist[2];
+    m_feedback_twist_publisher->msg_.twist.angular.x = twist[3];
+    m_feedback_twist_publisher->msg_.twist.angular.y = twist[4];
+    m_feedback_twist_publisher->msg_.twist.angular.z = twist[5];
+
+    m_feedback_twist_publisher->unlockAndPublish();
+  }
+
+}
+
 
 } // namespace
