@@ -32,6 +32,7 @@ find_package(kdl_parser REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(urdf REQUIRED)
+find_package(realtime_tools REQUIRED)
 
 
 # Convenience variable for dependencies
@@ -42,6 +43,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
         pluginlib
         urdf
         Eigen3
+        realtime_tools
 )
 
 ament_export_dependencies(

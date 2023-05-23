@@ -47,6 +47,8 @@
 #include <cartesian_controller_base/Utility.h>
 #include <controller_interface/controller_interface.hpp>
 #include <functional>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -54,6 +56,7 @@
 #include <memory>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <realtime_tools/realtime_publisher.h>
 #include <string>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <vector>
@@ -185,6 +188,23 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
       m_joint_state_pos_handles;
 
   private:
+
+    /**
+     * @brief Publish the controller's end-effector pose and twist
+     *
+     * The data are w.r.t. the specified robot base link.
+     * If this function is called after `computeJointControlCmds()` has
+     * been called, then the controller's internal state represents the state
+     * right after the error computation, and corresponds to the new target
+     * state that will be send to the actuators in this control cycle.
+     */
+    void publishStateFeedback();
+
+    realtime_tools::RealtimePublisherSharedPtr<geometry_msgs::msg::PoseStamped>
+      m_feedback_pose_publisher;
+    realtime_tools::RealtimePublisherSharedPtr<geometry_msgs::msg::TwistStamped>
+      m_feedback_twist_publisher;
+
     std::vector<std::string> m_cmd_interface_types;
     std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_pos_handles;
     std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>> m_joint_cmd_vel_handles;
