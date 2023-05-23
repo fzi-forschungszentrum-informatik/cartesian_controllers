@@ -15,6 +15,8 @@ import rclpy
 from rclpy.node import Node
 from controller_manager_msgs.srv import ListControllers
 from controller_manager_msgs.srv import SwitchController
+from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import WrenchStamped
 
 
 def generate_test_description():
@@ -29,10 +31,11 @@ def generate_test_description():
 
 
 class IntegrationTest(unittest.TestCase):
-    """ An integration test for controller initialization and startup
+    """ Integration tests for the cartesian controllers in a simulation setting
 
-    We check if each controller successfully performs the life cycle of:
-    `initialized` - `active` - `update` - `inactive`.
+    We check if each controller successfully performs the life cycle of
+    `initialized` - `active` - `update` - `inactive`, and whether it behaves
+    correctly in selected use cases.
     """
     def __init__(self, *args):
         super().__init__(*args)
@@ -72,6 +75,10 @@ class IntegrationTest(unittest.TestCase):
         if not self.switch_controller.wait_for_service(timeout.nanoseconds/1e9):
             self.fail("Service switch_controllers not available")
 
+        self.target_pose_pub = self.node.create_publisher(PoseStamped, "target_frame", 3)
+        self.target_wrench_pub = self.node.create_publisher(WrenchStamped, "target_wrench", 3)
+        self.ft_sensor_wrench_pub = self.node.create_publisher(WrenchStamped, "ft_sensor_wrench", 3)
+
     def test_controller_initialization(self):
         """ Test whether every controller got initialized correctly
 
@@ -109,6 +116,53 @@ class IntegrationTest(unittest.TestCase):
             time.sleep(3) # process some update() cycles
             self.stop_controller(name)
             self.assertTrue(self.check_state(name, 'inactive'), "{} is stopping correctly".format(name))
+
+    def test_inputs_with_nans(self):
+        """ Test whether every controller survives inputs with NaNs
+
+        We publish invalid values to all input topics.
+        The controllers' callbacks store them even when in inactive state (=default) after startup.
+        We then check if every controller can be activated normally.
+        """
+        # Target pose
+        target_pose = PoseStamped()
+        target_pose.header.frame_id = "base_link"
+        target_pose.pose.position.x = float('nan')
+        target_pose.pose.position.y = float('nan')
+        target_pose.pose.position.z = float('nan')
+        target_pose.pose.orientation.x = float('nan')
+        target_pose.pose.orientation.y = float('nan')
+        target_pose.pose.orientation.z = float('nan')
+        target_pose.pose.orientation.w = float('nan')
+        self.target_pose_pub.publish(target_pose)
+
+        # Force-torque sensor
+        ft_sensor_wrench = WrenchStamped()
+        ft_sensor_wrench.wrench.force.x = float('nan')
+        ft_sensor_wrench.wrench.force.y = float('nan')
+        ft_sensor_wrench.wrench.force.z = float('nan')
+        ft_sensor_wrench.wrench.torque.x = float('nan')
+        ft_sensor_wrench.wrench.torque.y = float('nan')
+        ft_sensor_wrench.wrench.torque.z = float('nan')
+        self.ft_sensor_wrench_pub.publish(ft_sensor_wrench)
+
+        # Target wrench
+        target_wrench = WrenchStamped()
+        target_wrench.wrench.force.x = float('nan')
+        target_wrench.wrench.force.y = float('nan')
+        target_wrench.wrench.force.z = float('nan')
+        target_wrench.wrench.torque.x = float('nan')
+        target_wrench.wrench.torque.y = float('nan')
+        target_wrench.wrench.torque.z = float('nan')
+        self.target_wrench_pub.publish(target_wrench)
+
+        time.sleep(1) # give the controllers some time to process
+
+        for name in self.our_controllers:
+            self.start_controller(name)
+            time.sleep(3) # process some update() cycles
+            self.assertTrue(self.check_state(name, 'active'), f"{name} survives inputs with NaNs")
+            self.stop_controller(name)
 
     def check_state(self, controller, state):
         """ Check the controller's state

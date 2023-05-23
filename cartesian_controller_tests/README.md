@@ -7,7 +7,7 @@ Useful information on integration tests in ROS2 is available [here][1]
 ## Run tests manually
 In a sourced terminal, call
 ```bash
-colcon test --packages-select cartesian_controller_tests && colcon test-result --verbose
+colcon test --packages-select cartesian_controller_tests
 ```
 to run and inspect the integration tests locally.
 
