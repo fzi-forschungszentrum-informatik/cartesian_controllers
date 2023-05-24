@@ -278,6 +278,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  stopCurrentMotion();
+
   if (m_active)
   {
     m_joint_cmd_pos_handles.clear();
@@ -348,11 +350,52 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+CartesianControllerBase::on_shutdown(const rclcpp_lifecycle::State& previous_state)
+{
+  stopCurrentMotion();
+
+  if (m_active)
+  {
+    m_joint_cmd_pos_handles.clear();
+    m_joint_cmd_vel_handles.clear();
+    m_joint_state_pos_handles.clear();
+    this->release_interfaces();
+    m_active = false;
+  }
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+
 void CartesianControllerBase::writeJointControlCmds()
 {
   if (get_node()->get_parameter("solver.publish_state_feedback").as_bool())
   {
     publishStateFeedback();
+  }
+
+  auto nan_in = [](const auto& values) -> bool {
+    for (const auto& value : values)
+    {
+      if (std::isnan(value))
+      {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (nan_in(m_simulated_joint_motion.positions) || nan_in(m_simulated_joint_motion.velocities))
+  {
+    RCLCPP_ERROR(get_node()->get_logger(),
+                 "NaN detected in internal model. It's unlikely to recover from this. Shutting down.");
+
+#if defined CARTESIAN_CONTROLLERS_HUMBLE
+    get_node()->shutdown();
+#elif defined CARTESIAN_CONTROLLERS_FOXY || defined CARTESIAN_CONTROLLERS_GALACTIC
+    this->shutdown();
+#endif
+    return;
   }
 
   // Write all available types.
