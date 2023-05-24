@@ -99,6 +99,9 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
         const rclcpp_lifecycle::State & previous_state) override;
 
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+    on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
+
   protected:
     /**
      * @brief Write joint control commands to the real hardware
@@ -188,6 +191,17 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
       m_joint_state_pos_handles;
 
   private:
+
+    /**
+     * @brief Stop joint motion when in velocity control
+     */
+    void stopCurrentMotion()
+    {
+      for (size_t i = 0; i < m_joint_cmd_vel_handles.size(); ++i)
+      {
+        m_joint_cmd_vel_handles[i].get().set_value(0.0);
+      }
+    }
 
     /**
      * @brief Publish the controller's end-effector pose and twist
