@@ -38,7 +38,7 @@ This package provides such a controller suite for the [ros2_control](https://con
 ## Installation
 Switch into the `src` folder of your current ROS2 workspace and
 ```bash
-git clone -b ros2-devel git@github.com:fzi-forschungszentrum-informatik/cartesian_controllers.git
+git clone -b ros2 https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers.git
 rosdep install --from-paths ./ --ignore-src -y
 cd ..
 colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
