@@ -193,6 +193,11 @@ ctrl::Vector6D CartesianMotionController::computeMotionError()
 void CartesianMotionController::targetFrameCallback(
   const geometry_msgs::msg::PoseStamped::SharedPtr target)
 {
+  if (!this->isActive())
+  {
+    return;
+  }
+
   if (std::isnan(target->pose.position.x) || std::isnan(target->pose.position.y) ||
       std::isnan(target->pose.position.z) || std::isnan(target->pose.orientation.x) ||
       std::isnan(target->pose.orientation.y) || std::isnan(target->pose.orientation.z) ||
