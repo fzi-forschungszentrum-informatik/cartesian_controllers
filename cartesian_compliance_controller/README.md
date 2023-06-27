@@ -53,6 +53,8 @@ my_cartesian_compliance_controller:
 
     solver:
         error_scale: 0.5
+        forward_dynamics:
+            link_mass: 0.1
 
     pd_gains:
         trans_x: {p: 0.05}
