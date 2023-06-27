@@ -84,6 +84,8 @@ As a default, please build the cartesian_controllers in release mode:
 ```bash
 catkin_make -DCMAKE_BUILD_TYPE=Release
 ```
+If no build type is specified, the controller is automatically built in release mode.
+
 The forward dynamics implementation heavily relies on
 orocos_kinematics_dynamics (KDL), which use Eigen for linear algebra.
 Building in Release mode can give you a 10-times speed-up, and makes sure that
