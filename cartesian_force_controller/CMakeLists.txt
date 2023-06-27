@@ -7,6 +7,11 @@ add_compile_options(-std=c++17)
 set(ADDITIONAL_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Wno-unused-parameter)
 add_compile_options(${ADDITIONAL_COMPILE_OPTIONS})
 
+# Sets build type to "Release" in case no build type has not been set before
+if(NOT CMAKE_BUILD_TYPE) 
+  set(CMAKE_BUILD_TYPE Release)
+endif(NOT CMAKE_BUILD_TYPE)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
