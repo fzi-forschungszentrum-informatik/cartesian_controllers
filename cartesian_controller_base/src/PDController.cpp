@@ -54,7 +54,7 @@ PDController::~PDController()
 }
 
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 void PDController::init(const std::string& params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
 #else
 void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node> handle)

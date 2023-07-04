@@ -53,7 +53,7 @@ CartesianMotionController::CartesianMotionController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianMotionController::on_init()
 {
   const auto ret = Base::on_init();
@@ -114,7 +114,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 controller_interface::return_type CartesianMotionController::update(const rclcpp::Time& time,
                                                                    const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY

@@ -85,7 +85,7 @@ controller_interface::InterfaceConfiguration CartesianControllerBase::state_inte
   return conf;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_init()
 {
   if (!m_initialized)
@@ -390,7 +390,7 @@ void CartesianControllerBase::writeJointControlCmds()
     RCLCPP_ERROR(get_node()->get_logger(),
                  "NaN detected in internal model. It's unlikely to recover from this. Shutting down.");
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     get_node()->shutdown();
 #elif defined CARTESIAN_CONTROLLERS_FOXY || defined CARTESIAN_CONTROLLERS_GALACTIC
     this->shutdown();

@@ -146,7 +146,7 @@ class IKSolver
      *
      * @return True, if everything went well
      */
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
     virtual bool init(std::shared_ptr<rclcpp::Node> nh,

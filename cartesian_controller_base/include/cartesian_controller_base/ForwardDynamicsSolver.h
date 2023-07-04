@@ -103,7 +103,7 @@ class ForwardDynamicsSolver : public IKSolver
      *
      * @return True, if everything went well
      */
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
     bool init(std::shared_ptr<rclcpp::Node> nh,
