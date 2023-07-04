@@ -58,7 +58,7 @@ class SpatialPDController
   public:
     SpatialPDController();
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> params);
 #else
     bool init(std::shared_ptr<rclcpp::Node> params);

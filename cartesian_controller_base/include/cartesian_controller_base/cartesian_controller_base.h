@@ -84,7 +84,7 @@ class CartesianControllerBase : public controller_interface::ControllerInterface
 
     virtual controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
     virtual controller_interface::return_type init(const std::string & controller_name) override;

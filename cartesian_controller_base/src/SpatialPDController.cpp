@@ -57,7 +57,7 @@ ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, cons
   return m_cmd;
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 bool SpatialPDController::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
 #else
 bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)

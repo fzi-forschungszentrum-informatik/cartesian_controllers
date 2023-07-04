@@ -123,7 +123,7 @@ namespace cartesian_controller_base{
   }
 
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
   bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
   bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp::Node> nh,

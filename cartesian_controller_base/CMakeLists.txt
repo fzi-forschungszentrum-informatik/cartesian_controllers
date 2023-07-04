@@ -8,7 +8,9 @@ add_compile_options(${ADDITIONAL_COMPILE_OPTIONS})
 
 # Use CMake to pass the current ROS_DISTRO via variables into a preprocessor template.
 # We then include this file and switch between the API for foxy and galactic.
-if($ENV{ROS_DISTRO} STREQUAL "humble")
+if($ENV{ROS_DISTRO} STREQUAL "iron")
+        set(CARTESIAN_CONTROLLERS_IRON TRUE)
+elseif($ENV{ROS_DISTRO} STREQUAL "humble")
         set(CARTESIAN_CONTROLLERS_HUMBLE TRUE)
 elseif($ENV{ROS_DISTRO} STREQUAL "galactic")
         set(CARTESIAN_CONTROLLERS_GALACTIC TRUE)

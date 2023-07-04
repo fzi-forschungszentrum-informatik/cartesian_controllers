@@ -106,7 +106,7 @@ namespace cartesian_controller_base{
     return control_cmd;
   }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
   bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
   bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp::Node> nh,
