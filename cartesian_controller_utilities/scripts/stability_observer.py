@@ -4,7 +4,9 @@ import numpy as np
 import threading
 import rospy
 import time
-from geometry_msgs.msg import WrenchStamped
+from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Float32
 
 
 
@@ -22,17 +24,18 @@ class StabilityObserver(object):
         # force data samples.
         # Influences the frequency resolution (df) with the sensor's sampling time (T):
         # df = 1 / (T * N)
-        self.N = 128
+        self.N = 256
 
         # Crossover frequency omega (below = stable, above = unstable).
         # Fastest rate that humans could intentionally generate in experiments
         # with haptic interaction. Everything above is considered unstable,
         # unwanted control behavior.
-        self.wc = 20 # Hz
+        self.wc = 5 # Hz
 
         dim = 6 # Cartesian force dimension
         self.data = np.zeros((self.N, dim)).tolist()
-        self.sensor_sub = rospy.Subscriber('/wrench', WrenchStamped, self.sensor_cb)
+        self.sensor_sub = rospy.Subscriber('/my_cartesian_force_controller/current_twist', TwistStamped, self.sensor_cb)
+        self.index_pub = rospy.Publisher('stability_index', Float32, queue_size=3)
 
         # Online recursive stability index according to [1].
         self.I_s = 0
@@ -63,8 +66,8 @@ class StabilityObserver(object):
         """
         self.calls += 1 # performance measure
 
-        point = [data.wrench.force.x, data.wrench.force.y, data.wrench.force.z,
-                 data.wrench.torque.x, data.wrench.torque.y, data.wrench.torque.z
+        point = [data.twist.linear.x, data.twist.linear.y, data.twist.linear.z,
+                 data.twist.angular.x, data.twist.angular.y, data.twist.angular.z
                  ]
         self.data.append(point)
         self.data.pop(0)  # drop oldest value
@@ -88,29 +91,19 @@ class StabilityObserver(object):
             # We seem to be resuming after a pause and need to build up the sensor rate.
             index = -1
 
-        # Sum of magnitudes of the high frequency components
-        axis = 2  # of sensor measurements
-        high_mag = np.sum(amplitude_spec[index:, axis])
+        # Use the maximal amplitude from the high frequencies as indicator of instability.
+        axis = 2  # of sensor measurements for testing
+        max_mag = max(amplitude_spec[index:, axis])
 
-        # Sum of magnitudes of all frequency components
-        all_mag = np.sum(amplitude_spec[:, axis])
-
-        # Stability indices and parameters from [1]. See p. 7.
-        I_w = high_mag / all_mag if all_mag else 0.0
-        f_max = 100 # Newton
-        h = 0.99 # lambda
-        f_window = 25
-        p = min(f_window, len(self.data))
-        f_h = np.array(self.data)[-p:, axis]  # The last p values, one Cartesian axis for testing
-        I_frms = np.sqrt(1/p * np.sum(np.square(f_h))) / f_max
+        h = 0.90 # lambda
 
         # Final stability index
-        self.I_s = I_w * I_frms + h * self.I_s
-
+        self.I_s = max_mag + h * self.I_s
+        self.index_pub.publish(self.I_s)
 
         # Debug output
-        print(f" {self.rate:.1f} Hz  stability index: {self.I_s:.3f}", end='\r', flush=True)
-        #print(f" {self.rate:.1f} Hz  I_w: {I_w:.3f}", end='\r', flush=True)
+        print(f" {self.rate:.1f} Hz  I_s: {self.I_s:.3f}", end='\r', flush=True)
+
 
 
 
