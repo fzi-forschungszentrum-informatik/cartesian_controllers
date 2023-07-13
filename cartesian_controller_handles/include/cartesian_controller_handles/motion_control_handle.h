@@ -75,7 +75,7 @@ class MotionControlHandle : public controller_interface::ControllerInterface
     MotionControlHandle();
     ~MotionControlHandle();
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
     virtual controller_interface::return_type init(const std::string & controller_name) override;
@@ -93,7 +93,7 @@ class MotionControlHandle : public controller_interface::ControllerInterface
     controller_interface::InterfaceConfiguration command_interface_configuration() const override;
     controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
     controller_interface::return_type update() override;
