@@ -57,7 +57,7 @@
 
 namespace cartesian_controller_simulation {
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareInfo& info)
 {
   // Keep an internal copy of the given configuration
@@ -105,7 +105,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs two possible command interfaces.",
                    joint.name.c_str());
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
       return Simulator::CallbackReturn::ERROR;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
       return Simulator::return_type::ERROR;
@@ -120,7 +120,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
                    joint.name.c_str(),
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY);
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
       return Simulator::CallbackReturn::ERROR;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
       return Simulator::return_type::ERROR;
@@ -132,7 +132,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
       RCLCPP_ERROR(rclcpp::get_logger("Simulator"),
                    "Joint '%s' needs 3 state interfaces.",
                    joint.name.c_str());
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
       return Simulator::CallbackReturn::ERROR;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
       return Simulator::return_type::ERROR;
@@ -149,7 +149,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
                    hardware_interface::HW_IF_POSITION,
                    hardware_interface::HW_IF_VELOCITY,
                    hardware_interface::HW_IF_EFFORT);
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
       return Simulator::CallbackReturn::ERROR;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
       return Simulator::return_type::ERROR;
@@ -157,7 +157,7 @@ Simulator::return_type Simulator::configure(const hardware_interface::HardwareIn
     }
   }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
   return Simulator::CallbackReturn::SUCCESS;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
   return Simulator::return_type::OK;
@@ -222,7 +222,7 @@ Simulator::return_type Simulator::stop()
 #endif
 
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 Simulator::return_type Simulator::read([[maybe_unused]] const rclcpp::Time& time,
                                        [[maybe_unused]] const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_FOXY
@@ -249,7 +249,7 @@ Simulator::return_type Simulator::read()
   return return_type::OK;
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 Simulator::return_type Simulator::write([[maybe_unused]] const rclcpp::Time& time,
                                         [[maybe_unused]] const rclcpp::Duration& period)
 #elif defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_FOXY

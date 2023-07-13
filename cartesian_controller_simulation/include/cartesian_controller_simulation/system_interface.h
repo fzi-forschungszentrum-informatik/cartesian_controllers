@@ -71,7 +71,7 @@ constexpr char HW_IF_DAMPING[]   = "damping";
  * controller_manager coordinated library.
  *
  */
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 class Simulator : public hardware_interface::SystemInterface
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 class Simulator : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
@@ -83,7 +83,7 @@ public:
 
   RCLCPP_SHARED_PTR_DEFINITIONS(Simulator)
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
   return_type configure(const hardware_interface::HardwareInfo& info) override;
@@ -97,7 +97,7 @@ public:
                                           const std::vector<std::string>& stop_interfaces) override;
 
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
   return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
   return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 

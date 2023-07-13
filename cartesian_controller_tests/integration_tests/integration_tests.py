@@ -96,7 +96,7 @@ class IntegrationTest(unittest.TestCase):
         controller manager contains our controllers and if they have the
         expected state.
         """
-        if os.environ['ROS_DISTRO'] == 'humble':
+        if os.environ['ROS_DISTRO'] == 'humble' or os.environ['ROS_DISTRO'] == 'iron':
             expected_state = 'unconfigured'
         else:  # galactic, foxy
             expected_state = 'finalized'

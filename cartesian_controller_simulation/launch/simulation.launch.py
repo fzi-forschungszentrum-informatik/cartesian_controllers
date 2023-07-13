@@ -45,7 +45,7 @@ from launch_ros.substitutions import FindPackageShare
 
 import os
 distro = os.environ['ROS_DISTRO']
-if distro == 'humble' or distro == 'galactic':
+if distro == 'iron' or distro == 'humble' or distro == 'galactic':
     spawner = "spawner"
 else:  # foxy
     spawner = "spawner.py"
