@@ -5,7 +5,7 @@
   <version>0.0.0</version>
   <description>The cartesian_motion_controller package</description>
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url>
   <author email="scherzin@fzi.de">Stefan Scherzinger</author>
 
