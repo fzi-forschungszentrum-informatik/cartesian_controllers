@@ -7,7 +7,7 @@ set(ADDITIONAL_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Wno-unused-parameter)
 add_compile_options(${ADDITIONAL_COMPILE_OPTIONS})
 
 # Use CMake to pass the current ROS_DISTRO via variables into a preprocessor template.
-# We then include this file and switch between the API for foxy and galactic.
+# We then include this file and switch between the different APIs.
 if($ENV{ROS_DISTRO} STREQUAL "iron")
         set(CARTESIAN_CONTROLLERS_IRON TRUE)
 elseif($ENV{ROS_DISTRO} STREQUAL "humble")
@@ -17,7 +17,7 @@ elseif($ENV{ROS_DISTRO} STREQUAL "galactic")
 elseif($ENV{ROS_DISTRO} STREQUAL "foxy")
         set(CARTESIAN_CONTROLLERS_FOXY TRUE)
 else()
-        message(WARNING "ROS2 version must be {foxy|galactic|humble}")
+        message(WARNING "ROS2 version must be {iron|humble|galactic|foxy}")
 endif()
 configure_file(include/cartesian_controller_base/ROS2VersionConfig.h.in ROS2VersionConfig.h)
 
