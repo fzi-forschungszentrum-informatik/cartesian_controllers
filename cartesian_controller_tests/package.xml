@@ -5,7 +5,7 @@
   <version>0.1.0</version>
   <description>Integration tests for the Cartesian controllers</description>
   <maintainer email="scherzin@fzi.de">Stefan Scherzinger</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
 
   <test_depend>launch</test_depend> 
