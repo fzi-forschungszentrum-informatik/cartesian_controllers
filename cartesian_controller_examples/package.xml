@@ -41,6 +41,8 @@
   <run_depend>ros_control_boilerplate</run_depend>
   <run_depend>controller_manager</run_depend>
   <run_depend>robot_state_publisher</run_depend>
+  <run_depend>cartesian_controllers</run_depend>
+  <run_depend>cartesian_controller_handles</run_depend>
 
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
