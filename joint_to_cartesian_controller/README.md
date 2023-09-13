@@ -3,6 +3,16 @@ This adapter-controller basically transforms the joint trajectory commands from
 a connected joint-based controller to target pose commands for Cartesian
 controllers. It only works for controllers from the *position_controllers* family, e.g. *position_controllers/JointTrajectoryController*.
 
+## Getting Started
+1) In a sourced terminal, run
+```bash
+roslaunch cartesian_controller_examples examples.launch
+```
+2) In another sourced terminal, open rqt and navigate to the *Controller Manager* plugin under *Robot Tools*.
+Select */controller_manager* as namespace and activate *my_joint_to_cartesian_controller*.
+
+1) In rqt open the *Joint trajectory controller* plugin under *Robot Tools*. Choose the ns "my_joint_to_cartesian_controller/controller_manager" and the controller "joint_trajectory_controller", turn on the controller. Move the joints and observe how the target pose moves accordingly.
+
 ## Example ##
 Below is an example entry for a controller specific configuration using the ur10 robot.
 ```yaml
