@@ -45,7 +45,7 @@ from launch_ros.substitutions import FindPackageShare
 
 import os
 distro = os.environ['ROS_DISTRO']
-if distro == 'iron' or distro == 'humble' or distro == 'galactic':
+if distro in ['galactic', 'humble', 'iron']:
     spawner = "spawner"
 else:  # foxy
     spawner = "spawner.py"
@@ -98,47 +98,35 @@ def generate_launch_description():
             ]
     )
 
-    # Joint states
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
-    )
-    cartesian_compliance_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
-    )
-    cartesian_force_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
-    )
-    cartesian_motion_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["cartesian_motion_controller", "--stopped", "-c", "/controller_manager"],
-    )
-    motion_control_handle_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["motion_control_handle", "--stopped", "-c", "/controller_manager"],
-    )
-    joint_trajectory_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["joint_trajectory_controller", "--stopped", "-c", "/controller_manager"],
-    )
-    invalid_cartesian_compliance_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["invalid_cartesian_compliance_controller", "--stopped", "-c", "/controller_manager"],
-    )
-    invalid_cartesian_force_controller_spawner = Node(
-        package="controller_manager",
-        executable=spawner,
-        arguments=["invalid_cartesian_force_controller", "--stopped", "-c", "/controller_manager"],
-    )
+    # Convenience function for easy spawner construction
+    def controller_spawner(name, *args):
+        return Node(
+            package="controller_manager",
+            executable=spawner,
+            output="screen",
+            arguments=[name] + [a for a in args],
+        )
+
+    # Active controllers
+    active_list = [
+        "joint_state_broadcaster",
+    ]
+    active_spawners = [controller_spawner(controller) for controller in active_list]
+
+    # Inactive controllers
+    inactive_list = [
+        "cartesian_compliance_controller",
+        "cartesian_force_controller",
+        "cartesian_motion_controller",
+        "motion_control_handle",
+        "joint_trajectory_controller",
+        "invalid_cartesian_compliance_controller",
+        "invalid_cartesian_force_controller",
+    ]
+    state = "--inactive" if distro in ['humble', 'iron'] else "--stopped"
+    inactive_spawners = [
+        controller_spawner(controller, state) for controller in inactive_list
+    ]
 
     # TF tree
     robot_state_publisher = Node(
@@ -161,18 +149,10 @@ def generate_launch_description():
     )
 
     # Nodes to start
-    nodes = [
-        control_node,
-        joint_state_broadcaster_spawner,
-        cartesian_compliance_controller_spawner,
-        cartesian_force_controller_spawner,
-        cartesian_motion_controller_spawner,
-        motion_control_handle_spawner,
-        joint_trajectory_controller_spawner,
-        invalid_cartesian_compliance_controller_spawner,
-        invalid_cartesian_force_controller_spawner,
-        robot_state_publisher,
-        rviz
-    ]
+    nodes = (
+        [control_node, robot_state_publisher, rviz]
+        + active_spawners
+        + inactive_spawners
+    )
 
     return LaunchDescription(declared_arguments + nodes)
