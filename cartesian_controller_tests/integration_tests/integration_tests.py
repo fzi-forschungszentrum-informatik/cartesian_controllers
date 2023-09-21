@@ -18,6 +18,9 @@ from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import WrenchStamped
 
+import os
+
+distro = os.environ['ROS_DISTRO']
 
 def generate_test_description():
 
@@ -181,13 +184,19 @@ class IntegrationTest(unittest.TestCase):
     def start_controller(self, controller):
         """ Start the given controller """
         req = SwitchController.Request()
-        req.start_controllers = [controller]
+        if distro in ['humble', 'iron']:
+            req.activate_controllers = [controller]
+        else:
+            req.start_controllers = [controller]
         self.perform_switch(req)
 
     def stop_controller(self, controller):
         """ Stop the given controller """
         req = SwitchController.Request()
-        req.stop_controllers = [controller]
+        if distro in ['humble', 'iron']:
+            req.deactivate_controllers = [controller]
+        else:
+            req.stop_controllers = [controller]
         self.perform_switch(req)
 
     def perform_switch(self, req):
