@@ -97,6 +97,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianMotionController::on_activate(
     const rclcpp_lifecycle::State & previous_state)
 {
+  RCLCPP_INFO_STREAM(get_node()->get_logger(), "[CartesianMotionController] activating");
   Base::on_activate(previous_state);
 
   // Reset simulation with real joint state

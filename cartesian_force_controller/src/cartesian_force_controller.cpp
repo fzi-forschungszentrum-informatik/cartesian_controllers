@@ -89,11 +89,29 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return ret;
   }
 
-  // Make sure sensor link is part of the robot chain
+  m_target_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
+    get_node()->get_name() + std::string("/target_wrench"),
+    10,
+    std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
+
+  
+
+
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_activate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  RCLCPP_INFO_STREAM(get_node()->get_logger(), "[CartesianForceController] activating");
+  Base::on_activate(previous_state);
+
+
+   // Make sure sensor link is part of the robot chain
   m_ft_sensor_ref_link = get_node()->get_parameter("ft_sensor_ref_link").as_string();
   if(!Base::robotChainContains(m_ft_sensor_ref_link))
   {
-    RCLCPP_ERROR_STREAM(get_node()->get_logger(),
+    RCLCPP_ERROR_STREAM(get_node()->get_logger(), "[CartesianForceController]: " <<
                         m_ft_sensor_ref_link << " is not part of the kinematic chain from "
                                              << Base::m_robot_base_link << " to "
                                              << Base::m_end_effector_link);
@@ -103,27 +121,16 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   // Make sure sensor wrenches are interpreted correctly
   setFtSensorReferenceFrame(Base::m_end_effector_link);
 
-  m_target_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-    get_node()->get_name() + std::string("/target_wrench"),
-    10,
-    std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
+ 
+  m_target_wrench.setZero();
+  m_ft_sensor_wrench.setZero();
+
 
   m_ft_sensor_wrench_subscriber =
     get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
       get_node()->get_name() + std::string("/ft_sensor_wrench"),
       10,
       std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
-
-  m_target_wrench.setZero();
-  m_ft_sensor_wrench.setZero();
-
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianForceController::on_activate(
-    const rclcpp_lifecycle::State & previous_state)
-{
-  Base::on_activate(previous_state);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
