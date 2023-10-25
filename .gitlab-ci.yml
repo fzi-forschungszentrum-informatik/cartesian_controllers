@@ -15,7 +15,7 @@ pre-commit:
   stage: .pre
   image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_workstation
   script:
-    - pip3 install pre-commit==3.5.0
+    - pip3 install pre-commit==2.17.0
     - pre-commit run -a
 
 include:
