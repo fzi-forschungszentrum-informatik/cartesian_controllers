@@ -11,13 +11,12 @@
 //-----------------------------------------------------------------------------
 
 
-
 #include "rackki_learning/mujoco_simulator.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include <chrono>
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
 
