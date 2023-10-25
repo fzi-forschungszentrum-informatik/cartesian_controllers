@@ -1,0 +1,24 @@
+variables:
+  BEFORE_BUILD_UPSTREAM_WORKSPACE: "sudo apt-get install -y libboost-all-dev"
+
+.build_matrix:
+  parallel:
+    matrix:
+      - ROS_DISTRO: humble
+        CI_IMAGE: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_22.04_ros2:humble
+        CLANG_TIDY: "false"
+      - ROS_DISTRO: rolling
+        CI_IMAGE: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_22.04_ros2:rolling
+        CLANG_TIDY: "false"
+
+pre-commit:
+  stage: .pre
+  image: ids-git.fzi.de:5555/continuous_integration/ci_docker_images/ubuntu_20.04_workstation
+  script:
+    - pip3 install pre-commit==3.5.0
+    - pre-commit run -a
+
+include:
+  - project: 'continuous_integration/ci_scripts'
+    ref: master
+    file: '/gitlab-ci-yml/ros2_pipeline.yml'
