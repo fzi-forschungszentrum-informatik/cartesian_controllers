@@ -1,5 +1,5 @@
 variables:
-  BEFORE_BUILD_UPSTREAM_WORKSPACE: "sudo apt-get install -y libboost-all-dev"
+  BEFORE_BUILD_TARGET_WORKSPACE: "./.install_mujoco.sh"
 
 .build_matrix:
   parallel:
