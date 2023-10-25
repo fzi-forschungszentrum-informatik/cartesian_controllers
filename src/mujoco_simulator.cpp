@@ -22,7 +22,8 @@ namespace rackki_learning {
 
 MuJoCoSimulator::MuJoCoSimulator() {}
 
-void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
+void MuJoCoSimulator::targetWrenchCallback(
+  const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
   // Synchronize target wrenches with state feedback.
   if (command_mutex.try_lock())
@@ -35,17 +36,17 @@ void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamp
     m_target_wrench[5] = wrench->wrench.torque.z;
 
     // Indices into the data vectors
-    int p = m_active_body * 3;  // position [x,y,z]
-    int r = m_active_body * 4;  // rotation quaternion [w,x,y,z]
-    int v = m_active_body * 6;  // velocity [rot, lin]
+    int p = m_active_body * 3; // position [x,y,z]
+    int r = m_active_body * 4; // rotation quaternion [w,x,y,z]
+    int v = m_active_body * 6; // velocity [rot, lin]
 
     // Object pose w.r.t. the assembly goal.
-    auto pose_msg = geometry_msgs::msg::PoseStamped();
-    pose_msg.header.frame_id = "world";
-    pose_msg.header.stamp = m_node->now();
-    pose_msg.pose.position.x = d->xpos[p + 0];
-    pose_msg.pose.position.y = d->xpos[p + 1];
-    pose_msg.pose.position.z = d->xpos[p + 2];
+    auto pose_msg               = geometry_msgs::msg::PoseStamped();
+    pose_msg.header.frame_id    = "world";
+    pose_msg.header.stamp       = m_node->now();
+    pose_msg.pose.position.x    = d->xpos[p + 0];
+    pose_msg.pose.position.y    = d->xpos[p + 1];
+    pose_msg.pose.position.z    = d->xpos[p + 2];
     pose_msg.pose.orientation.w = d->xquat[r + 0];
     pose_msg.pose.orientation.x = d->xquat[r + 1];
     pose_msg.pose.orientation.y = d->xquat[r + 2];
@@ -53,15 +54,15 @@ void MuJoCoSimulator::targetWrenchCallback(const geometry_msgs::msg::WrenchStamp
     m_feedback_pose_publisher->publish(pose_msg);
 
     // Object twist w.r.t. the assembly goal.
-    auto twist_msg = geometry_msgs::msg::TwistStamped();
+    auto twist_msg            = geometry_msgs::msg::TwistStamped();
     twist_msg.header.frame_id = "world";
-    twist_msg.header.stamp = m_node->now();
+    twist_msg.header.stamp    = m_node->now();
     twist_msg.twist.angular.x = d->cvel[v + 0];
     twist_msg.twist.angular.y = d->cvel[v + 1];
     twist_msg.twist.angular.z = d->cvel[v + 2];
-    twist_msg.twist.linear.x = d->cvel[v + 3];
-    twist_msg.twist.linear.y = d->cvel[v + 4];
-    twist_msg.twist.linear.z = d->cvel[v + 5];
+    twist_msg.twist.linear.x  = d->cvel[v + 3];
+    twist_msg.twist.linear.y  = d->cvel[v + 4];
+    twist_msg.twist.linear.z  = d->cvel[v + 5];
     m_feedback_twist_publisher->publish(twist_msg);
 
     command_mutex.unlock();
@@ -193,7 +194,7 @@ void MuJoCoSimulator::controlCBImpl(const mjModel* m, mjData* d)
   // Apply external force-torque vector.
   for (size_t i = 0; i < m_target_wrench.size(); ++i)
   {
-    constexpr int xfrc_dim = 6;
+    constexpr int xfrc_dim                        = 6;
     d->xfrc_applied[m_active_body * xfrc_dim + i] = m_target_wrench[i];
   }
 
@@ -213,7 +214,7 @@ int MuJoCoSimulator::simulateImpl()
 
   // Fetch parameters directly from launch file
   auto model_xml = m_node->declare_parameter<std::string>("mujoco_model");
-  auto mesh_dir = m_node->declare_parameter<std::string>("mesh_directory");
+  auto mesh_dir  = m_node->declare_parameter<std::string>("mesh_directory");
 
   // Load mesh files into a virtual file system.
   // MuJoCo's xml compiler will look there first when creating the model.

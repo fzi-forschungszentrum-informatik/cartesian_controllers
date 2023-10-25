@@ -21,12 +21,12 @@
 #include <vector>
 
 #include "GLFW/glfw3.h"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "mujoco/mujoco.h"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
 
 namespace rackki_learning {
 
@@ -74,8 +74,8 @@ public:
   MuJoCoSimulator& operator=(MuJoCoSimulator&&) = delete;
 
   // Use this in ROS2 code
-  static bool ready() {return getInstance().m_ready;};
-  static std::shared_ptr<rclcpp::Node> getNode() {return getInstance().m_node;};
+  static bool ready() { return getInstance().m_ready; };
+  static std::shared_ptr<rclcpp::Node> getNode() { return getInstance().m_node; };
 
 
   // ROS2 input and output topics
