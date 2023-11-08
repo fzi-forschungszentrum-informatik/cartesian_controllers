@@ -32,6 +32,9 @@ set(MUJOCO_LIBRARIES
         ${MUJOCO_DIR}/lib/libmujoco.so
         )
 
+# Python
+find_package(ament_cmake_python REQUIRED)
+
 # --------------------------------------------------------------------------------
 # Make sure that library relocation works for both build and install.
 # See here: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
@@ -93,8 +96,25 @@ install(
   TARGETS ${PROJECT_NAME}_simulator
   DESTINATION lib/${PROJECT_NAME})
 
+ament_python_install_package(${PROJECT_NAME})
 
 if(BUILD_TESTING)
+
+  # See: https://docs.ros.org/en/rolling/How-To-Guides/Ament-CMake-Python-Documentation.html
+  find_package(ament_cmake_pytest REQUIRED)
+  set(_pytest_tests
+    test/test_dataset.py
+    test/test_model.py
+  )
+
+  foreach(_test_path ${_pytest_tests})
+    get_filename_component(_test_name ${_test_path} NAME_WE)
+    ament_add_pytest_test(${_test_name} ${_test_path}
+      APPEND_ENV PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
+      TIMEOUT 60
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+  endforeach()
 endif()
 
 ament_package()
