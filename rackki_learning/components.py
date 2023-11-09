@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Layer
 from tensorflow.keras.losses import Loss
 from tensorflow_probability import distributions as tfd
+from tensorflow.keras import saving
 
 
 class LSTMEncoderLayer(Layer):
@@ -17,7 +18,7 @@ class LSTMEncoderLayer(Layer):
             )
         super().__init__(**kwargs)
 
-    def call(self, x):
+    def call(self, x, dynamic_batch_size=True):
         with tf.name_scope("lstm_encoder"):
             pred, h_state, c_state = self.lstm(x)
             return tf.concat([pred, h_state, c_state], axis=-1)
@@ -41,22 +42,26 @@ class MixtureDensityLayer(Layer):
             self.alphas = make_dense(n_gaussians, activation="softmax", name="alphas")
         super().__init__(**kwargs)
 
-    def call(self, x):
+    def call(self, x, dynamic_batch_size=True):
         with tf.name_scope("mdn"):
             return tf.keras.layers.concatenate(
                 [self.mus(x), self.sigmas(x), self.alphas(x)], name="outputs"
             )
 
 
+@saving.register_keras_serializable()
 class NegLogLikelihood(Loss):
     def __init__(self, n_gaussians):
         self.n_gaussians = n_gaussians
         super().__init__(name="neg_log_likelihood")
 
-    def call(self, y_true, y_pred):
+    def call(self, y_true, y_pred, dynamic_batch_size=True):
         mixture_params = y_pred
         gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)
         return tf.reduce_mean(tf.negative(gaussian_mixture.log_prob(y_true)))
+
+    def get_config(self):
+        return {"n_gaussians": self.n_gaussians}
 
 
 class GaussianMixture(object):

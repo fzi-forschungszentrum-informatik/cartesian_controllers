@@ -50,6 +50,6 @@ class Model(object):
             print(f" {str(step)} / {str(training_iterations)}", end="\r", flush=True)
         return True
 
-    def export(self, model_dir: str) -> bool:
-        self.model.export(model_dir)
+    def save(self, model_dir: str) -> bool:
+        self.model.save(model_dir)
         return True

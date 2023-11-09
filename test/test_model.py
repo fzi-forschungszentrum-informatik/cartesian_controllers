@@ -4,7 +4,7 @@ import tensorflow as tf
 import os
 
 
-def test_training_and_exporting_models(request):
+def test_training_and_saving_models(request):
     # Training
     data_path = os.path.join(request.node.fspath.dirname, "rosbags")
     training_data = Dataset(data_path)
@@ -13,23 +13,22 @@ def test_training_and_exporting_models(request):
     success = model.train(training_data, evaluation_data, training_iterations=12)
     assert success
 
-    # Exporting
+    # Saving
     model_dir = os.path.join(request.node.fspath.dirname, "models/model_1")
-    success = model.export(model_dir)
+    success = model.save(model_dir)
     assert success
 
 
 def test_loading_and_serving_models(request):
     # Loading
-    exported_model_dir = os.path.join(request.node.fspath.dirname, "models/model_1")
-    model = tf.saved_model.load(exported_model_dir)
+    model_dir = os.path.join(request.node.fspath.dirname, "models/model_1")
+    model = tf.keras.models.load_model(model_dir)
 
     # Serving
     data_path = os.path.join(request.node.fspath.dirname, "rosbags")
     test_data = Dataset(data_path)
-    x_test, y_test = test_data.get_batch(10)
-    y = model.serve(x_test)  # noqa: F841
+    x_test, y_test = test_data.get_batch(1)
+    y = model.predict(x_test)  # noqa: F841
     # TODO:
-    # - Support batchsize = 1
     # - Add an additional endpoint for sampling from a gaussian mixture
     assert True
