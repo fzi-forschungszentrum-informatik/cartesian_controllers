@@ -36,7 +36,7 @@ class MixtureDensityLayer(Layer):
         with tf.name_scope("mdn"):
             self.mus = make_dense(n_gaussians * out_dim, activation=None, name="mus")
             self.sigmas = make_dense(
-                n_gaussians, activation="exponential", name="sigmas"
+                n_gaussians * out_dim, activation="exponential", name="sigmas"
             )
             self.alphas = make_dense(n_gaussians, activation="softmax", name="alphas")
         super().__init__(**kwargs)
@@ -64,13 +64,12 @@ class GaussianMixture(object):
         out_dim = 6  # 3 forces and 3 torques
         nk = n_gaussians
         mus, sigmas, alphas = tf.split(
-            mixture_params, num_or_size_splits=[nk * out_dim, nk, nk], axis=-1
+            mixture_params, num_or_size_splits=[nk * out_dim, nk * out_dim, nk], axis=-1
         )
         mus = tf.split(mus, num_or_size_splits=[out_dim] * nk, axis=-1)
-        sigmas = tf.unstack(sigmas, num=nk, axis=-1)
+        sigmas = tf.split(sigmas, num_or_size_splits=[out_dim] * nk, axis=-1)
         components = [
-            tfd.MultivariateNormalDiag(loc=a, scale_identity_multiplier=b)
-            for a, b in zip(mus, sigmas)
+            tfd.MultivariateNormalDiag(loc=a, scale_diag=b) for a, b in zip(mus, sigmas)
         ]
         self.gaussian_mixture = tfd.Mixture(
             cat=tfd.Categorical(probs=alphas), components=components, validate_args=True
