@@ -14,6 +14,7 @@ class Dataset(object):
         self.inputs = []
         self.labels = []
         self.input_scaling = {}
+        self.sequence_length = 7
 
         file_paths = []
         for root, subdirectories, files in os.walk(directory_path):
@@ -25,8 +26,7 @@ class Dataset(object):
         rclpy.init()
         node = rclpy.create_node("dataset_creation")
         reader = SequentialReader()
-        file_count = 1
-        for file_path in file_paths:
+        for file_count, file_path in enumerate(file_paths, 1):
             tmp_poses = []
             tmp_twists = []
             tmp_wrenches = []
@@ -89,7 +89,6 @@ class Dataset(object):
                 np.concatenate((tmp_poses, tmp_twists, tmp_wrenches), axis=1)
             )
             reader.reset_filter()
-            file_count += 1
 
         node.destroy_node()
         rclpy.shutdown()
@@ -115,3 +114,33 @@ class Dataset(object):
         # Revert shape
         self.inputs = np.split(self.inputs, split_idx)
         del self.inputs[-1]  # empty element through split at the end
+
+    def get_batch(self, minibatch_size):
+        """Compose a mini batch of data
+
+        shape of inputs : [minibatch_size, sequence_length, in_dim]
+        shape of labels : [minibatch_size, out_dim]
+
+        time       : ------------->
+        inputs (m) : ||||||||||
+        labels (1) :           |
+
+        """
+        inputs = []
+        labels = []
+
+        for _ in range(minibatch_size):
+            while True:  # Search for a sufficiently long sequence
+                random_sequence = np.random.randint(0, len(self.inputs))
+                limit = len(self.inputs[random_sequence]) - self.sequence_length
+                if limit > 0:
+                    break
+            begin = np.random.randint(0, limit)
+            end = begin + self.sequence_length
+
+            # current pose:  [0:7]
+            # current twist: [7:13]
+            # target wrench: [13:19]
+            inputs.append([self.inputs[random_sequence][i] for i in range(begin, end)])
+            labels.append(self.labels[random_sequence][end][13:19])
+        return np.array(inputs), np.array(labels)

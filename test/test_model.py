@@ -4,9 +4,9 @@ import os
 
 
 def test_training(request):
-    directory_path = os.path.join(request.node.fspath.dirname, "rosbags")
-    training_data = Dataset(directory_path)
-    evaluation_data = Dataset(directory_path)
-    model = Model()
-    success = model.train(training_data, evaluation_data)
+    data_path = os.path.join(request.node.fspath.dirname, "rosbags")
+    training_data = Dataset(data_path)
+    evaluation_data = Dataset(data_path)
+    model = Model(n_nodes=17, n_gaussians=5)
+    success = model.train(training_data, evaluation_data, training_iterations=12)
     assert success
