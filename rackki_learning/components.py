@@ -45,8 +45,21 @@ class MixtureDensityLayer(Layer):
     def call(self, x, dynamic_batch_size=True):
         with tf.name_scope("mdn"):
             return tf.keras.layers.concatenate(
-                [self.mus(x), self.sigmas(x), self.alphas(x)], name="outputs"
+                [self.mus(x), self.sigmas(x), self.alphas(x)], name="mixture_params"
             )
+
+
+class PredictionLayer(Layer):
+    def __init__(self, n_gaussians, **kwargs):
+        self.n_gaussians = n_gaussians
+        super().__init__(**kwargs)
+
+    def call(self, mixture_params, training=None, **kwargs):
+        if training:
+            return mixture_params
+        else:
+            gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)
+            return gaussian_mixture.sample()
 
 
 @saving.register_keras_serializable()
@@ -85,3 +98,6 @@ class GaussianMixture(object):
 
     def log_prob(self, y_true):
         return self.gaussian_mixture.log_prob(y_true)
+
+    def sample(self):
+        return self.gaussian_mixture.sample()

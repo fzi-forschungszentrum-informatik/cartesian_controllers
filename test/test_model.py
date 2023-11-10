@@ -2,6 +2,7 @@ from rackki_learning.dataset import Dataset
 from rackki_learning.model import Model
 import tensorflow as tf
 import os
+import numpy as np
 
 
 def test_training_and_saving_models(request):
@@ -28,7 +29,5 @@ def test_loading_and_serving_models(request):
     data_path = os.path.join(request.node.fspath.dirname, "rosbags")
     test_data = Dataset(data_path)
     x_test, y_test = test_data.get_batch(1)
-    y = model.predict(x_test)  # noqa: F841
-    # TODO:
-    # - Add an additional endpoint for sampling from a gaussian mixture
-    assert True
+    y = model.predict(x_test)
+    assert np.array(y).shape == (1, 6)  # [[fx, fy, fz, tx, ty, tz]]

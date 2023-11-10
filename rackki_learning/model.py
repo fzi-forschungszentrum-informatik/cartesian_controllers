@@ -3,8 +3,8 @@ from rackki_learning.dataset import Dataset
 from rackki_learning.components import (
     LSTMEncoderLayer,
     MixtureDensityLayer,
+    PredictionLayer,
     NegLogLikelihood,
-    GaussianMixture,
 )
 
 
@@ -15,6 +15,7 @@ class Model(object):
         self.model = tf.keras.models.Sequential()
         self.model.add(LSTMEncoderLayer(self.n_nodes))
         self.model.add(MixtureDensityLayer(self.n_gaussians))
+        self.model.add(PredictionLayer(self.n_gaussians))
 
     def train(
         self,
@@ -36,15 +37,12 @@ class Model(object):
             if step % 10 == 0:
                 x_eval, y_eval = evaluation_data.get_batch(batch_size)
 
-                mixture_params = self.model.predict_on_batch(x=x_eval)
-                mean = GaussianMixture(mixture_params, self.n_gaussians).mean()
+                y_pred = self.model.predict_on_batch(x=x_eval)
                 accuracy = tf.reduce_mean(
-                    tf.keras.losses.MSE(y_true=y_eval, y_pred=mean)
+                    tf.keras.losses.MSE(y_true=y_eval, y_pred=y_pred)
                 )
-                loss_eval = self.model.test_on_batch(x=x_eval, y=y_eval)
 
                 tf.summary.scalar("training_loss", data=loss, step=step)
-                tf.summary.scalar("evaluation_loss", data=loss_eval, step=step)
                 tf.summary.scalar("evaluation_accuracy", data=accuracy, step=step)
 
             print(f" {str(step)} / {str(training_iterations)}", end="\r", flush=True)
