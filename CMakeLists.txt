@@ -4,10 +4,6 @@ project(rackki_learning)
 # We need C++17
 set(CMAKE_CXX_STANDARD 17)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -35,6 +31,15 @@ set(MUJOCO_LIBRARIES
 # Python
 find_package(ament_cmake_python REQUIRED)
 
+# Tensorflow's C++ API
+# We use ika-rwth-aachen's prebuild .deb package.
+# Install that according to their install instructions.
+set(TENSORFLOW_INCLUDE_DIRS /usr/local/include/tensorflow)
+set(TENSORFLOW_LIBRARIES
+        /usr/local/lib/libtensorflow_cc.so
+        /usr/local/lib/libtensorflow_framework.so
+        )
+
 # --------------------------------------------------------------------------------
 # Make sure that library relocation works for both build and install.
 # See here: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
@@ -58,6 +63,10 @@ endif()
 add_executable(${PROJECT_NAME}_simulator
         src/mujoco_simulator.cpp
         src/simulator_node.cpp
+        )
+
+target_compile_options(${PROJECT_NAME}_simulator PUBLIC
+        -Wall -Wextra -Wpedantic
         )
 
 target_include_directories(${PROJECT_NAME}_simulator PUBLIC
@@ -98,13 +107,17 @@ install(
 
 ament_python_install_package(${PROJECT_NAME})
 
+#--------------------------------------------------------------------------------
+# Test
+#--------------------------------------------------------------------------------
 if(BUILD_TESTING)
 
+  # Python
   # See: https://docs.ros.org/en/rolling/How-To-Guides/Ament-CMake-Python-Documentation.html
   find_package(ament_cmake_pytest REQUIRED)
   set(_pytest_tests
-    test/test_dataset.py
-    test/test_model.py
+    test/python/test_dataset.py
+    test/python/test_model.py
   )
 
   foreach(_test_path ${_pytest_tests})
@@ -115,6 +128,24 @@ if(BUILD_TESTING)
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
   endforeach()
+
+  # C++
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(${PROJECT_NAME}_test_prediction
+    test/cpp/test_prediction.cpp
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/models
+  )
+  target_include_directories(${PROJECT_NAME}_test_prediction PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    ${TENSORFLOW_INCLUDE_DIRS}
+  )
+  ament_target_dependencies(${PROJECT_NAME}_test_prediction
+  )
+  target_link_libraries(${PROJECT_NAME}_test_prediction
+    ${TENSORFLOW_LIBRARIES}
+  )
+
 endif()
 
 ament_package()

@@ -1,0 +1,2 @@
+# Ignore built models and their parameters
+test/models/**
