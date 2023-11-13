@@ -49,5 +49,5 @@ class Model(object):
         return True
 
     def save(self, model_dir: str) -> bool:
-        self.model.save(model_dir)
+        self.model.save(model_dir, save_format="tf")
         return True

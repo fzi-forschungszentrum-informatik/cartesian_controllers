@@ -7,7 +7,7 @@ from tensorflow.keras import saving
 
 class LSTMEncoderLayer(Layer):
     def __init__(self, n_nodes, **kwargs):
-        with tf.name_scope("lstm_encoder"):
+        with tf.name_scope("lstm"):
             self.n_nodes = n_nodes
             self.lstm = tf.keras.layers.LSTM(
                 self.n_nodes,
@@ -16,10 +16,10 @@ class LSTMEncoderLayer(Layer):
                 dropout=0.5,
                 recurrent_dropout=0.5,
             )
-        super().__init__(**kwargs)
+        super().__init__(name="lstm", **kwargs)
 
     def call(self, x, dynamic_batch_size=True):
-        with tf.name_scope("lstm_encoder"):
+        with tf.name_scope("lstm"):
             pred, h_state, c_state = self.lstm(x)
             return tf.concat([pred, h_state, c_state], axis=-1)
 
@@ -40,7 +40,7 @@ class MixtureDensityLayer(Layer):
                 n_gaussians * out_dim, activation="exponential", name="sigmas"
             )
             self.alphas = make_dense(n_gaussians, activation="softmax", name="alphas")
-        super().__init__(**kwargs)
+        super().__init__(name="mdn", **kwargs)
 
     def call(self, x, dynamic_batch_size=True):
         with tf.name_scope("mdn"):
@@ -51,15 +51,17 @@ class MixtureDensityLayer(Layer):
 
 class PredictionLayer(Layer):
     def __init__(self, n_gaussians, **kwargs):
-        self.n_gaussians = n_gaussians
-        super().__init__(**kwargs)
+        with tf.name_scope("prediction"):
+            self.n_gaussians = n_gaussians
+            super().__init__(name="prediction", **kwargs)
 
     def call(self, mixture_params, training=None, **kwargs):
-        if training:
-            return mixture_params
-        else:
-            gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)
-            return gaussian_mixture.sample()
+        with tf.name_scope("prediction"):
+            if training:
+                return mixture_params
+            else:
+                gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)
+                return gaussian_mixture.sample()
 
 
 @saving.register_keras_serializable()
