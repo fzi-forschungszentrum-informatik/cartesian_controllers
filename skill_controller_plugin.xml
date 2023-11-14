@@ -1,0 +1,11 @@
+<library path="skill_controller">
+
+  <class name="rackki_learning/SkillController"
+         type="rackki_learning::SkillController"
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Serve a RackKI-specific tensorflow model inside a ROS2 controller.
+    </description>
+  </class>
+
+</library>
