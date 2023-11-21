@@ -122,7 +122,13 @@ install(
   TARGETS
   ${PROJECT_NAME}_simulator
   skill_controller
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  scripts/model.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_python_install_package(${PROJECT_NAME})
 pluginlib_export_plugin_description_file(controller_interface skill_controller_plugin.xml)
