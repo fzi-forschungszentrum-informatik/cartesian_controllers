@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(controller_interface REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(urdf REQUIRED)
 
 # GLFW
 # With PkgConfig is the official way: https://www.glfw.org/docs/3.0/build.html#build_link_cmake_pkgconfig
@@ -96,6 +98,8 @@ target_include_directories(skill_controller PUBLIC
 ament_target_dependencies(skill_controller
         rclcpp
         controller_interface
+        kdl_parser
+        urdf
         )
 target_link_libraries(skill_controller
         ${TENSORFLOW_LIBRARIES}
