@@ -1,5 +1,9 @@
+#include "tensorflow/cc/ops/const_op.h"
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <initializer_list>
+#include <tensorflow/cc/framework/ops.h>
+#include <tensorflow/cc/ops/standard_ops.h>
 #include <tensorflow/cc/saved_model/loader.h>
 #include <tensorflow/core/platform/env.h>
 #include <tensorflow/core/public/session.h>
@@ -17,12 +21,34 @@ TEST(rackki_learning, test_prediction)
   ASSERT_TRUE(status.ok());
 
   auto* session = bundle.GetSession();
+  auto scope    = tensorflow::Scope::NewRootScope();
 
   // Check the available input and output tensor names with:
   // saved_model_cli show --dir model_1 --all
-  tensorflow::Tensor input_tensor(tensorflow::DT_FLOAT, tensorflow::TensorShape({1, 7, 19}));
+  auto input_shape = tensorflow::TensorShape({1, 1, 19});
+  tensorflow::Input::Initializer input(std::initializer_list<float>({1.0,
+                                                                     2.0,
+                                                                     3.0,
+                                                                     4.0,
+                                                                     5.0,
+                                                                     6.0,
+                                                                     7.0,
+                                                                     8.0,
+                                                                     9.0,
+                                                                     10.0,
+                                                                     11.0,
+                                                                     12.0,
+                                                                     13.0,
+                                                                     14.0,
+                                                                     15.0,
+                                                                     16.0,
+                                                                     17.0,
+                                                                     18.0,
+                                                                     19.0}),
+                                       input_shape);
+
   std::vector<std::pair<std::string, tensorflow::Tensor> > inputs = {
-    {"serving_default_lstm_input:0", input_tensor}};
+    {"serving_default_lstm_input:0", input.tensor}};
   std::vector<tensorflow::Tensor> outputs;
 
   status = session->Run(inputs, {"StatefulPartitionedCall:0"}, {}, &outputs);
