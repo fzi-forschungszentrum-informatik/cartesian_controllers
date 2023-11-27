@@ -1,10 +1,12 @@
 #include "rackki_learning/skill_controller.h"
 #include "controller_interface/helpers.hpp"
+#include "geometry_msgs/msg/detail/wrench_stamped__struct.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "kdl/tree.hpp"
 #include "kdl_parser/kdl_parser.hpp"
 #include "rclcpp/logging.hpp"
 #include "urdf/model.h"
+#include <algorithm>
 #include <memory>
 #include <tensorflow/cc/ops/const_op.h>
 #include <tensorflow/cc/saved_model/loader.h>
@@ -41,6 +43,8 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<std::string>("robot_base_link", "");
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
+  auto_declare<double>("max_force", 30.0);
+  auto_declare<double>("max_torque", 3.0);
   return CallbackReturn::SUCCESS;
 }
 
@@ -97,9 +101,11 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
     return CallbackReturn::ERROR;
   }
 
-  m_joint_positions     = KDL::JntArray(m_joint_names.size());
-  m_joint_velocities    = KDL::JntArray(m_joint_names.size());
-  m_end_effector_solver = std::make_unique<KDL::ChainFkSolverVel_recursive>(m_robot_chain);
+  m_joint_positions         = KDL::JntArray(m_joint_names.size());
+  m_joint_velocities        = KDL::JntArray(m_joint_names.size());
+  m_end_effector_solver     = std::make_unique<KDL::ChainFkSolverVel_recursive>(m_robot_chain);
+  m_target_wrench_publisher = get_node()->create_publisher<geometry_msgs::msg::WrenchStamped>(
+    std::string(get_node()->get_name()) + "/target_wrench", 1);
 
   return CallbackReturn::SUCCESS;
 }
@@ -145,14 +151,17 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
       auto status = m_bundle.GetSession()->Run(inputs, {"StatefulPartitionedCall:0"}, {}, &outputs);
       if (status.ok())
       {
-        auto values                     = outputs[0].flat<float>();
+        float max_force  = std::abs(get_node()->get_parameter("max_force").as_double());
+        float max_torque = std::abs(get_node()->get_parameter("max_torque").as_double());
+        auto values      = outputs[0].flat<float>();
         m_target_wrench.header.stamp    = this->get_node()->now();
-        m_target_wrench.wrench.force.x  = values(0);
-        m_target_wrench.wrench.force.y  = values(1);
-        m_target_wrench.wrench.force.z  = values(2);
-        m_target_wrench.wrench.torque.x = values(3);
-        m_target_wrench.wrench.torque.y = values(4);
-        m_target_wrench.wrench.torque.z = values(5);
+        m_target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
+        m_target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
+        m_target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
+        m_target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
+        m_target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
+        m_target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
+        m_target_wrench_publisher->publish(m_target_wrench);
       }
       else
       {

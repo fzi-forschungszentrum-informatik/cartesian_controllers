@@ -52,6 +52,7 @@ private:
   geometry_msgs::msg::WrenchStamped m_target_wrench;
   std::mutex m_joint_mutex;
   KDL::Frame m_target_pose;
+  rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_publisher;
 
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
     m_joint_state_pos_handles;
