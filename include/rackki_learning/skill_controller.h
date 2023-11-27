@@ -2,10 +2,13 @@
 #define SKILL_CONTROLLER_H_INCLUDED
 
 #include "controller_interface/controller_interface.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "kdl/chain.hpp"
 #include <array>
 #include <hardware_interface/loaned_state_interface.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
+#include <kdl/frames.hpp>
+#include <mutex>
 #include <tensorflow/cc/saved_model/loader.h>
 #include <thread>
 
@@ -36,16 +39,27 @@ public:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
 private:
+  std::vector<std::pair<std::string, tensorflow::Tensor> > buildInputTensor();
+  void updateJointStates();
+  void cleanup();
+
   std::thread m_serving_thread;
   tensorflow::SavedModelBundleLite m_bundle;
+
   std::vector<std::string> m_joint_names;
+  KDL::JntArray m_joint_positions;
+  KDL::JntArray m_joint_velocities;
+  geometry_msgs::msg::WrenchStamped m_target_wrench;
+  std::mutex m_joint_mutex;
+  KDL::Frame m_target_pose;
+
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
     m_joint_state_pos_handles;
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
     m_joint_state_vel_handles;
+
   KDL::Chain m_robot_chain;
   std::unique_ptr<KDL::ChainFkSolverVel_recursive> m_end_effector_solver;
-  std::array<double, 19> m_model_input;
   std::atomic<bool> m_active = false;
 };
 

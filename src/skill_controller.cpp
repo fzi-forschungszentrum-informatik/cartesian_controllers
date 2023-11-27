@@ -4,11 +4,12 @@
 #include "kdl/tree.hpp"
 #include "kdl_parser/kdl_parser.hpp"
 #include "rclcpp/logging.hpp"
-#include "tensorflow/core/framework/tensor.h"
-#include "tensorflow/core/framework/tensor_shape.h"
 #include "urdf/model.h"
 #include <memory>
+#include <tensorflow/cc/ops/const_op.h>
 #include <tensorflow/cc/saved_model/loader.h>
+#include <tensorflow/core/framework/tensor.h>
+#include <tensorflow/core/framework/tensor_shape.h>
 #include <tensorflow/core/public/session.h>
 
 namespace rackki_learning {
@@ -96,6 +97,8 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
     return CallbackReturn::ERROR;
   }
 
+  m_joint_positions     = KDL::JntArray(m_joint_names.size());
+  m_joint_velocities    = KDL::JntArray(m_joint_names.size());
   m_end_effector_solver = std::make_unique<KDL::ChainFkSolverVel_recursive>(m_robot_chain);
 
   return CallbackReturn::SUCCESS;
@@ -129,21 +132,29 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
     return CallbackReturn::ERROR;
   }
 
+  m_joint_mutex.lock();
+  updateJointStates();
+  m_joint_mutex.unlock();
+
   m_active         = true;
   m_serving_thread = std::thread([this]() {
     while (m_active)
     {
-      auto input_shape = tensorflow::TensorShape({1, 7, 19});
-      tensorflow::Tensor input_tensor(tensorflow::DT_FLOAT, input_shape);
-      // auto a = input_tensor.flat<float>();
-      // auto b = a.reshape(input_tensor.shape());
-      // tensorflow::Tensor tmp(tensorflow::DT_FLOAT, input_shape,
-      // &tensorflow::TensorBuffer(a.data()));
-      std::vector<std::pair<std::string, tensorflow::Tensor> > inputs = {
-        {"serving_default_lstm_input:0", input_tensor}};
-      std::vector<tensorflow::Tensor> outputs;
+      auto inputs  = buildInputTensor();
+      auto outputs = std::vector<tensorflow::Tensor>();
       auto status = m_bundle.GetSession()->Run(inputs, {"StatefulPartitionedCall:0"}, {}, &outputs);
-      if (!status.ok())
+      if (status.ok())
+      {
+        auto values                     = outputs[0].flat<float>();
+        m_target_wrench.header.stamp    = this->get_node()->now();
+        m_target_wrench.wrench.force.x  = values(0);
+        m_target_wrench.wrench.force.y  = values(1);
+        m_target_wrench.wrench.force.z  = values(2);
+        m_target_wrench.wrench.torque.x = values(3);
+        m_target_wrench.wrench.torque.y = values(4);
+        m_target_wrench.wrench.torque.z = values(5);
+      }
+      else
       {
         auto clock = *get_node()->get_clock();
         RCLCPP_WARN_STREAM_THROTTLE(
@@ -159,30 +170,89 @@ controller_interface::return_type
 SkillController::update([[maybe_unused]] const rclcpp::Time& time,
                         [[maybe_unused]] const rclcpp::Duration& period)
 {
-  return controller_interface::return_type::ERROR;
+  if (m_joint_mutex.try_lock())
+  {
+    updateJointStates();
+    m_joint_mutex.unlock();
+  }
+  return controller_interface::return_type::OK;
 }
 
 SkillController::CallbackReturn
 SkillController::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
-  if (m_active)
-  {
-    m_joint_state_pos_handles.clear();
-    m_joint_state_vel_handles.clear();
-    this->release_interfaces();
-    m_active = false;
-  }
-
-  if (m_serving_thread.joinable())
-  {
-    m_serving_thread.join();
-  }
+  cleanup();
   return CallbackReturn::SUCCESS;
 }
 
 SkillController::CallbackReturn
 SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
+  cleanup();
+  auto status = m_bundle.GetSession()->Close();
+  if (!status.ok())
+  {
+    return CallbackReturn::ERROR;
+  }
+  return CallbackReturn::SUCCESS;
+}
+
+std::vector<std::pair<std::string, tensorflow::Tensor> > SkillController::buildInputTensor()
+{
+  // Compute current end effector pose and velocity w.r.t the robot base link
+  KDL::FrameVel end_effector;
+  m_joint_mutex.lock();
+  m_end_effector_solver->JntToCart(KDL::JntArrayVel(m_joint_positions, m_joint_velocities),
+                                   end_effector);
+  m_joint_mutex.unlock();
+
+  // The neural network expects all inputs with respect to the target frame.
+  KDL::Frame current_pose  = m_target_pose.Inverse() * end_effector.GetFrame();
+  KDL::Twist current_twist = m_target_pose.Inverse() * end_effector.GetTwist();
+  double current_pose_qx;
+  double current_pose_qy;
+  double current_pose_qz;
+  double current_pose_qw;
+  current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
+
+  auto input_shape = tensorflow::TensorShape({1, 1, 19});
+  tensorflow::Input::Initializer input(std::initializer_list<float>({
+                                         static_cast<float>(current_pose.p.x()),
+                                         static_cast<float>(current_pose.p.y()),
+                                         static_cast<float>(current_pose.p.z()),
+                                         static_cast<float>(current_pose_qx),
+                                         static_cast<float>(current_pose_qy),
+                                         static_cast<float>(current_pose_qz),
+                                         static_cast<float>(current_pose_qw),
+                                         static_cast<float>(current_twist.vel.x()),
+                                         static_cast<float>(current_twist.vel.y()),
+                                         static_cast<float>(current_twist.vel.z()),
+                                         static_cast<float>(current_twist.rot.x()),
+                                         static_cast<float>(current_twist.rot.y()),
+                                         static_cast<float>(current_twist.rot.z()),
+                                         static_cast<float>(m_target_wrench.wrench.force.x),
+                                         static_cast<float>(m_target_wrench.wrench.force.y),
+                                         static_cast<float>(m_target_wrench.wrench.force.z),
+                                         static_cast<float>(m_target_wrench.wrench.torque.x),
+                                         static_cast<float>(m_target_wrench.wrench.torque.y),
+                                         static_cast<float>(m_target_wrench.wrench.torque.z),
+                                       }),
+                                       input_shape);
+
+  return {{"serving_default_lstm_input:0", input.tensor}};
+}
+
+void SkillController::updateJointStates()
+{
+  for (size_t i = 0; i < m_joint_names.size(); ++i)
+  {
+    m_joint_positions(i)  = m_joint_state_pos_handles[i].get().get_value();
+    m_joint_velocities(i) = m_joint_state_vel_handles[i].get().get_value();
+  }
+}
+
+void SkillController::cleanup()
+{
   if (m_active)
   {
     m_joint_state_pos_handles.clear();
@@ -195,12 +265,6 @@ SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& pre
   {
     m_serving_thread.join();
   }
-  auto status = m_bundle.GetSession()->Close();
-  if (!status.ok())
-  {
-    return CallbackReturn::ERROR;
-  }
-  return CallbackReturn::SUCCESS;
 }
 
 } // namespace rackki_learning

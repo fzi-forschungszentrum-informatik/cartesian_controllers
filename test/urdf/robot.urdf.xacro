@@ -6,6 +6,7 @@
                 <joint name="${name}">
                         <command_interface name="position"/>
                         <state_interface name="position"/>
+                        <state_interface name="velocity"/>
                 </joint>
         </xacro:macro>
         <ros2_control name="robot_simulation" type="system">
