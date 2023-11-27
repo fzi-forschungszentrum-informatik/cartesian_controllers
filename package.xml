@@ -21,6 +21,8 @@
   <test_depend>python3-pytest-cov</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>controller_manager</test_depend>
+  <test_depend>controller_manager_msgs</test_depend>
   <test_depend>launch_testing_ament_cmake</test_depend>
   <test_depend>xacro</test_depend>
 
