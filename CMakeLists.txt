@@ -4,14 +4,13 @@ project(rackki_learning)
 # We need C++17
 set(CMAKE_CXX_STANDARD 17)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(urdf REQUIRED)
 
 # GLFW
 # With PkgConfig is the official way: https://www.glfw.org/docs/3.0/build.html#build_link_cmake_pkgconfig
@@ -30,6 +29,18 @@ endif()
 set(MUJOCO_INCLUDE_DIRS ${MUJOCO_DIR}/include)
 set(MUJOCO_LIBRARIES
         ${MUJOCO_DIR}/lib/libmujoco.so
+        )
+
+# Python
+find_package(ament_cmake_python REQUIRED)
+
+# Tensorflow's C++ API
+# We use ika-rwth-aachen's prebuild .deb package.
+# Install that according to their install instructions.
+set(TENSORFLOW_INCLUDE_DIRS /usr/local/include/tensorflow)
+set(TENSORFLOW_LIBRARIES
+        /usr/local/lib/libtensorflow_cc.so
+        /usr/local/lib/libtensorflow_framework.so
         )
 
 # --------------------------------------------------------------------------------
@@ -56,25 +67,43 @@ add_executable(${PROJECT_NAME}_simulator
         src/mujoco_simulator.cpp
         src/simulator_node.cpp
         )
-
+target_compile_options(${PROJECT_NAME}_simulator PUBLIC
+        -Wall -Wextra -Wpedantic
+        )
 target_include_directories(${PROJECT_NAME}_simulator PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         ${MUJOCO_INCLUDE_DIRS}
         ${GLFW_INCLUDE_DIRS}
         )
-
 ament_target_dependencies(${PROJECT_NAME}_simulator
         rclcpp
         geometry_msgs
         )
-
 target_link_libraries(${PROJECT_NAME}_simulator
         ${MUJOCO_LIBRARIES}
         ${GLFW_LIBRARIES}
         GLEW::GLEW
         )
 
+# Skill controller
+add_library(skill_controller SHARED
+        src/skill_controller.cpp
+        )
+target_include_directories(skill_controller PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        ${TENSORFLOW_INCLUDE_DIRS}
+        )
+ament_target_dependencies(skill_controller
+        rclcpp
+        controller_interface
+        kdl_parser
+        urdf
+        )
+target_link_libraries(skill_controller
+        ${TENSORFLOW_LIBRARIES}
+)
 
 #--------------------------------------------------------------------------------
 # Install
@@ -90,11 +119,67 @@ install(
 )
 
 install(
-  TARGETS ${PROJECT_NAME}_simulator
-  DESTINATION lib/${PROJECT_NAME})
+  TARGETS
+  ${PROJECT_NAME}_simulator
+  skill_controller
+  DESTINATION lib/${PROJECT_NAME}
+)
 
+install(PROGRAMS
+  scripts/model.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
+ament_python_install_package(${PROJECT_NAME})
+pluginlib_export_plugin_description_file(controller_interface skill_controller_plugin.xml)
+
+#--------------------------------------------------------------------------------
+# Test
+#--------------------------------------------------------------------------------
 if(BUILD_TESTING)
+
+  # ML components in Python
+  # See: https://docs.ros.org/en/rolling/How-To-Guides/Ament-CMake-Python-Documentation.html
+  find_package(ament_cmake_pytest REQUIRED)
+  set(_pytest_tests
+    test/python/test_dataset.py
+    test/python/test_model.py
+  )
+
+  foreach(_test_path ${_pytest_tests})
+    get_filename_component(_test_name ${_test_path} NAME_WE)
+    ament_add_pytest_test(${_test_name} ${_test_path}
+      APPEND_ENV PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
+      TIMEOUT 60
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+  endforeach()
+
+  # Prediction in C++
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(${PROJECT_NAME}_test_prediction
+    test/cpp/test_prediction.cpp
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/models
+  )
+  target_include_directories(${PROJECT_NAME}_test_prediction PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    ${TENSORFLOW_INCLUDE_DIRS}
+  )
+  ament_target_dependencies(${PROJECT_NAME}_test_prediction
+  )
+  target_link_libraries(${PROJECT_NAME}_test_prediction
+    ${TENSORFLOW_LIBRARIES}
+  )
+
+  # ROS2 controller integration
+  install(
+    DIRECTORY test/config test/urdf
+    DESTINATION share/${PROJECT_NAME}
+  )
+  find_package(launch_testing_ament_cmake)
+  add_launch_test(test/launch/test_skill_controller.py)
+
 endif()
 
 ament_package()

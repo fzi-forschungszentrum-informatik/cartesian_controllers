@@ -1,5 +1,5 @@
 variables:
-  BEFORE_BUILD_TARGET_WORKSPACE: "./.install_mujoco.sh"
+  BEFORE_BUILD_TARGET_WORKSPACE: "./.install_mujoco.sh && ./.install_python_dependencies.sh && ./.install_libtensorflow_cc.sh"
 
 .build_matrix:
   parallel:

@@ -27,3 +27,14 @@ repos:
         language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: ['-fallback-style=none', '-i']
+
+  # Python
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+
+  - repo: https://github.com/psf/black.git
+    rev: 23.7.0
+    hooks:
+    -   id: black
