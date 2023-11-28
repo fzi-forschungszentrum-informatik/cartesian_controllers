@@ -11,12 +11,12 @@ def generate_launch_description():
         parameters=[
             {"zero_when_static": True},
             {"static_count_threshold": 30},
-            {"linear_scale/x": 10.0},
-            {"linear_scale/y": 10.0},
-            {"linear_scale/z": 10.0},
-            {"angular_scale/x": 0.5},
-            {"angular_scale/y": 0.5},
-            {"angular_scale/z": 0.5},
+            {"linear_scale/x": 50.0},
+            {"linear_scale/y": 50.0},
+            {"linear_scale/z": 50.0},
+            {"angular_scale/x": 5.0},
+            {"angular_scale/y": 5.0},
+            {"angular_scale/z": 5.0},
         ],
         output="both",
     )
