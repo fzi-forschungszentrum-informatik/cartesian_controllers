@@ -122,6 +122,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
                         m_compliance_ref_link << " is not part of the kinematic chain from "
                                               << Base::m_robot_base_link << " to "
                                               << Base::m_end_effector_link);
+    release_interfaces();                                              
     return TYPE::ERROR;
   }
 
