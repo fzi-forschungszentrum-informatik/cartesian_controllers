@@ -70,6 +70,9 @@ add_executable(${PROJECT_NAME}_simulator
 target_compile_options(${PROJECT_NAME}_simulator PUBLIC
         -Wall -Wextra -Wpedantic
         )
+target_compile_definitions(${PROJECT_NAME}_simulator PRIVATE
+        MUJOCO_PLUGIN_DIR="${MUJOCO_DIR}/bin/mujoco_plugin"
+        )
 target_include_directories(${PROJECT_NAME}_simulator PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -127,6 +130,7 @@ install(
 
 install(PROGRAMS
   scripts/model.py
+  scripts/teach_device.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -208,6 +208,8 @@ int MuJoCoSimulator::simulate()
 
 int MuJoCoSimulator::simulateImpl()
 {
+  mj_loadAllPluginLibraries(MUJOCO_PLUGIN_DIR, nullptr);
+
   // Initialize ROS2 node
   m_node = std::make_shared<rclcpp::Node>("simulator",
                                           rclcpp::NodeOptions().allow_undeclared_parameters(true));
