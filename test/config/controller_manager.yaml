@@ -6,7 +6,7 @@ controller_manager:
 
 skill_controller:
   ros__parameters:
-    model_path: /home/scherzin/src/robot_folders/checkout/rack-ki/colcon_ws/src/rackki_learning/test/models/model_1
+    model_path: /root/target_ws/src/rackki_learning/test/models/model_1  # CI setting
     end_effector_link: "tool0"  # Coordinate system of the active assembly part
     robot_base_link: "base_link"
     max_force: 30.0
