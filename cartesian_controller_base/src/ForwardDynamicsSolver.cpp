@@ -147,7 +147,10 @@ namespace cartesian_controller_base{
     m_jnt_space_inertia.resize(m_number_joints);
 
     // Set the initial value if provided at runtime, else use default value.
-    m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.1);
+    if(!nh->has_parameter(m_params + "/link_mass"))
+      m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.1);
+    else
+      m_min = nh->get_parameter(m_params + "/link_mass").get_value<double>();
 
     RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver initialized");
     RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver has control over %i joints", m_number_joints);

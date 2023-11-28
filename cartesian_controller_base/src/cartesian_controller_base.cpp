@@ -154,7 +154,79 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 
-  // Get kinematics specific configuration
+
+    // Get names of actuated joints
+  m_joint_names = get_node()->get_parameter("joints").as_string_array();
+  if (m_joint_names.empty())
+  {
+    RCLCPP_ERROR(get_node()->get_logger(), "joints array is empty");
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+  // Check command interfaces.
+  // We support position, velocity, or both.
+  m_cmd_interface_types = get_node()->get_parameter("command_interfaces").as_string_array();
+  if (m_cmd_interface_types.empty())
+  {
+    RCLCPP_ERROR(get_node()->get_logger(), "No command_interfaces specified");
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+  for (const auto& type : m_cmd_interface_types)
+  {
+    RCLCPP_INFO_STREAM(get_node()->get_logger(), type);
+    if (type != hardware_interface::HW_IF_POSITION && type != hardware_interface::HW_IF_VELOCITY)
+    {
+      RCLCPP_ERROR(
+        get_node()->get_logger(),
+        "Unsupported command interface: %s. Choose position or velocity",
+        type.c_str());
+      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+    }
+  }
+
+
+
+  // Controller-internal state publishing
+  m_feedback_pose_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::PoseStamped> >(
+      get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
+        std::string(get_node()->get_name()) + "/current_pose", 3));
+
+  m_feedback_twist_publisher =
+    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::TwistStamped> >(
+      get_node()->create_publisher<geometry_msgs::msg::TwistStamped>(
+        std::string(get_node()->get_name()) + "/current_twist", 3));
+
+  m_configured = true;
+  RCLCPP_INFO_STREAM(get_node()->get_logger(), "Configured controller");
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  stopCurrentMotion();
+
+  if (m_active)
+  {
+    m_joint_cmd_pos_handles.clear();
+    m_joint_cmd_vel_handles.clear();
+    m_joint_state_pos_handles.clear();
+    this->release_interfaces();
+    m_active = false;
+  }
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_activate(
+    const rclcpp_lifecycle::State & previous_state)
+{
+  if (m_active)
+  {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+
+
+    // Get kinematics specific configuration
   urdf::Model robot_model;
   KDL::Tree   robot_tree;
 
@@ -197,13 +269,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 
-  // Get names of actuated joints
-  m_joint_names = get_node()->get_parameter("joints").as_string_array();
-  if (m_joint_names.empty())
-  {
-    RCLCPP_ERROR(get_node()->get_logger(), "joints array is empty");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
-  }
+
 
   // Parse joint limits
   KDL::JntArray upper_pos_limits(m_joint_names.size());
@@ -239,65 +305,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(get_node());
 
-  // Check command interfaces.
-  // We support position, velocity, or both.
-  m_cmd_interface_types = get_node()->get_parameter("command_interfaces").as_string_array();
-  if (m_cmd_interface_types.empty())
-  {
-    RCLCPP_ERROR(get_node()->get_logger(), "No command_interfaces specified");
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
-  }
-  for (const auto& type : m_cmd_interface_types)
-  {
-    if (type != hardware_interface::HW_IF_POSITION && type != hardware_interface::HW_IF_VELOCITY)
-    {
-      RCLCPP_ERROR(
-        get_node()->get_logger(),
-        "Unsupported command interface: %s. Choose position or velocity",
-        type.c_str());
-      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
-    }
-  }
 
-  // Controller-internal state publishing
-  m_feedback_pose_publisher =
-    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::PoseStamped> >(
-      get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
-        std::string(get_node()->get_name()) + "/current_pose", 3));
-
-  m_feedback_twist_publisher =
-    std::make_shared<realtime_tools::RealtimePublisher<geometry_msgs::msg::TwistStamped> >(
-      get_node()->create_publisher<geometry_msgs::msg::TwistStamped>(
-        std::string(get_node()->get_name()) + "/current_twist", 3));
-
-  m_configured = true;
-
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_deactivate(
-    const rclcpp_lifecycle::State & previous_state)
-{
-  stopCurrentMotion();
-
-  if (m_active)
-  {
-    m_joint_cmd_pos_handles.clear();
-    m_joint_cmd_vel_handles.clear();
-    m_joint_state_pos_handles.clear();
-    this->release_interfaces();
-    m_active = false;
-  }
-  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianControllerBase::on_activate(
-    const rclcpp_lifecycle::State & previous_state)
-{
-  if (m_active)
-  {
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-  }
 
   // Get command handles.
   for (const auto& type : m_cmd_interface_types)
@@ -319,6 +327,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
       return CallbackReturn::ERROR;
     }
   }
+  
 
   // Get state handles.
   if (!controller_interface::get_ordered_interfaces(state_interfaces_,
