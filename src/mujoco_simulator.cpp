@@ -263,10 +263,10 @@ int MuJoCoSimulator::simulateImpl()
 
   // ROS2 communication
   m_feedback_pose_publisher =
-    m_node->create_publisher<geometry_msgs::msg::PoseStamped>("/feedback_pose", 3);
+    m_node->create_publisher<geometry_msgs::msg::PoseStamped>("/current_pose", 3);
 
   m_feedback_twist_publisher =
-    m_node->create_publisher<geometry_msgs::msg::TwistStamped>("/feedback_twist", 3);
+    m_node->create_publisher<geometry_msgs::msg::TwistStamped>("/current_twist", 3);
 
   m_target_wrench_subscriber = m_node->create_subscription<geometry_msgs::msg::WrenchStamped>(
     "/target_wrench",
