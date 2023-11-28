@@ -55,7 +55,9 @@ def generate_launch_description():
     inactive_list = [
         "skill_controller",
     ]
-    inactive_flag = "--inactive" if distro in ["iron", "humble"] else "--stopped"
+    inactive_flag = (
+        "--inactive" if distro in ["rolling", "iron", "humble"] else "--stopped"
+    )
     inactive_spawners = [
         controller_spawner(controller, inactive_flag) for controller in inactive_list
     ]
@@ -126,7 +128,7 @@ class SkillControllerTests(unittest.TestCase):
 
     def start_controller(self, controller):
         req = SwitchController.Request()
-        if distro in ["humble", "iron"]:
+        if distro in ["rolling", "humble", "iron"]:
             req.activate_controllers = [controller]
         else:
             req.start_controllers = [controller]
@@ -134,7 +136,7 @@ class SkillControllerTests(unittest.TestCase):
 
     def stop_controller(self, controller):
         req = SwitchController.Request()
-        if distro in ["humble", "iron"]:
+        if distro in ["rolling", "humble", "iron"]:
             req.deactivate_controllers = [controller]
         else:
             req.stop_controllers = [controller]
