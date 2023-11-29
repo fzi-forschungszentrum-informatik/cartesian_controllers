@@ -1,5 +1,4 @@
-# Define button commands in this file
-spacenav_buttons:
+teach_device:
   ros__parameters:
 
     # If set to False, a button cannot be pressed twice in a row.
@@ -17,14 +16,14 @@ spacenav_buttons:
                     # button 0
                     "echo 'start recording'; ros2 bag record /current_pose /current_twist /target_wrench",
                     # button 1
-                    "echo 'stop recording'; kill -9 $(pgrep -fa current_pose | awk '{print $1}') & ros2 topic pub -r 100 -1 --keep-alive 0.01 /respawn std_msgs/msg/Empty & echo 'reset'"
+                    "echo 'stop recording'; kill -9 $(pgrep -fa current_pose | awk '{print $1}') & ros2 service call /simulator/reset std_srvs/srv/Trigger & echo 'reset'"
             ]
 
     # Directories where the commands are executed
     cmd_dirs :
             [
                     # command 0
-                    "/home/scherzin/src/robot_folders/checkout/rack-ki/colcon_ws",
+                    "",
                     # command 1
                     "",
             ]

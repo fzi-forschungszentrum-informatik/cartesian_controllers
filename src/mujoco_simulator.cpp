@@ -273,6 +273,15 @@ int MuJoCoSimulator::simulateImpl()
     3,
     std::bind(&MuJoCoSimulator::targetWrenchCallback, this, std::placeholders::_1));
 
+  m_reset_server = m_node->create_service<std_srvs::srv::Trigger>(
+    std::string(m_node->get_name()) + "/reset",
+    [this]([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+           std::shared_ptr<std_srvs::srv::Trigger::Response> response) -> void {
+      m_reset_simulation = true;
+      response->success  = true;
+      response->message  = "success";
+    });
+
   m_ready = true;
 
   // init GLFW
@@ -331,6 +340,14 @@ int MuJoCoSimulator::simulateImpl()
 
     // process pending GUI events, call GLFW callbacks
     glfwPollEvents();
+
+    if (m_reset_simulation)
+    {
+      mj_resetData(m, d);
+      mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
+      mj_forward(m, d);
+      m_reset_simulation = false;
+    }
   }
 
   // free visualization storage

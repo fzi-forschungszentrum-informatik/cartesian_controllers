@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(urdf REQUIRED)
@@ -82,6 +83,7 @@ target_include_directories(${PROJECT_NAME}_simulator PUBLIC
 ament_target_dependencies(${PROJECT_NAME}_simulator
         rclcpp
         geometry_msgs
+        std_srvs
         )
 target_link_libraries(${PROJECT_NAME}_simulator
         ${MUJOCO_LIBRARIES}
