@@ -17,6 +17,9 @@
   <depend>controller_interface</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
+  <depend>rackki_interfaces</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>python3-pytest</test_depend>
   <test_depend>python3-pytest-cov</test_depend>
