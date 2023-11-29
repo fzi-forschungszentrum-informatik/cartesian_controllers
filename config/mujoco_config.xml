@@ -17,6 +17,9 @@
                         </instance>
                 </plugin>
         </extension>
+        <contact>
+                <pair name="passive_active_components_contact" condim="6" geom1="passive_component" geom2="active_component" friction="0.1 0.1 0.005 0.0001 0.0001" />
+        </contact>
 
         <!--
         Allow to pass six additional parameters to each joint.
@@ -30,7 +33,7 @@
                 <material name="matplane" reflectance="0.2" texture="texplane" texrepeat="1 1" texuniform="true"/>
                 <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
                 <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
-                <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 1.00">
+                <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 0.991">
                         <plugin instance="sdf"/>
                 </mesh>
                 <mesh name="active_component" file="active_component.stl">
@@ -42,7 +45,7 @@
 
                 <!-- Fixed with the world -->
                 <body name="passive_component" pos="0 0 0.0" quat="1 0 0 0">
-                        <geom type="sdf" mesh="passive_component" material="passive_component">
+                        <geom name="passive_component" type="sdf" mesh="passive_component" material="passive_component">
                                 <plugin instance="sdf"/>
                         </geom>
                 </body>
@@ -51,7 +54,7 @@
                 <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
                         <joint name="free_joint" type="free" user="5000 9000 9000 200 200 200"/>
-                        <geom type="mesh" mesh="active_component" material="active_component">
+                        <geom name="active_component" type="mesh" mesh="active_component" material="active_component">
                         </geom>
                 </body>
         </worldbody>
