@@ -27,6 +27,7 @@
 #include "mujoco/mujoco.h"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 namespace rackki_learning {
 
@@ -78,11 +79,13 @@ public:
   static std::shared_ptr<rclcpp::Node> getNode() { return getInstance().m_node; };
 
 
-  // ROS2 input and output topics
+  // ROS2 interfaces
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr m_feedback_pose_publisher;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr m_feedback_twist_publisher;
   rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
   void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr m_reset_server;
+  std::atomic_bool m_reset_simulation = false;
 
   // Identifier for the active assembly component
   int m_active_body = 0;

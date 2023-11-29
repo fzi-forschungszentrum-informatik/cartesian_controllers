@@ -208,6 +208,8 @@ int MuJoCoSimulator::simulate()
 
 int MuJoCoSimulator::simulateImpl()
 {
+  mj_loadAllPluginLibraries(MUJOCO_PLUGIN_DIR, nullptr);
+
   // Initialize ROS2 node
   m_node = std::make_shared<rclcpp::Node>("simulator",
                                           rclcpp::NodeOptions().allow_undeclared_parameters(true));
@@ -261,15 +263,24 @@ int MuJoCoSimulator::simulateImpl()
 
   // ROS2 communication
   m_feedback_pose_publisher =
-    m_node->create_publisher<geometry_msgs::msg::PoseStamped>("/feedback_pose", 3);
+    m_node->create_publisher<geometry_msgs::msg::PoseStamped>("/current_pose", 3);
 
   m_feedback_twist_publisher =
-    m_node->create_publisher<geometry_msgs::msg::TwistStamped>("/feedback_twist", 3);
+    m_node->create_publisher<geometry_msgs::msg::TwistStamped>("/current_twist", 3);
 
   m_target_wrench_subscriber = m_node->create_subscription<geometry_msgs::msg::WrenchStamped>(
     "/target_wrench",
     3,
     std::bind(&MuJoCoSimulator::targetWrenchCallback, this, std::placeholders::_1));
+
+  m_reset_server = m_node->create_service<std_srvs::srv::Trigger>(
+    std::string(m_node->get_name()) + "/reset",
+    [this]([[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+           std::shared_ptr<std_srvs::srv::Trigger::Response> response) -> void {
+      m_reset_simulation = true;
+      response->success  = true;
+      response->message  = "success";
+    });
 
   m_ready = true;
 
@@ -329,6 +340,14 @@ int MuJoCoSimulator::simulateImpl()
 
     // process pending GUI events, call GLFW callbacks
     glfwPollEvents();
+
+    if (m_reset_simulation)
+    {
+      mj_resetData(m, d);
+      mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
+      mj_forward(m, d);
+      m_reset_simulation = false;
+    }
   }
 
   // free visualization storage

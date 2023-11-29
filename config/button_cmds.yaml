@@ -1,0 +1,29 @@
+teach_device:
+  ros__parameters:
+
+    # If set to False, a button cannot be pressed twice in a row.
+    # Can be used to force alternation between two buttons, e.g. when doing `start recording`
+    # - `stop recording` tasks.
+    repeat_same_button : False
+
+    # Minimum duration in seconds to pass between two buttons pressed.
+    # Can be used to control the rate of pressing.
+    button_sleep: 1.0
+
+    # Define which commands to execute on pressing buttons
+    button_cmds :
+            [
+                    # button 0
+                    "echo 'start recording'; ros2 bag record /current_pose /current_twist /target_wrench",
+                    # button 1
+                    "echo 'stop recording'; kill -9 $(pgrep -fa current_pose | awk '{print $1}') & ros2 service call /simulator/reset std_srvs/srv/Trigger & echo 'reset'"
+            ]
+
+    # Directories where the commands are executed
+    cmd_dirs :
+            [
+                    # command 0
+                    "",
+                    # command 1
+                    "",
+            ]

@@ -13,6 +13,7 @@
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
+  <depend>std_srvs</depend>
   <depend>controller_interface</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
