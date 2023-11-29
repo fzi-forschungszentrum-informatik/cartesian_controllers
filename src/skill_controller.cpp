@@ -1,6 +1,5 @@
 #include "rackki_learning/skill_controller.h"
 #include "controller_interface/helpers.hpp"
-#include "geometry_msgs/msg/detail/wrench_stamped__struct.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "kdl/tree.hpp"
 #include "kdl_parser/kdl_parser.hpp"

@@ -4,7 +4,6 @@
 #include "controller_interface/controller_interface.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "kdl/chain.hpp"
-#include "rackki_interfaces/srv/detail/set_target__struct.hpp"
 #include "rackki_interfaces/srv/set_target.hpp"
 #include "tf2/exceptions.h"
 #include "tf2_ros/buffer.h"
