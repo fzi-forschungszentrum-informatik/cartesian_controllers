@@ -18,9 +18,9 @@ class LSTMEncoderLayer(Layer):
             )
         super().__init__(name="lstm", **kwargs)
 
-    def call(self, x, dynamic_batch_size=True):
+    def call(self, x, training=None, dynamic_batch_size=True):
         with tf.name_scope("lstm"):
-            pred, h_state, c_state = self.lstm(x)
+            pred, h_state, c_state = self.lstm(x, training=training)
             return tf.concat([pred, h_state, c_state], axis=-1)
 
 
