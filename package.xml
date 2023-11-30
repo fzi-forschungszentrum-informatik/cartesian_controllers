@@ -17,6 +17,9 @@
   <depend>controller_interface</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
+  <depend>rackki_interfaces</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>python3-pytest</test_depend>
   <test_depend>python3-pytest-cov</test_depend>
@@ -26,6 +29,8 @@
   <test_depend>controller_manager_msgs</test_depend>
   <test_depend>launch_testing_ament_cmake</test_depend>
   <test_depend>xacro</test_depend>
+  <test_depend>joint_state_broadcaster</test_depend>
+  <test_depend>robot_state_publisher</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

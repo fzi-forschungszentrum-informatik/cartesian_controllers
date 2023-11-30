@@ -1,12 +1,12 @@
 #include "rackki_learning/skill_controller.h"
 #include "controller_interface/helpers.hpp"
-#include "geometry_msgs/msg/detail/wrench_stamped__struct.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "kdl/tree.hpp"
 #include "kdl_parser/kdl_parser.hpp"
 #include "rclcpp/logging.hpp"
 #include "urdf/model.h"
 #include <algorithm>
+#include <kdl/frames.hpp>
 #include <memory>
 #include <tensorflow/cc/ops/const_op.h>
 #include <tensorflow/cc/saved_model/loader.h>
@@ -107,12 +107,28 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
   m_target_wrench_publisher = get_node()->create_publisher<geometry_msgs::msg::WrenchStamped>(
     std::string(get_node()->get_name()) + "/target_wrench", 1);
 
+  m_tf_buffer   = std::make_unique<tf2_ros::Buffer>(get_node()->get_clock());
+  m_tf_listener = std::make_shared<tf2_ros::TransformListener>(*m_tf_buffer);
+
+  m_set_target_server = get_node()->create_service<rackki_interfaces::srv::SetTarget>(
+    std::string(get_node()->get_name()) + "/set_target",
+    [this](const std::shared_ptr<rackki_interfaces::srv::SetTarget::Request> request,
+           std::shared_ptr<rackki_interfaces::srv::SetTarget::Response> response) -> void {
+      response->success = setTarget(request->tf_name);
+    });
+
   return CallbackReturn::SUCCESS;
 }
 
 SkillController::CallbackReturn
 SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
+  if (!m_has_target)
+  {
+    RCLCPP_WARN(get_node()->get_logger(), "No TF target specified.");
+    return CallbackReturn::ERROR;
+  }
+
   if (!controller_interface::get_ordered_interfaces(this->state_interfaces_,
                                                     m_joint_names,
                                                     hardware_interface::HW_IF_POSITION,
@@ -216,8 +232,10 @@ std::vector<std::pair<std::string, tensorflow::Tensor> > SkillController::buildI
   m_joint_mutex.unlock();
 
   // The neural network expects all inputs with respect to the target frame.
+  m_target_mutex.lock();
   KDL::Frame current_pose  = m_target_pose.Inverse() * end_effector.GetFrame();
   KDL::Twist current_twist = m_target_pose.Inverse() * end_effector.GetTwist();
+  m_target_mutex.unlock();
   double current_pose_qx;
   double current_pose_qy;
   double current_pose_qz;
@@ -262,6 +280,7 @@ void SkillController::updateJointStates()
 
 void SkillController::cleanup()
 {
+  m_has_target = false;
   if (m_active)
   {
     m_joint_state_pos_handles.clear();
@@ -274,6 +293,34 @@ void SkillController::cleanup()
   {
     m_serving_thread.join();
   }
+}
+
+bool SkillController::setTarget(const std::string& target)
+{
+  geometry_msgs::msg::TransformStamped t;
+  auto base = get_node()->get_parameter("robot_base_link").as_string();
+  try
+  {
+    t = m_tf_buffer->lookupTransform(base, target, tf2::TimePointZero);
+  }
+  catch (const tf2::TransformException& ex)
+  {
+    RCLCPP_INFO(get_node()->get_logger(),
+                "Could not lookup transform from %s to %s: %s",
+                target.c_str(),
+                base.c_str(),
+                ex.what());
+    return false;
+  }
+  m_target_mutex.lock();
+  m_target_pose.p[0] = t.transform.translation.x;
+  m_target_pose.p[1] = t.transform.translation.y;
+  m_target_pose.p[2] = t.transform.translation.z;
+  m_target_pose.M    = KDL::Rotation::Quaternion(
+    t.transform.rotation.x, t.transform.rotation.y, t.transform.rotation.z, t.transform.rotation.w);
+  m_target_mutex.unlock();
+  m_has_target = true;
+  return true;
 }
 
 } // namespace rackki_learning

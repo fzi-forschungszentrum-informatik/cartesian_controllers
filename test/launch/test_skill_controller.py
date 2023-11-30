@@ -14,6 +14,7 @@ import rclpy
 from rclpy.node import Node as PythonNode
 from controller_manager_msgs.srv import ListControllers
 from controller_manager_msgs.srv import SwitchController
+from rackki_interfaces.srv import SetTarget
 import os
 
 distro = os.environ["ROS_DISTRO"]
@@ -41,6 +42,14 @@ def generate_launch_description():
         parameters=[robot_description, controller_manager_config],
     )
 
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="screen",
+        parameters=[robot_description],
+    )
+
     def controller_spawner(name, *args):
         return Node(
             package="controller_manager",
@@ -49,7 +58,9 @@ def generate_launch_description():
             arguments=[name] + [a for a in args],
         )
 
-    active_list = []
+    active_list = [
+        "joint_state_broadcaster",
+    ]
     active_spawners = [controller_spawner(controller) for controller in active_list]
 
     inactive_list = [
@@ -62,7 +73,7 @@ def generate_launch_description():
         controller_spawner(controller, inactive_flag) for controller in inactive_list
     ]
 
-    nodes = [control_node] + active_spawners + inactive_spawners
+    nodes = [control_node, robot_state_publisher] + active_spawners + inactive_spawners
     return LaunchDescription(nodes)
 
 
@@ -98,6 +109,7 @@ class SkillControllerTests(unittest.TestCase):
         controller = "skill_controller"
         self.assertTrue(self.check_state(controller, "inactive"))
         for _ in range(3):
+            self.assertTrue(self.update_target("tool0"))
             self.start_controller(controller)
             self.assertTrue(self.check_state(controller, "active"))
             self.stop_controller(controller)
@@ -116,6 +128,12 @@ class SkillControllerTests(unittest.TestCase):
         )
         if not self.switch_controller.wait_for_service(timeout.nanoseconds / 1e9):
             self.fail("Service switch_controllers not available")
+
+        self.set_target = self.node.create_client(
+            SetTarget, "/skill_controller/set_target"
+        )
+        if not self.set_target.wait_for_service(timeout.nanoseconds / 1e9):
+            self.fail("Service set_target not available")
 
     def check_state(self, controller, state):
         req = ListControllers.Request()
@@ -146,3 +164,10 @@ class SkillControllerTests(unittest.TestCase):
         req.strictness = req.BEST_EFFORT
         future = self.switch_controller.call_async(req)
         rclpy.spin_until_future_complete(self.node, future)
+
+    def update_target(self, target):
+        req = SetTarget.Request()
+        req.tf_name = target
+        future = self.set_target.call_async(req)
+        rclpy.spin_until_future_complete(self.node, future)
+        return future.result().success
