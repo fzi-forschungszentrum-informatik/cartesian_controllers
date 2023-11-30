@@ -1,2 +1,3 @@
-# Ignore built models and their parameters
+# Ignore models and their parameters
 test/models/**
+models/**
