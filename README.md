@@ -9,26 +9,17 @@ This package contains
 - scripts and algorithmic implementations to learn skills from these data.
 
 ## Build and install
-We use MuJoCo with the [X11 OpenGL setting](https://mujoco.readthedocs.io/en/latest/programming.html#using-opengl) and
-need both [GLFW](https://www.glfw.org/) and [GLEW](http://glew.sourceforge.net/).
 
-1. Install them as system dependencies with
+1. Install dependencies
    ```bash
-   sudo apt-get install libglfw3-dev libglew-dev
-   ```
-   OpenGL itself should ship with recent Ubuntu OS.
-
-2. Download MuJoCo's most recent [release](https://github.com/deepmind/mujoco/releases/) and extract that somewhere.
-It's a ready-to-use, pre-built library package, and we will just point to it during the build.
-   ```bash
-   cd $HOME
-   wget https://github.com/deepmind/mujoco/releases/download/3.0.0/mujoco-3.0.0-linux-x86_64.tar.gz
-   tar -xf mujoco-3.0.0-linux-x86_64.tar.gz
+   ./.install_mujoco.sh  # required for simulation
+   ./.install_python_dependencies.sh  # required for training and serving models in python
+   ./.install_libtensorflow_cc.sh  # required for serving models in C++
    ```
 
-3. Switch to the *root* of your ROS2 workspace and build the package (*standalone*) with
+2. Switch to the *root* of your ROS2 workspace and build the package (*standalone*) with
    ```bash
-   colcon build --cmake-args "-DMUJOCO_DIR=$HOME/mujoco-3.0.0"  --packages-select rackki_learning
+   colcon build --packages-select rackki_learning
    ```
 
 ## Launching the simulation
