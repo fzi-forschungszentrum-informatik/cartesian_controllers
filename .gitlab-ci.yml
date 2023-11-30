@@ -1,5 +1,7 @@
 variables:
   BEFORE_BUILD_TARGET_WORKSPACE: "./.install_mujoco.sh && ./.install_python_dependencies.sh && ./.install_libtensorflow_cc.sh"
+  UPSTREAM_WORKSPACE: ".upstream_workspace.yaml"
+  ROSDEP_SKIP_KEYS: "rackki_interfaces"
 
 .build_matrix:
   parallel:

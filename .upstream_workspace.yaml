@@ -1,0 +1,7 @@
+repositories:
+
+  # Everything that rosdep will not install
+  rackki_interfaces:
+    type: git
+    url: git@ids-git.fzi.de:project-groups/rackki/rackki_interfaces.git
+    version: humble
