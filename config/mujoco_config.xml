@@ -29,8 +29,8 @@
         <asset>
 
                 <texture type="skybox" builtin="gradient" rgb1="0.9 0.9 0.9" rgb2="0.5 0.5 0.5" width="512" height="512"/>
-                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
-                <material name="matplane" reflectance="0.2" texture="texplane" texrepeat="1 1" texuniform="true"/>
+                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="128" height="128" mark="cross" markrgb=".8 .8 .8"/>
+                <material name="matplane" reflectance="0.0" texture="texplane" texrepeat="10 10" texuniform="true"/>
                 <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
                 <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
                 <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 0.991">
@@ -53,7 +53,7 @@
                 <!-- Controllable with user commands. -->
                 <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
-                        <joint name="free_joint" type="free" user="5000 9000 9000 200 200 200"/>
+                        <joint name="free_joint" type="free" user="5000 7000 7000 100 100 100"/>
                         <geom name="active_component" type="mesh" mesh="active_component" material="active_component">
                         </geom>
                 </body>
