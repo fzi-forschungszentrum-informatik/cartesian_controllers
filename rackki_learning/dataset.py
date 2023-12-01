@@ -10,11 +10,11 @@ from copy import copy
 
 
 class Dataset(object):
-    def __init__(self, directory_path: str) -> None:
+    def __init__(self, directory_path: str, sequence_length: int = 25) -> None:
         self.inputs = []
         self.labels = []
         self.input_scaling = {}
-        self.sequence_length = 7
+        self.sequence_length = sequence_length
 
         file_paths = []
         for root, subdirectories, files in os.walk(directory_path):
