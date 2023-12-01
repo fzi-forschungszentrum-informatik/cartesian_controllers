@@ -44,13 +44,14 @@ public:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
 private:
-  std::vector<std::pair<std::string, tensorflow::Tensor> > buildInputTensor();
+  void updateInputSequence();
   void updateJointStates();
   void cleanup();
   bool setTarget(const std::string& target);
 
   std::thread m_serving_thread;
   tensorflow::SavedModelBundleLite m_bundle;
+  std::deque<std::pair<std::string, tensorflow::Tensor> > m_input_sequence;
 
   std::vector<std::string> m_joint_names;
   KDL::JntArray m_joint_positions;

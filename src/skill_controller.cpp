@@ -6,6 +6,7 @@
 #include "rclcpp/logging.hpp"
 #include "urdf/model.h"
 #include <algorithm>
+#include <deque>
 #include <kdl/frames.hpp>
 #include <memory>
 #include <tensorflow/cc/ops/const_op.h>
@@ -45,6 +46,7 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
   auto_declare<double>("max_force", 30.0);
   auto_declare<double>("max_torque", 3.0);
+  auto_declare<int>("prediction_memory", 30);
   return CallbackReturn::SUCCESS;
 }
 
@@ -162,9 +164,12 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
   m_serving_thread = std::thread([this]() {
     while (m_active)
     {
-      auto inputs  = buildInputTensor();
+      updateInputSequence();
       auto outputs = std::vector<tensorflow::Tensor>();
-      auto status = m_bundle.GetSession()->Run(inputs, {"StatefulPartitionedCall:0"}, {}, &outputs);
+      auto status  = m_bundle.GetSession()->Run({m_input_sequence.begin(), m_input_sequence.end()},
+                                               {"StatefulPartitionedCall:0"},
+                                               {},
+                                               &outputs);
       if (status.ok())
       {
         float max_force  = std::abs(get_node()->get_parameter("max_force").as_double());
@@ -222,7 +227,7 @@ SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& pre
   return CallbackReturn::SUCCESS;
 }
 
-std::vector<std::pair<std::string, tensorflow::Tensor> > SkillController::buildInputTensor()
+void SkillController::updateInputSequence()
 {
   // Compute current end effector pose and velocity w.r.t the robot base link
   KDL::FrameVel end_effector;
@@ -266,7 +271,11 @@ std::vector<std::pair<std::string, tensorflow::Tensor> > SkillController::buildI
                                        }),
                                        input_shape);
 
-  return {{"serving_default_lstm_input:0", input.tensor}};
+  m_input_sequence.push_front({"serving_default_lstm_input:0", input.tensor});
+  if (m_input_sequence.size() > get_node()->get_parameter("prediction_memory").as_int())
+  {
+    m_input_sequence.pop_back();
+  }
 }
 
 void SkillController::updateJointStates()
@@ -293,6 +302,8 @@ void SkillController::cleanup()
   {
     m_serving_thread.join();
   }
+
+  m_input_sequence.clear();
 }
 
 bool SkillController::setTarget(const std::string& target)
