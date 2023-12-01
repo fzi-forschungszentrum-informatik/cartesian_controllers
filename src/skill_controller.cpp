@@ -289,14 +289,8 @@ void SkillController::updateJointStates()
 
 void SkillController::cleanup()
 {
+  m_active     = false;
   m_has_target = false;
-  if (m_active)
-  {
-    m_joint_state_pos_handles.clear();
-    m_joint_state_vel_handles.clear();
-    this->release_interfaces();
-    m_active = false;
-  }
 
   if (m_serving_thread.joinable())
   {
@@ -304,6 +298,9 @@ void SkillController::cleanup()
   }
 
   m_input_sequence.clear();
+  m_joint_state_pos_handles.clear();
+  m_joint_state_vel_handles.clear();
+  this->release_interfaces();
 }
 
 bool SkillController::setTarget(const std::string& target)
