@@ -19,6 +19,7 @@ class Model(object):
         self.model.add(LSTMEncoderLayer(self.n_nodes))
         self.model.add(MixtureDensityLayer(self.n_gaussians))
         self.model.add(PredictionLayer(self.n_gaussians))
+        self.input_scaling = {}
 
     def train(
         self,
@@ -35,6 +36,7 @@ class Model(object):
             optimizer=tf.keras.optimizers.Adam(learning_rate),
             loss=NegLogLikelihood(self.n_gaussians),
         )
+        self.input_scaling = training_data.input_scaling
         writer = tf.summary.create_file_writer(log_dir)
         with writer.as_default():
             for step in range(1, training_iterations):
@@ -58,4 +60,7 @@ class Model(object):
 
     def save(self, model_dir: str) -> bool:
         self.model.save(model_dir, save_format="tf")
+        with open(os.path.join(model_dir, "input_scaling.yaml"), "w") as f:
+            f.write(f"mean: {self.input_scaling['mean']}\n")
+            f.write(f"sigma: {self.input_scaling['sigma']}\n")
         return True

@@ -52,6 +52,8 @@ private:
   std::thread m_serving_thread;
   tensorflow::SavedModelBundleLite m_bundle;
   std::deque<std::pair<std::string, tensorflow::Tensor> > m_input_sequence;
+  std::vector<double> m_mean;
+  std::vector<double> m_sigma;
 
   std::vector<std::string> m_joint_names;
   KDL::JntArray m_joint_positions;
