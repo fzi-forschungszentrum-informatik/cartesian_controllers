@@ -137,7 +137,7 @@ install(
 )
 
 install(PROGRAMS
-  scripts/model.py
+  scripts/serve_model.py
   scripts/teach_device.py
   DESTINATION lib/${PROJECT_NAME}
 )
