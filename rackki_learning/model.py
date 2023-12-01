@@ -6,6 +6,9 @@ from rackki_learning.components import (
     PredictionLayer,
     NegLogLikelihood,
 )
+import os
+from os.path import expanduser
+from datetime import datetime
 
 
 class Model(object):
@@ -24,28 +27,33 @@ class Model(object):
         training_iterations: int = 20,
         batch_size: int = 10,
         learning_rate: float = 0.0005,
+        log_dir: str = os.path.join(
+            expanduser("~"), "tensorboard", datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        ),
     ) -> bool:
         self.model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate),
             loss=NegLogLikelihood(self.n_gaussians),
         )
+        writer = tf.summary.create_file_writer(log_dir)
+        with writer.as_default():
+            for step in range(1, training_iterations):
+                x_train, y_train = training_data.get_batch(batch_size)
+                loss = self.model.train_on_batch(x=x_train, y=y_train)
 
-        for step in range(1, training_iterations):
-            x_train, y_train = training_data.get_batch(batch_size)
-            loss = self.model.train_on_batch(x=x_train, y=y_train)
+                if step % 10 == 0:
+                    x_eval, y_eval = evaluation_data.get_batch(batch_size)
+                    y_pred = self.model.predict_on_batch(x=x_eval)
+                    accuracy = tf.reduce_mean(
+                        tf.keras.losses.MSE(y_true=y_eval, y_pred=y_pred)
+                    )
+                    tf.summary.scalar("training_loss", data=loss, step=step)
+                    tf.summary.scalar("evaluation_accuracy", data=accuracy, step=step)
+                    writer.flush()
 
-            if step % 10 == 0:
-                x_eval, y_eval = evaluation_data.get_batch(batch_size)
-
-                y_pred = self.model.predict_on_batch(x=x_eval)
-                accuracy = tf.reduce_mean(
-                    tf.keras.losses.MSE(y_true=y_eval, y_pred=y_pred)
+                print(
+                    f" {str(step)} / {str(training_iterations)}", end="\r", flush=True
                 )
-
-                tf.summary.scalar("training_loss", data=loss, step=step)
-                tf.summary.scalar("evaluation_accuracy", data=accuracy, step=step)
-
-            print(f" {str(step)} / {str(training_iterations)}", end="\r", flush=True)
         return True
 
     def save(self, model_dir: str) -> bool:
