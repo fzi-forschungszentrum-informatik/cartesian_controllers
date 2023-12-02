@@ -8,6 +8,8 @@ from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import TwistStamped
 from geometry_msgs.msg import WrenchStamped
 from collections import deque
+import yaml
+import os
 
 
 class Server(Node):
@@ -17,6 +19,11 @@ class Server(Node):
         self.prediction_memory = self.declare_parameter("prediction_memory", 30).value
         self.model_dir = self.declare_parameter("model_dir", "").value
         self.model = tf.keras.models.load_model(self.model_dir)
+        with open(os.path.join(self.model_dir, "input_scaling.yaml")) as f:
+            self.feature_scaling = yaml.load(f, Loader=yaml.SafeLoader)
+        self.mean = self.feature_scaling["mean"]
+        self.sigma = self.feature_scaling["sigma"]
+
         self.current_pose = PoseStamped()
         self.current_twist = TwistStamped()
         self.target_wrench = WrenchStamped()
@@ -54,25 +61,27 @@ class Server(Node):
 
     def update_input_sequence(self):
         point = [0.0 for i in range(19)]
-        point[0] = self.current_pose.pose.position.x
-        point[1] = self.current_pose.pose.position.y
-        point[2] = self.current_pose.pose.position.z
-        point[3] = self.current_pose.pose.orientation.x
-        point[4] = self.current_pose.pose.orientation.y
-        point[5] = self.current_pose.pose.orientation.z
-        point[6] = self.current_pose.pose.orientation.w
-        point[7] = self.current_twist.twist.linear.x
-        point[8] = self.current_twist.twist.linear.y
-        point[9] = self.current_twist.twist.linear.z
-        point[10] = self.current_twist.twist.angular.x
-        point[11] = self.current_twist.twist.angular.y
-        point[12] = self.current_twist.twist.angular.z
-        point[13] = self.target_wrench.wrench.force.x
-        point[14] = self.target_wrench.wrench.force.y
-        point[15] = self.target_wrench.wrench.force.z
-        point[16] = self.target_wrench.wrench.torque.x
-        point[17] = self.target_wrench.wrench.torque.y
-        point[18] = self.target_wrench.wrench.torque.z
+        # fmt: off
+        point[0] = (self.current_pose.pose.position.x - self.mean[0]) / self.sigma[0]
+        point[1] = (self.current_pose.pose.position.y - self.mean[1]) / self.sigma[1]
+        point[2] = (self.current_pose.pose.position.z - self.mean[2]) / self.sigma[2]
+        point[3] = (self.current_pose.pose.orientation.x - self.mean[3]) / self.sigma[3]
+        point[4] = (self.current_pose.pose.orientation.y - self.mean[4]) / self.sigma[4]
+        point[5] = (self.current_pose.pose.orientation.z - self.mean[5]) / self.sigma[5]
+        point[6] = (self.current_pose.pose.orientation.w - self.mean[6]) / self.sigma[6]
+        point[7] = (self.current_twist.twist.linear.x - self.mean[7]) / self.sigma[7]
+        point[8] = (self.current_twist.twist.linear.y - self.mean[8]) / self.sigma[8]
+        point[9] = (self.current_twist.twist.linear.z - self.mean[9]) / self.sigma[9]
+        point[10] = (self.current_twist.twist.angular.x - self.mean[10]) / self.sigma[10]  # noqa: E501
+        point[11] = (self.current_twist.twist.angular.y - self.mean[11]) / self.sigma[11]  # noqa: E501
+        point[12] = (self.current_twist.twist.angular.z - self.mean[12]) / self.sigma[12]  # noqa: E501
+        point[13] = (self.target_wrench.wrench.force.x - self.mean[13]) / self.sigma[13]
+        point[14] = (self.target_wrench.wrench.force.y - self.mean[14]) / self.sigma[14]
+        point[15] = (self.target_wrench.wrench.force.z - self.mean[15]) / self.sigma[15]
+        point[16] = (self.target_wrench.wrench.torque.x - self.mean[16]) / self.sigma[16]  # noqa: E501
+        point[17] = (self.target_wrench.wrench.torque.y - self.mean[17]) / self.sigma[17]  # noqa: E501
+        point[18] = (self.target_wrench.wrench.torque.z - self.mean[18]) / self.sigma[18]  # noqa: E501
+        # fmt: on
         self.input_sequence.appendleft(point)
         if len(self.input_sequence) > self.prediction_memory:
             self.input_sequence.pop()
