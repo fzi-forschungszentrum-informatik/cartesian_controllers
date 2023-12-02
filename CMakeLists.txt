@@ -15,6 +15,7 @@ find_package(urdf REQUIRED)
 find_package(rackki_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 # GLFW
 # With PkgConfig is the official way: https://www.glfw.org/docs/3.0/build.html#build_link_cmake_pkgconfig
@@ -114,6 +115,7 @@ ament_target_dependencies(skill_controller
         )
 target_link_libraries(skill_controller
         ${TENSORFLOW_LIBRARIES}
+        yaml-cpp
 )
 
 #--------------------------------------------------------------------------------
@@ -137,8 +139,9 @@ install(
 )
 
 install(PROGRAMS
-  scripts/model.py
+  scripts/serve_model.py
   scripts/teach_device.py
+  scripts/train_model.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

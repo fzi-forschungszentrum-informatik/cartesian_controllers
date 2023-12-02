@@ -5,6 +5,7 @@
 #include "kdl_parser/kdl_parser.hpp"
 #include "rclcpp/logging.hpp"
 #include "urdf/model.h"
+#include "yaml-cpp/yaml.h"
 #include <algorithm>
 #include <deque>
 #include <kdl/frames.hpp>
@@ -100,6 +101,32 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
   if (m_joint_names.empty())
   {
     RCLCPP_ERROR(get_node()->get_logger(), "No joints specified");
+    return CallbackReturn::ERROR;
+  }
+
+  try
+  {
+    auto config = YAML::LoadFile(model_path + "/input_scaling.yaml");
+    for (const auto& entry : config["mean"])
+    {
+      m_mean.emplace_back(entry.as<double>());
+    }
+    for (const auto& entry : config["sigma"])
+    {
+      m_sigma.emplace_back(entry.as<double>());
+    }
+  }
+  catch (const YAML::Exception& e)
+  {
+    RCLCPP_ERROR(get_node()->get_logger(), "Failed to load input scaling from file: %s", e.what());
+    return CallbackReturn::ERROR;
+  }
+  if (m_mean.size() != 19 || m_sigma.size() != 19)
+  {
+    RCLCPP_ERROR(get_node()->get_logger(),
+                 "Wrong size of input scaling: mean: %lu, sigma: %lu",
+                 m_mean.size(),
+                 m_sigma.size());
     return CallbackReturn::ERROR;
   }
 
@@ -248,28 +275,29 @@ void SkillController::updateInputSequence()
   current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
 
   auto input_shape = tensorflow::TensorShape({1, 1, 19});
-  tensorflow::Input::Initializer input(std::initializer_list<float>({
-                                         static_cast<float>(current_pose.p.x()),
-                                         static_cast<float>(current_pose.p.y()),
-                                         static_cast<float>(current_pose.p.z()),
-                                         static_cast<float>(current_pose_qx),
-                                         static_cast<float>(current_pose_qy),
-                                         static_cast<float>(current_pose_qz),
-                                         static_cast<float>(current_pose_qw),
-                                         static_cast<float>(current_twist.vel.x()),
-                                         static_cast<float>(current_twist.vel.y()),
-                                         static_cast<float>(current_twist.vel.z()),
-                                         static_cast<float>(current_twist.rot.x()),
-                                         static_cast<float>(current_twist.rot.y()),
-                                         static_cast<float>(current_twist.rot.z()),
-                                         static_cast<float>(m_target_wrench.wrench.force.x),
-                                         static_cast<float>(m_target_wrench.wrench.force.y),
-                                         static_cast<float>(m_target_wrench.wrench.force.z),
-                                         static_cast<float>(m_target_wrench.wrench.torque.x),
-                                         static_cast<float>(m_target_wrench.wrench.torque.y),
-                                         static_cast<float>(m_target_wrench.wrench.torque.z),
-                                       }),
-                                       input_shape);
+  tensorflow::Input::Initializer input(
+    std::initializer_list<float>({
+      static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
+      static_cast<float>((current_pose.p.y() - m_mean[1]) / m_sigma[1]),
+      static_cast<float>((current_pose.p.z() - m_mean[2]) / m_sigma[2]),
+      static_cast<float>((current_pose_qx - m_mean[3]) / m_sigma[3]),
+      static_cast<float>((current_pose_qy - m_mean[4]) / m_sigma[4]),
+      static_cast<float>((current_pose_qz - m_mean[5]) / m_sigma[5]),
+      static_cast<float>((current_pose_qw - m_mean[6]) / m_sigma[6]),
+      static_cast<float>((current_twist.vel.x() - m_mean[7]) / m_sigma[7]),
+      static_cast<float>((current_twist.vel.y() - m_mean[8]) / m_sigma[8]),
+      static_cast<float>((current_twist.vel.z() - m_mean[9]) / m_sigma[9]),
+      static_cast<float>((current_twist.rot.x() - m_mean[10]) / m_sigma[10]),
+      static_cast<float>((current_twist.rot.y() - m_mean[11]) / m_sigma[11]),
+      static_cast<float>((current_twist.rot.z() - m_mean[12]) / m_sigma[12]),
+      static_cast<float>((m_target_wrench.wrench.force.x - m_mean[13]) / m_sigma[13]),
+      static_cast<float>((m_target_wrench.wrench.force.y - m_mean[14]) / m_sigma[14]),
+      static_cast<float>((m_target_wrench.wrench.force.z - m_mean[15]) / m_sigma[15]),
+      static_cast<float>((m_target_wrench.wrench.torque.x - m_mean[16]) / m_sigma[16]),
+      static_cast<float>((m_target_wrench.wrench.torque.y - m_mean[17]) / m_sigma[17]),
+      static_cast<float>((m_target_wrench.wrench.torque.z - m_mean[18]) / m_sigma[18]),
+    }),
+    input_shape);
 
   m_input_sequence.push_front({"serving_default_lstm_input:0", input.tensor});
   if (m_input_sequence.size() > get_node()->get_parameter("prediction_memory").as_int())

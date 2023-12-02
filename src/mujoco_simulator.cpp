@@ -16,6 +16,7 @@
 #include "geometry_msgs/msg/detail/twist_stamped__struct.hpp"
 #include <filesystem>
 #include <memory>
+#include <random>
 #include <vector>
 
 namespace rackki_learning {
@@ -84,8 +85,31 @@ void MuJoCoSimulator::keyboardCBImpl([[maybe_unused]] GLFWwindow* window,
   if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
   {
     mj_resetData(m, d);
-    mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
+    if (!m_starting_poses.empty())
+    {
+      auto device  = std::random_device();
+      auto random  = std::default_random_engine(device());
+      auto indices = std::uniform_int_distribution<std::size_t>(0, m_starting_poses.size() - 1);
+      auto idx     = indices(random);
+      auto pose    = m_starting_poses[idx];
+      mju_copy(d->qpos, pose.data(), 7);
+    }
+    else
+    {
+      mju_copy(d->qpos, m->key_qpos, 7); // initial states from xml
+    }
+    command_mutex.lock();
+    m_target_wrench = {0, 0, 0, 0, 0, 0};
+    command_mutex.unlock();
     mj_forward(m, d);
+  }
+
+  // GLFW_KEY_SPACE: record current pose
+  if (act == GLFW_PRESS && key == GLFW_KEY_SPACE)
+  {
+    std::array<double, 7> pose;
+    mju_copy(pose.data(), d->qpos, 7);
+    m_starting_poses.emplace_back(pose);
   }
 }
 
@@ -343,9 +367,7 @@ int MuJoCoSimulator::simulateImpl()
 
     if (m_reset_simulation)
     {
-      mj_resetData(m, d);
-      mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
-      mj_forward(m, d);
+      getInstance().keyboardCBImpl(nullptr, GLFW_KEY_BACKSPACE, 0, GLFW_PRESS, 0);
       m_reset_simulation = false;
     }
   }

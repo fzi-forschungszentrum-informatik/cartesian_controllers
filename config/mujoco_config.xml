@@ -8,8 +8,8 @@
         <option>
                 <flag gravity="disable" override="enable"/>
         </option>
-        <option o_solimp="0.0 0.9 0.001 0.5 2" o_solref="0.001 1"/>
-        <option sdf_iterations="10" sdf_initpoints="20"/>
+        <option o_solimp="0.0 0.999 0.001 0.1 1" o_solref="-100000 -10000"/>
+        <option timestep="0.005" integrator="implicitfast" sdf_iterations="10" sdf_initpoints="20"/>
         <extension>
                 <plugin plugin="mujoco.sdf.sdflib">
                         <instance name="sdf">
@@ -29,11 +29,11 @@
         <asset>
 
                 <texture type="skybox" builtin="gradient" rgb1="0.9 0.9 0.9" rgb2="0.5 0.5 0.5" width="512" height="512"/>
-                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
-                <material name="matplane" reflectance="0.2" texture="texplane" texrepeat="1 1" texuniform="true"/>
+                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="128" height="128" mark="cross" markrgb=".8 .8 .8"/>
+                <material name="matplane" reflectance="0.0" texture="texplane" texrepeat="10 10" texuniform="true"/>
                 <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
                 <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
-                <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 0.991">
+                <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 1.0">
                         <plugin instance="sdf"/>
                 </mesh>
                 <mesh name="active_component" file="active_component.stl">
@@ -53,7 +53,7 @@
                 <!-- Controllable with user commands. -->
                 <body name="active_component">
                         <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
-                        <joint name="free_joint" type="free" user="5000 9000 9000 200 200 200"/>
+                        <joint name="free_joint" type="free" user="3000 3000 3000 100 100 100"/>
                         <geom name="active_component" type="mesh" mesh="active_component" material="active_component">
                         </geom>
                 </body>

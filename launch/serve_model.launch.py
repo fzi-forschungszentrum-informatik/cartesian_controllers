@@ -15,7 +15,7 @@ def generate_launch_description():
             arg_model_dir,
             Node(
                 package="rackki_learning",
-                executable="model.py",
+                executable="serve_model.py",
                 name="model",
                 output="screen",
                 emulate_tty=True,
