@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <array>
 #include <atomic>
 #include <cstdio>
 #include <cstring>
@@ -107,6 +108,7 @@ public:
 
   // Buffers for data exchange with ROS2
   std::vector<double> m_target_wrench = {0, 0, 0, 0, 0, 0};
+  std::vector<std::array<double, 7> > m_starting_poses;
 
   // Safety guards for buffers
   std::mutex command_mutex;
