@@ -85,6 +85,9 @@ void MuJoCoSimulator::keyboardCBImpl([[maybe_unused]] GLFWwindow* window,
   {
     mj_resetData(m, d);
     mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
+    command_mutex.lock();
+    m_target_wrench = {0, 0, 0, 0, 0, 0};
+    command_mutex.unlock();
     mj_forward(m, d);
   }
 }
@@ -343,9 +346,7 @@ int MuJoCoSimulator::simulateImpl()
 
     if (m_reset_simulation)
     {
-      mj_resetData(m, d);
-      mju_copy(d->qpos, m->key_qpos, m->nq); // initial states from xml
-      mj_forward(m, d);
+      getInstance().keyboardCBImpl(nullptr, GLFW_KEY_BACKSPACE, 0, GLFW_PRESS, 0);
       m_reset_simulation = false;
     }
   }
