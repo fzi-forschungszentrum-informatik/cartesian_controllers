@@ -53,11 +53,12 @@ class PredictionLayer(Layer):
     def __init__(self, n_gaussians, **kwargs):
         with tf.name_scope("prediction"):
             self.n_gaussians = n_gaussians
+            self.testing = False
             super().__init__(name="prediction", **kwargs)
 
     def call(self, mixture_params, training=None, **kwargs):
         with tf.name_scope("prediction"):
-            if training:
+            if training or self.testing:
                 return mixture_params
             else:
                 gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)

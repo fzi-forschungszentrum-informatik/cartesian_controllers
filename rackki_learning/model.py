@@ -21,6 +21,9 @@ class Model(object):
         self.model.add(PredictionLayer(self.n_gaussians))
         self.input_scaling = {}
 
+    def set_testing(self, flag: bool):
+        self.model.get_layer("prediction").testing = flag
+
     def train(
         self,
         training_data: Dataset,
@@ -44,12 +47,16 @@ class Model(object):
                 loss = self.model.train_on_batch(x=x_train, y=y_train)
 
                 if step % 10 == 0:
-                    x_eval, y_eval = evaluation_data.get_batch(batch_size)
+                    x_eval, y_eval = evaluation_data.get_batch(minibatch_size=1)
+                    self.set_testing(True)
+                    loss_eval = self.model.test_on_batch(x=x_eval, y=y_eval)
+                    self.set_testing(False)
                     y_pred = self.model.predict_on_batch(x=x_eval)
                     accuracy = tf.reduce_mean(
                         tf.keras.losses.MSE(y_true=y_eval, y_pred=y_pred)
                     )
                     tf.summary.scalar("training_loss", data=loss, step=step)
+                    tf.summary.scalar("evaluation_loss", data=loss_eval, step=step)
                     tf.summary.scalar("evaluation_accuracy", data=accuracy, step=step)
                     writer.flush()
 
