@@ -60,7 +60,7 @@ class Server(Node):
         self.current_twist = twist_msg
 
     def update_input_sequence(self):
-        point = [0.0 for i in range(13)]
+        point = [0.0 for i in range(7)]
         # fmt: off
         point[0] = (self.current_pose.pose.position.x - self.mean[0]) / self.sigma[0]
         point[1] = (self.current_pose.pose.position.y - self.mean[1]) / self.sigma[1]
@@ -69,12 +69,6 @@ class Server(Node):
         point[4] = (self.current_pose.pose.orientation.y - self.mean[4]) / self.sigma[4]
         point[5] = (self.current_pose.pose.orientation.z - self.mean[5]) / self.sigma[5]
         point[6] = (self.current_pose.pose.orientation.w - self.mean[6]) / self.sigma[6]
-        point[7] = (self.current_twist.twist.linear.x - self.mean[7]) / self.sigma[7]
-        point[8] = (self.current_twist.twist.linear.y - self.mean[8]) / self.sigma[8]
-        point[9] = (self.current_twist.twist.linear.z - self.mean[9]) / self.sigma[9]
-        point[10] = (self.current_twist.twist.angular.x - self.mean[10]) / self.sigma[10]  # noqa: E501
-        point[11] = (self.current_twist.twist.angular.y - self.mean[11]) / self.sigma[11]  # noqa: E501
-        point[12] = (self.current_twist.twist.angular.z - self.mean[12]) / self.sigma[12]  # noqa: E501
         # fmt: on
         self.input_sequence.appendleft(point)
         if len(self.input_sequence) > self.prediction_memory:

@@ -25,11 +25,9 @@ TEST(rackki_learning, test_prediction)
 
   // Check the available input and output tensor names with:
   // saved_model_cli show --dir model_1 --all
-  auto input_shape = tensorflow::TensorShape({1, 1, 13});
+  auto input_shape = tensorflow::TensorShape({1, 1, 7});
   tensorflow::Input::Initializer input(
-    std::initializer_list<float>(
-      {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0}),
-    input_shape);
+    std::initializer_list<float>({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}), input_shape);
 
   std::vector<std::pair<std::string, tensorflow::Tensor> > inputs = {
     {"serving_default_lstm_input:0", input.tensor}};
