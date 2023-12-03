@@ -121,7 +121,7 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to load input scaling from file: %s", e.what());
     return CallbackReturn::ERROR;
   }
-  if (m_mean.size() != 19 || m_sigma.size() != 19)
+  if (m_mean.size() != 13 || m_sigma.size() != 13)
   {
     RCLCPP_ERROR(get_node()->get_logger(),
                  "Wrong size of input scaling: mean: %lu, sigma: %lu",
@@ -199,17 +199,18 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
                                                &outputs);
       if (status.ok())
       {
-        float max_force  = std::abs(get_node()->get_parameter("max_force").as_double());
-        float max_torque = std::abs(get_node()->get_parameter("max_torque").as_double());
-        auto values      = outputs[0].flat<float>();
-        m_target_wrench.header.stamp    = this->get_node()->now();
-        m_target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
-        m_target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
-        m_target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
-        m_target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
-        m_target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
-        m_target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
-        m_target_wrench_publisher->publish(m_target_wrench);
+        float max_force            = std::abs(get_node()->get_parameter("max_force").as_double());
+        float max_torque           = std::abs(get_node()->get_parameter("max_torque").as_double());
+        auto values                = outputs[0].flat<float>();
+        auto target_wrench         = geometry_msgs::msg::WrenchStamped();
+        target_wrench.header.stamp = this->get_node()->now();
+        target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
+        target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
+        target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
+        target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
+        target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
+        target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
+        m_target_wrench_publisher->publish(target_wrench);
       }
       else
       {
@@ -274,7 +275,7 @@ void SkillController::updateInputSequence()
   double current_pose_qw;
   current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
 
-  auto input_shape = tensorflow::TensorShape({1, 1, 19});
+  auto input_shape = tensorflow::TensorShape({1, 1, 13});
   tensorflow::Input::Initializer input(
     std::initializer_list<float>({
       static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
@@ -290,12 +291,6 @@ void SkillController::updateInputSequence()
       static_cast<float>((current_twist.rot.x() - m_mean[10]) / m_sigma[10]),
       static_cast<float>((current_twist.rot.y() - m_mean[11]) / m_sigma[11]),
       static_cast<float>((current_twist.rot.z() - m_mean[12]) / m_sigma[12]),
-      static_cast<float>((m_target_wrench.wrench.force.x - m_mean[13]) / m_sigma[13]),
-      static_cast<float>((m_target_wrench.wrench.force.y - m_mean[14]) / m_sigma[14]),
-      static_cast<float>((m_target_wrench.wrench.force.z - m_mean[15]) / m_sigma[15]),
-      static_cast<float>((m_target_wrench.wrench.torque.x - m_mean[16]) / m_sigma[16]),
-      static_cast<float>((m_target_wrench.wrench.torque.y - m_mean[17]) / m_sigma[17]),
-      static_cast<float>((m_target_wrench.wrench.torque.z - m_mean[18]) / m_sigma[18]),
     }),
     input_shape);
 

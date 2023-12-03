@@ -15,8 +15,8 @@ import os
 class Server(Node):
     def __init__(self):
         super().__init__("server")
-        self.prediction_rate = self.declare_parameter("prediction_rate", 5).value
-        self.prediction_memory = self.declare_parameter("prediction_memory", 30).value
+        self.prediction_rate = self.declare_parameter("prediction_rate", 25).value
+        self.prediction_memory = self.declare_parameter("prediction_memory", 25).value
         self.model_dir = self.declare_parameter("model_dir", "").value
         self.model = tf.keras.models.load_model(self.model_dir)
         with open(os.path.join(self.model_dir, "input_scaling.yaml")) as f:
@@ -26,7 +26,6 @@ class Server(Node):
 
         self.current_pose = PoseStamped()
         self.current_twist = TwistStamped()
-        self.target_wrench = WrenchStamped()
         self.target_wrench_pub = self.create_publisher(
             WrenchStamped, "/target_wrench", 1
         )
@@ -46,21 +45,22 @@ class Server(Node):
         input_data = tf.constant([list(self.input_sequence)], dtype=tf.float32)
         output = self.model.signatures["serving_default"](lstm_input=input_data)
         result = output["prediction"].numpy().tolist()[0]
-        self.target_wrench.header.stamp = self.get_clock().now().to_msg()
-        self.target_wrench.wrench.force.x = result[0]
-        self.target_wrench.wrench.force.y = result[1]
-        self.target_wrench.wrench.force.z = result[2]
-        self.target_wrench.wrench.torque.x = result[3]
-        self.target_wrench.wrench.torque.y = result[4]
-        self.target_wrench.wrench.torque.z = result[5]
-        self.target_wrench_pub.publish(self.target_wrench)
+        target_wrench = WrenchStamped()
+        target_wrench.header.stamp = self.get_clock().now().to_msg()
+        target_wrench.wrench.force.x = result[0]
+        target_wrench.wrench.force.y = result[1]
+        target_wrench.wrench.force.z = result[2]
+        target_wrench.wrench.torque.x = result[3]
+        target_wrench.wrench.torque.y = result[4]
+        target_wrench.wrench.torque.z = result[5]
+        self.target_wrench_pub.publish(target_wrench)
 
     def msg_callback(self, pose_msg, twist_msg):
         self.current_pose = pose_msg
         self.current_twist = twist_msg
 
     def update_input_sequence(self):
-        point = [0.0 for i in range(19)]
+        point = [0.0 for i in range(13)]
         # fmt: off
         point[0] = (self.current_pose.pose.position.x - self.mean[0]) / self.sigma[0]
         point[1] = (self.current_pose.pose.position.y - self.mean[1]) / self.sigma[1]
@@ -75,12 +75,6 @@ class Server(Node):
         point[10] = (self.current_twist.twist.angular.x - self.mean[10]) / self.sigma[10]  # noqa: E501
         point[11] = (self.current_twist.twist.angular.y - self.mean[11]) / self.sigma[11]  # noqa: E501
         point[12] = (self.current_twist.twist.angular.z - self.mean[12]) / self.sigma[12]  # noqa: E501
-        point[13] = (self.target_wrench.wrench.force.x - self.mean[13]) / self.sigma[13]
-        point[14] = (self.target_wrench.wrench.force.y - self.mean[14]) / self.sigma[14]
-        point[15] = (self.target_wrench.wrench.force.z - self.mean[15]) / self.sigma[15]
-        point[16] = (self.target_wrench.wrench.torque.x - self.mean[16]) / self.sigma[16]  # noqa: E501
-        point[17] = (self.target_wrench.wrench.torque.y - self.mean[17]) / self.sigma[17]  # noqa: E501
-        point[18] = (self.target_wrench.wrench.torque.z - self.mean[18]) / self.sigma[18]  # noqa: E501
         # fmt: on
         self.input_sequence.appendleft(point)
         if len(self.input_sequence) > self.prediction_memory:

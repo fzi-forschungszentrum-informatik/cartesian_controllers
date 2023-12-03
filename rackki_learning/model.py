@@ -47,7 +47,7 @@ class Model(object):
                 loss = self.model.train_on_batch(x=x_train, y=y_train)
 
                 if step % 10 == 0:
-                    x_eval, y_eval = evaluation_data.get_batch(minibatch_size=1)
+                    x_eval, y_eval = evaluation_data.get_batch(batch_size)
                     self.set_testing(True)
                     loss_eval = self.model.test_on_batch(x=x_eval, y=y_eval)
                     self.set_testing(False)

@@ -58,7 +58,6 @@ private:
   std::vector<std::string> m_joint_names;
   KDL::JntArray m_joint_positions;
   KDL::JntArray m_joint_velocities;
-  geometry_msgs::msg::WrenchStamped m_target_wrench;
   std::mutex m_joint_mutex;
   KDL::Frame m_target_pose;
   std::mutex m_target_mutex;
