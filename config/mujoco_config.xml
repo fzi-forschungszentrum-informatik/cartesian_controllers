@@ -40,7 +40,10 @@
                 </mesh>
         </asset>
         <worldbody>
-                <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+                <light name="sun" directional="true" diffuse=".4 .4 .4" specular=".1 .1 .1" pos="0 0 100" dir="-0.1 -0.1 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="0 1 5" dir="0 -0.2 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="0 -1 5" dir="0 0.2 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="1 0 5" dir="-0.2 0 -1" castshadow="true"/>
                 <geom name="floor" pos="0 0 -0.10" size="0 0 1" type="plane" material="matplane"/>
 
                 <!-- Fixed with the world -->
