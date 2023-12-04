@@ -8,6 +8,7 @@
 #include "urdf/model.h"
 #include "yaml-cpp/yaml.h"
 #include <algorithm>
+#include <chrono>
 #include <deque>
 #include <kdl/frames.hpp>
 #include <memory>
@@ -48,6 +49,7 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<double>("max_force", 30.0);
   auto_declare<double>("max_torque", 3.0);
   auto_declare<int>("prediction_memory", 30);
+  auto_declare<int>("prediction_rate", 10);
   return CallbackReturn::SUCCESS;
 }
 
@@ -198,6 +200,10 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
         target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
         target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
         m_target_wrench_publisher->publish(target_wrench);
+        using namespace std::chrono;
+        auto interval = round<milliseconds>(
+          duration<double>(1.0 / get_node()->get_parameter("prediction_rate").as_int()));
+        std::this_thread::sleep_for(interval);
       }
       else
       {
