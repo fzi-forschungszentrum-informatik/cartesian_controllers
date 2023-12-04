@@ -15,7 +15,7 @@ import os
 class Server(Node):
     def __init__(self):
         super().__init__("server")
-        self.prediction_rate = self.declare_parameter("prediction_rate", 25).value
+        self.prediction_rate = self.declare_parameter("prediction_rate", 10).value
         self.prediction_memory = self.declare_parameter("prediction_memory", 25).value
         self.model_dir = self.declare_parameter("model_dir", "").value
         self.model = tf.keras.models.load_model(self.model_dir)
@@ -61,7 +61,6 @@ class Server(Node):
 
     def update_input_sequence(self):
         point = [0.0 for i in range(7)]
-        # fmt: off
         point[0] = (self.current_pose.pose.position.x - self.mean[0]) / self.sigma[0]
         point[1] = (self.current_pose.pose.position.y - self.mean[1]) / self.sigma[1]
         point[2] = (self.current_pose.pose.position.z - self.mean[2]) / self.sigma[2]
@@ -69,7 +68,6 @@ class Server(Node):
         point[4] = (self.current_pose.pose.orientation.y - self.mean[4]) / self.sigma[4]
         point[5] = (self.current_pose.pose.orientation.z - self.mean[5]) / self.sigma[5]
         point[6] = (self.current_pose.pose.orientation.w - self.mean[6]) / self.sigma[6]
-        # fmt: on
         self.input_sequence.appendleft(point)
         if len(self.input_sequence) > self.prediction_memory:
             self.input_sequence.pop()

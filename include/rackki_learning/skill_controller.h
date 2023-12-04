@@ -4,6 +4,7 @@
 #include "controller_interface/controller_interface.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "kdl/chain.hpp"
+#include "kdl/chainfksolver.hpp"
 #include "rackki_interfaces/srv/set_target.hpp"
 #include "tf2/exceptions.h"
 #include "tf2_ros/buffer.h"
@@ -11,7 +12,7 @@
 #include <array>
 #include <atomic>
 #include <hardware_interface/loaned_state_interface.hpp>
-#include <kdl/chainfksolvervel_recursive.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/frames.hpp>
 #include <mutex>
 #include <tensorflow/cc/saved_model/loader.h>
@@ -57,7 +58,6 @@ private:
 
   std::vector<std::string> m_joint_names;
   KDL::JntArray m_joint_positions;
-  KDL::JntArray m_joint_velocities;
   std::mutex m_joint_mutex;
   KDL::Frame m_target_pose;
   std::mutex m_target_mutex;
@@ -69,11 +69,9 @@ private:
 
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
     m_joint_state_pos_handles;
-  std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
-    m_joint_state_vel_handles;
 
   KDL::Chain m_robot_chain;
-  std::unique_ptr<KDL::ChainFkSolverVel_recursive> m_end_effector_solver;
+  std::unique_ptr<KDL::ChainFkSolverPos_recursive> m_end_effector_solver;
   std::atomic<bool> m_active = false;
 };
 
