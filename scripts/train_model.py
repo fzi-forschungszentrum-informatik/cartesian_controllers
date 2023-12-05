@@ -5,12 +5,13 @@ from rackki_learning.model import Model
 
 
 def main():
-    data_path = os.path.join(os.getcwd(), "../datasets/put")
-    training_data = Dataset(data_path, sequence_length=25)
-    evaluation_data = Dataset(data_path, sequence_length=25)
-    model = Model(n_nodes=50, n_gaussians=5)
+    training_files = os.path.join(os.getcwd(), "../datasets/put/train")
+    evaluation_files = os.path.join(os.getcwd(), "../datasets/put/eval")
+    training_data = Dataset(training_files, sequence_length=25)
+    evaluation_data = Dataset(evaluation_files, sequence_length=25)
+    model = Model(n_nodes=150, n_gaussians=4)
     model.train(
-        training_data, evaluation_data, training_iterations=10000, batch_size=128
+        training_data, evaluation_data, training_iterations=20000, batch_size=128
     )
 
     model_dir = os.path.join(os.getcwd(), "../models/put")

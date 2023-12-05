@@ -1,12 +1,14 @@
 #include "rackki_learning/skill_controller.h"
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include "kdl/chainfksolverpos_recursive.hpp"
 #include "kdl/tree.hpp"
 #include "kdl_parser/kdl_parser.hpp"
 #include "rclcpp/logging.hpp"
 #include "urdf/model.h"
 #include "yaml-cpp/yaml.h"
 #include <algorithm>
+#include <chrono>
 #include <deque>
 #include <kdl/frames.hpp>
 #include <memory>
@@ -33,7 +35,6 @@ controller_interface::InterfaceConfiguration SkillController::state_interface_co
   for (const auto& joint_name : m_joint_names)
   {
     conf.names.push_back(joint_name + "/position");
-    conf.names.push_back(joint_name + "/velocity");
   }
   return conf;
 }
@@ -48,6 +49,7 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<double>("max_force", 30.0);
   auto_declare<double>("max_torque", 3.0);
   auto_declare<int>("prediction_memory", 30);
+  auto_declare<int>("prediction_rate", 10);
   return CallbackReturn::SUCCESS;
 }
 
@@ -121,7 +123,7 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to load input scaling from file: %s", e.what());
     return CallbackReturn::ERROR;
   }
-  if (m_mean.size() != 19 || m_sigma.size() != 19)
+  if (m_mean.size() != 7 || m_sigma.size() != 7)
   {
     RCLCPP_ERROR(get_node()->get_logger(),
                  "Wrong size of input scaling: mean: %lu, sigma: %lu",
@@ -131,8 +133,7 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
   }
 
   m_joint_positions         = KDL::JntArray(m_joint_names.size());
-  m_joint_velocities        = KDL::JntArray(m_joint_names.size());
-  m_end_effector_solver     = std::make_unique<KDL::ChainFkSolverVel_recursive>(m_robot_chain);
+  m_end_effector_solver     = std::make_unique<KDL::ChainFkSolverPos_recursive>(m_robot_chain);
   m_target_wrench_publisher = get_node()->create_publisher<geometry_msgs::msg::WrenchStamped>(
     std::string(get_node()->get_name()) + "/target_wrench", 1);
 
@@ -170,18 +171,6 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
                  m_joint_state_pos_handles.size());
     return CallbackReturn::ERROR;
   }
-  if (!controller_interface::get_ordered_interfaces(this->state_interfaces_,
-                                                    m_joint_names,
-                                                    hardware_interface::HW_IF_VELOCITY,
-                                                    m_joint_state_vel_handles))
-  {
-    RCLCPP_ERROR(get_node()->get_logger(),
-                 "Expected %zu '%s' state interfaces, got %zu.",
-                 m_joint_names.size(),
-                 hardware_interface::HW_IF_VELOCITY,
-                 m_joint_state_vel_handles.size());
-    return CallbackReturn::ERROR;
-  }
 
   m_joint_mutex.lock();
   updateJointStates();
@@ -199,17 +188,22 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
                                                &outputs);
       if (status.ok())
       {
-        float max_force  = std::abs(get_node()->get_parameter("max_force").as_double());
-        float max_torque = std::abs(get_node()->get_parameter("max_torque").as_double());
-        auto values      = outputs[0].flat<float>();
-        m_target_wrench.header.stamp    = this->get_node()->now();
-        m_target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
-        m_target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
-        m_target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
-        m_target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
-        m_target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
-        m_target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
-        m_target_wrench_publisher->publish(m_target_wrench);
+        float max_force            = std::abs(get_node()->get_parameter("max_force").as_double());
+        float max_torque           = std::abs(get_node()->get_parameter("max_torque").as_double());
+        auto values                = outputs[0].flat<float>();
+        auto target_wrench         = geometry_msgs::msg::WrenchStamped();
+        target_wrench.header.stamp = this->get_node()->now();
+        target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
+        target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
+        target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
+        target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
+        target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
+        target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
+        m_target_wrench_publisher->publish(target_wrench);
+        using namespace std::chrono;
+        auto interval = round<milliseconds>(
+          duration<double>(1.0 / get_node()->get_parameter("prediction_rate").as_int()));
+        std::this_thread::sleep_for(interval);
       }
       else
       {
@@ -256,17 +250,15 @@ SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& pre
 
 void SkillController::updateInputSequence()
 {
-  // Compute current end effector pose and velocity w.r.t the robot base link
-  KDL::FrameVel end_effector;
+  // Compute current end effector pose w.r.t the robot base link
+  KDL::Frame end_effector;
   m_joint_mutex.lock();
-  m_end_effector_solver->JntToCart(KDL::JntArrayVel(m_joint_positions, m_joint_velocities),
-                                   end_effector);
+  m_end_effector_solver->JntToCart(m_joint_positions, end_effector);
   m_joint_mutex.unlock();
 
   // The neural network expects all inputs with respect to the target frame.
   m_target_mutex.lock();
-  KDL::Frame current_pose  = m_target_pose.Inverse() * end_effector.GetFrame();
-  KDL::Twist current_twist = m_target_pose.Inverse() * end_effector.GetTwist();
+  KDL::Frame current_pose = m_target_pose.Inverse() * end_effector;
   m_target_mutex.unlock();
   double current_pose_qx;
   double current_pose_qy;
@@ -274,7 +266,7 @@ void SkillController::updateInputSequence()
   double current_pose_qw;
   current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
 
-  auto input_shape = tensorflow::TensorShape({1, 1, 19});
+  auto input_shape = tensorflow::TensorShape({1, 1, 7});
   tensorflow::Input::Initializer input(
     std::initializer_list<float>({
       static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
@@ -284,18 +276,6 @@ void SkillController::updateInputSequence()
       static_cast<float>((current_pose_qy - m_mean[4]) / m_sigma[4]),
       static_cast<float>((current_pose_qz - m_mean[5]) / m_sigma[5]),
       static_cast<float>((current_pose_qw - m_mean[6]) / m_sigma[6]),
-      static_cast<float>((current_twist.vel.x() - m_mean[7]) / m_sigma[7]),
-      static_cast<float>((current_twist.vel.y() - m_mean[8]) / m_sigma[8]),
-      static_cast<float>((current_twist.vel.z() - m_mean[9]) / m_sigma[9]),
-      static_cast<float>((current_twist.rot.x() - m_mean[10]) / m_sigma[10]),
-      static_cast<float>((current_twist.rot.y() - m_mean[11]) / m_sigma[11]),
-      static_cast<float>((current_twist.rot.z() - m_mean[12]) / m_sigma[12]),
-      static_cast<float>((m_target_wrench.wrench.force.x - m_mean[13]) / m_sigma[13]),
-      static_cast<float>((m_target_wrench.wrench.force.y - m_mean[14]) / m_sigma[14]),
-      static_cast<float>((m_target_wrench.wrench.force.z - m_mean[15]) / m_sigma[15]),
-      static_cast<float>((m_target_wrench.wrench.torque.x - m_mean[16]) / m_sigma[16]),
-      static_cast<float>((m_target_wrench.wrench.torque.y - m_mean[17]) / m_sigma[17]),
-      static_cast<float>((m_target_wrench.wrench.torque.z - m_mean[18]) / m_sigma[18]),
     }),
     input_shape);
 
@@ -310,8 +290,7 @@ void SkillController::updateJointStates()
 {
   for (size_t i = 0; i < m_joint_names.size(); ++i)
   {
-    m_joint_positions(i)  = m_joint_state_pos_handles[i].get().get_value();
-    m_joint_velocities(i) = m_joint_state_vel_handles[i].get().get_value();
+    m_joint_positions(i) = m_joint_state_pos_handles[i].get().get_value();
   }
 }
 
@@ -327,7 +306,6 @@ void SkillController::cleanup()
 
   m_input_sequence.clear();
   m_joint_state_pos_handles.clear();
-  m_joint_state_vel_handles.clear();
   this->release_interfaces();
 }
 

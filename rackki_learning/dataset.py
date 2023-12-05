@@ -6,7 +6,6 @@ from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 from sklearn.preprocessing import StandardScaler
-from copy import copy
 
 
 class Dataset(object):
@@ -28,7 +27,6 @@ class Dataset(object):
         reader = SequentialReader()
         for file_count, file_path in enumerate(file_paths, 1):
             tmp_poses = []
-            tmp_twists = []
             tmp_wrenches = []
             storage_options = StorageOptions(uri=file_path, storage_id="sqlite3")
             converter_options = ConverterOptions(
@@ -57,17 +55,6 @@ class Dataset(object):
                             msg.pose.orientation.w,
                         ]
                     )
-                if topic == "/current_twist":
-                    tmp_twists.append(
-                        [
-                            msg.twist.linear.x,
-                            msg.twist.linear.y,
-                            msg.twist.linear.z,
-                            msg.twist.angular.x,
-                            msg.twist.angular.y,
-                            msg.twist.angular.z,
-                        ]
-                    )
                 if topic == "/target_wrench":
                     tmp_wrenches.append(
                         [
@@ -80,14 +67,12 @@ class Dataset(object):
                         ]
                     )
 
-            common_length = min(len(tmp_poses), len(tmp_twists), len(tmp_wrenches))
+            common_length = min(len(tmp_poses), len(tmp_wrenches))
             del tmp_poses[common_length:]
-            del tmp_twists[common_length:]
             del tmp_wrenches[common_length:]
             print(f" {str(file_count)} / {str(len(file_paths))}", end="\r", flush=True)
-            self.labels.append(
-                np.concatenate((tmp_poses, tmp_twists, tmp_wrenches), axis=1)
-            )
+            self.inputs.append(tmp_poses)
+            self.labels.append(tmp_wrenches)
             reader.reset_filter()
 
         node.destroy_node()
@@ -95,7 +80,6 @@ class Dataset(object):
 
         # Build a single big vector for input feature scaling
         # and keep track of the subsequences to revert this concatenation later.
-        self.inputs = copy(self.labels)
         split_idx = []
         idx = 0
         for i in self.inputs:
@@ -138,9 +122,6 @@ class Dataset(object):
             begin = np.random.randint(0, limit)
             end = begin + self.sequence_length
 
-            # current pose:  [0:7]
-            # current twist: [7:13]
-            # target wrench: [13:19]
             inputs.append([self.inputs[random_sequence][i] for i in range(begin, end)])
-            labels.append(self.labels[random_sequence][end][13:19])
+            labels.append(self.labels[random_sequence][end])
         return np.array(inputs), np.array(labels)
