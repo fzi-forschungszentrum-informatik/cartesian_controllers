@@ -45,14 +45,16 @@ public:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
 private:
+  constexpr static int FEATURE_DIM = 7;
   tensorflow::Tensor buildInputTensor();
+  geometry_msgs::msg::WrenchStamped processOutputTensor(const tensorflow::Tensor& output);
   void updateJointStates();
   void cleanup();
   bool setTarget(const std::string& target);
 
   std::thread m_serving_thread;
   tensorflow::SavedModelBundleLite m_bundle;
-  std::deque<std::array<float, 7> > m_input_sequence;
+  std::deque<std::array<float, FEATURE_DIM> > m_input_sequence;
   std::vector<double> m_mean;
   std::vector<double> m_sigma;
 

@@ -123,7 +123,7 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to load input scaling from file: %s", e.what());
     return CallbackReturn::ERROR;
   }
-  if (m_mean.size() != 7 || m_sigma.size() != 7)
+  if (m_mean.size() != FEATURE_DIM || m_sigma.size() != FEATURE_DIM)
   {
     RCLCPP_ERROR(get_node()->get_logger(),
                  "Wrong size of input scaling: mean: %lu, sigma: %lu",
@@ -186,17 +186,7 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
         {{"serving_default_lstm_input:0", inputs}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
       if (status.ok())
       {
-        float max_force            = std::abs(get_node()->get_parameter("max_force").as_double());
-        float max_torque           = std::abs(get_node()->get_parameter("max_torque").as_double());
-        auto values                = outputs[0].flat<float>();
-        auto target_wrench         = geometry_msgs::msg::WrenchStamped();
-        target_wrench.header.stamp = this->get_node()->now();
-        target_wrench.wrench.force.x  = std::clamp(values(0), -max_force, max_force);
-        target_wrench.wrench.force.y  = std::clamp(values(1), -max_force, max_force);
-        target_wrench.wrench.force.z  = std::clamp(values(2), -max_force, max_force);
-        target_wrench.wrench.torque.x = std::clamp(values(3), -max_torque, max_torque);
-        target_wrench.wrench.torque.y = std::clamp(values(4), -max_torque, max_torque);
-        target_wrench.wrench.torque.z = std::clamp(values(5), -max_torque, max_torque);
+        auto target_wrench = processOutputTensor(outputs[0]);
         m_target_wrench_publisher->publish(target_wrench);
         using namespace std::chrono;
         auto interval = round<milliseconds>(
@@ -264,7 +254,7 @@ tensorflow::Tensor SkillController::buildInputTensor()
   double current_pose_qw;
   current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
 
-  auto point = std::array<float, 7>({
+  auto point = std::array<float, FEATURE_DIM>({
     static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
     static_cast<float>((current_pose.p.y() - m_mean[1]) / m_sigma[1]),
     static_cast<float>((current_pose.p.z() - m_mean[2]) / m_sigma[2]),
@@ -281,18 +271,45 @@ tensorflow::Tensor SkillController::buildInputTensor()
 
   tensorflow::Tensor input(
     tensorflow::DT_FLOAT,
-    tensorflow::TensorShape({1, static_cast<long>(m_input_sequence.size()), 7}));
+    tensorflow::TensorShape({1, static_cast<long>(m_input_sequence.size()), FEATURE_DIM}));
   auto input_data = input.tensor<float, 3>();
 
   for (int i = 0; i < m_input_sequence.size(); ++i)
   {
-    for (int j = 0; j < 7; ++j)
+    for (int j = 0; j < FEATURE_DIM; ++j)
     {
       input_data(0, i, j) = m_input_sequence[i][j];
     }
   }
   input.tensor<float, 3>() = input_data;
   return input;
+}
+
+geometry_msgs::msg::WrenchStamped
+SkillController::processOutputTensor(const tensorflow::Tensor& output)
+{
+  double max_force           = std::abs(get_node()->get_parameter("max_force").as_double());
+  double max_torque          = std::abs(get_node()->get_parameter("max_torque").as_double());
+  auto values                = output.flat<float>();
+  auto predicted_wrench      = KDL::Wrench();
+  predicted_wrench.force[0]  = values(0);
+  predicted_wrench.force[1]  = values(1);
+  predicted_wrench.force[2]  = values(2);
+  predicted_wrench.torque[0] = values(3);
+  predicted_wrench.torque[1] = values(4);
+  predicted_wrench.torque[2] = values(5);
+  predicted_wrench = m_target_pose.M * predicted_wrench; // force control in robot base coordinates
+
+  auto target_wrench            = geometry_msgs::msg::WrenchStamped();
+  target_wrench.header.stamp    = this->get_node()->now();
+  target_wrench.header.frame_id = get_node()->get_parameter("robot_base_link").as_string();
+  target_wrench.wrench.force.x  = std::clamp(predicted_wrench.force[0], -max_force, max_force);
+  target_wrench.wrench.force.y  = std::clamp(predicted_wrench.force[1], -max_force, max_force);
+  target_wrench.wrench.force.z  = std::clamp(predicted_wrench.force[2], -max_force, max_force);
+  target_wrench.wrench.torque.x = std::clamp(predicted_wrench.torque[0], -max_torque, max_torque);
+  target_wrench.wrench.torque.y = std::clamp(predicted_wrench.torque[1], -max_torque, max_torque);
+  target_wrench.wrench.torque.z = std::clamp(predicted_wrench.torque[2], -max_torque, max_torque);
+  return target_wrench;
 }
 
 void SkillController::updateJointStates()
