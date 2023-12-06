@@ -180,12 +180,10 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
   m_serving_thread = std::thread([this]() {
     while (m_active)
     {
-      updateInputSequence();
+      auto inputs  = buildInputTensor();
       auto outputs = std::vector<tensorflow::Tensor>();
-      auto status  = m_bundle.GetSession()->Run({m_input_sequence.begin(), m_input_sequence.end()},
-                                               {"StatefulPartitionedCall:0"},
-                                               {},
-                                               &outputs);
+      auto status  = m_bundle.GetSession()->Run(
+        {{"serving_default_lstm_input:0", inputs}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
       if (status.ok())
       {
         float max_force            = std::abs(get_node()->get_parameter("max_force").as_double());
@@ -248,7 +246,7 @@ SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& pre
   return CallbackReturn::SUCCESS;
 }
 
-void SkillController::updateInputSequence()
+tensorflow::Tensor SkillController::buildInputTensor()
 {
   // Compute current end effector pose w.r.t the robot base link
   KDL::Frame end_effector;
@@ -266,24 +264,35 @@ void SkillController::updateInputSequence()
   double current_pose_qw;
   current_pose.M.GetQuaternion(current_pose_qx, current_pose_qy, current_pose_qz, current_pose_qw);
 
-  auto input_shape = tensorflow::TensorShape({1, 1, 7});
-  tensorflow::Input::Initializer input(
-    std::initializer_list<float>({
-      static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
-      static_cast<float>((current_pose.p.y() - m_mean[1]) / m_sigma[1]),
-      static_cast<float>((current_pose.p.z() - m_mean[2]) / m_sigma[2]),
-      static_cast<float>((current_pose_qx - m_mean[3]) / m_sigma[3]),
-      static_cast<float>((current_pose_qy - m_mean[4]) / m_sigma[4]),
-      static_cast<float>((current_pose_qz - m_mean[5]) / m_sigma[5]),
-      static_cast<float>((current_pose_qw - m_mean[6]) / m_sigma[6]),
-    }),
-    input_shape);
-
-  m_input_sequence.push_front({"serving_default_lstm_input:0", input.tensor});
+  auto point = std::array<float, 7>({
+    static_cast<float>((current_pose.p.x() - m_mean[0]) / m_sigma[0]),
+    static_cast<float>((current_pose.p.y() - m_mean[1]) / m_sigma[1]),
+    static_cast<float>((current_pose.p.z() - m_mean[2]) / m_sigma[2]),
+    static_cast<float>((current_pose_qx - m_mean[3]) / m_sigma[3]),
+    static_cast<float>((current_pose_qy - m_mean[4]) / m_sigma[4]),
+    static_cast<float>((current_pose_qz - m_mean[5]) / m_sigma[5]),
+    static_cast<float>((current_pose_qw - m_mean[6]) / m_sigma[6]),
+  });
+  m_input_sequence.push_front(point);
   if (m_input_sequence.size() > get_node()->get_parameter("prediction_memory").as_int())
   {
     m_input_sequence.pop_back();
   }
+
+  tensorflow::Tensor input(
+    tensorflow::DT_FLOAT,
+    tensorflow::TensorShape({1, static_cast<long>(m_input_sequence.size()), 7}));
+  auto input_data = input.tensor<float, 3>();
+
+  for (int i = 0; i < m_input_sequence.size(); ++i)
+  {
+    for (int j = 0; j < 7; ++j)
+    {
+      input_data(0, i, j) = m_input_sequence[i][j];
+    }
+  }
+  input.tensor<float, 3>() = input_data;
+  return input;
 }
 
 void SkillController::updateJointStates()
