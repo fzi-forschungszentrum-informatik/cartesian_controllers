@@ -19,6 +19,7 @@
         </extension>
         <contact>
                 <pair name="passive_active_components_contact" condim="6" geom1="passive_component" geom2="active_component" friction="0.1 0.1 0.005 0.0001 0.0001" />
+                <exclude name="disassembly_target" body1="active_component" body2="disassembly_target"/>
         </contact>
 
         <!--
@@ -33,6 +34,7 @@
                 <material name="matplane" reflectance="0.0" texture="texplane" texrepeat="10 10" texuniform="true"/>
                 <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
                 <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
+                <material name="disassembly_target" rgba="0.462 0.196 0.411 0.0"/>
                 <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 1.0">
                         <plugin instance="sdf"/>
                 </mesh>
@@ -51,6 +53,11 @@
                         <geom name="passive_component" type="sdf" mesh="passive_component" material="passive_component">
                                 <plugin instance="sdf"/>
                         </geom>
+                </body>
+
+                <!-- Disassembly target-->
+                <body name="disassembly_target" pos="0.17 0 0.0" quat="1 0 0 0">
+                        <geom name="disassembly_target" type="mesh" mesh="active_component" material="disassembly_target"/>
                 </body>
 
                 <!-- Controllable with user commands. -->
