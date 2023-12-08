@@ -3,25 +3,40 @@ from tensorflow.keras.layers import Layer
 from tensorflow.keras.losses import Loss
 from tensorflow_probability import distributions as tfd
 from tensorflow.keras import saving
+from tensorflow.keras.layers import (
+    MultiHeadAttention,
+    GlobalAveragePooling1D,
+    Dense,
+    Dropout,
+)
 
 
-class LSTMEncoderLayer(Layer):
+class MultiHeadAttentionLayer(Layer):
+    def __init__(self, n_heads, key_dim, **kwargs):
+        with tf.name_scope("attention"):
+            self.attention = MultiHeadAttention(num_heads=n_heads, key_dim=key_dim)
+            self.global_average_pooling = GlobalAveragePooling1D()
+        super().__init__(name="attention", **kwargs)
+
+    def call(self, x, training=None):
+        with tf.name_scope("attention"):
+            x = self.attention(query=x, value=x, training=training)
+            x = self.global_average_pooling(x)
+            return x
+
+
+class DenseLayer(Layer):
     def __init__(self, n_nodes, **kwargs):
-        with tf.name_scope("lstm"):
-            self.n_nodes = n_nodes
-            self.lstm = tf.keras.layers.LSTM(
-                self.n_nodes,
-                stateful=False,
-                return_state=True,
-                dropout=0.5,
-                recurrent_dropout=0.5,
-            )
-        super().__init__(name="lstm", **kwargs)
+        with tf.name_scope("dense"):
+            self.dense = Dense(units=n_nodes, activation="relu")
+            self.droput = Dropout(0.5)
+        super().__init__(name="dense", **kwargs)
 
-    def call(self, x, training=None, dynamic_batch_size=True):
-        with tf.name_scope("lstm"):
-            pred, h_state, c_state = self.lstm(x, training=training)
-            return tf.concat([pred, h_state, c_state], axis=-1)
+    def call(self, x, training=None):
+        with tf.name_scope("dense"):
+            x = self.dense(x)
+            x = self.droput(x, training=training)
+            return x
 
 
 class MixtureDensityLayer(Layer):

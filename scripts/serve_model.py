@@ -43,7 +43,7 @@ class Server(Node):
     def predict(self):
         self.update_input_sequence()
         input_data = tf.constant([list(self.input_sequence)], dtype=tf.float32)
-        output = self.model.signatures["serving_default"](lstm_input=input_data)
+        output = self.model.signatures["serving_default"](attention_input=input_data)
         result = output["prediction"].numpy().tolist()[0]
         target_wrench = WrenchStamped()
         target_wrench.header.stamp = self.get_clock().now().to_msg()

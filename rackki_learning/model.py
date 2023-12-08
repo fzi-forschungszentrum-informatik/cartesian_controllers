@@ -1,7 +1,7 @@
 import tensorflow as tf
 from rackki_learning.dataset import Dataset
 from rackki_learning.components import (
-    LSTMEncoderLayer,
+    MultiHeadAttentionLayer,
     MixtureDensityLayer,
     PredictionLayer,
     NegLogLikelihood,
@@ -12,11 +12,16 @@ from datetime import datetime
 
 
 class Model(object):
-    def __init__(self, n_nodes: int = 10, n_gaussians: int = 4):
-        self.n_nodes = n_nodes
+    def __init__(
+        self,
+        n_nodes: int = 20,
+        key_dim: int = 10,
+        n_heads: int = 8,
+        n_gaussians: int = 4,
+    ):
         self.n_gaussians = n_gaussians
         self.model = tf.keras.models.Sequential()
-        self.model.add(LSTMEncoderLayer(self.n_nodes))
+        self.model.add(MultiHeadAttentionLayer(n_heads=n_heads, key_dim=key_dim))
         self.model.add(MixtureDensityLayer(self.n_gaussians))
         self.model.add(PredictionLayer(self.n_gaussians))
         self.input_scaling = {}
