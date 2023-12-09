@@ -4,6 +4,8 @@ from tensorflow.keras.losses import Loss
 from tensorflow_probability import distributions as tfd
 from tensorflow.keras import saving
 from tensorflow.keras.layers import (
+    Bidirectional,
+    LSTM,
     MultiHeadAttention,
     GlobalAveragePooling1D,
     Dense,
@@ -15,13 +17,17 @@ class LSTMEncoderLayer(Layer):
     def __init__(self, n_nodes, **kwargs):
         with tf.name_scope("lstm"):
             self.n_nodes = n_nodes
-            self.lstm = tf.keras.layers.LSTM(
-                self.n_nodes,
-                stateful=False,
-                return_state=False,
-                return_sequences=True,
-                dropout=0.5,
-                recurrent_dropout=0.5,
+
+            self.lstm = Bidirectional(
+                merge_mode="sum",
+                layer=LSTM(
+                    n_nodes,
+                    stateful=False,
+                    return_state=False,
+                    return_sequences=True,
+                    dropout=0.5,
+                    recurrent_dropout=0.5,
+                ),
             )
         super().__init__(name="lstm", **kwargs)
 

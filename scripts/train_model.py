@@ -11,13 +11,13 @@ def main():
     evaluation_files = os.path.join(os.getcwd(), f"../datasets/{TYPE}/eval")
     training_data = Dataset(training_files, sequence_length=25)
     evaluation_data = Dataset(evaluation_files, sequence_length=25)
-    model = Model(n_nodes=150, key_dim=32, n_heads=8, n_gaussians=4)
+    model = Model(n_nodes=100, key_dim=32, n_heads=8, n_gaussians=4)
     model.train(
         training_data,
         evaluation_data,
         training_iterations=10000,
         batch_size=128,
-        learning_rate=0.0005,
+        learning_rate=0.0003,
     )
 
     model_dir = os.path.join(os.getcwd(), f"../models/{TYPE}")
