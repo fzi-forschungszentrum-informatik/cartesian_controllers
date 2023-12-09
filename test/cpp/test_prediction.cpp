@@ -45,7 +45,7 @@ TEST(rackki_learning, test_prediction)
   // Check the available input and output tensor names with:
   // saved_model_cli show --dir model_1 --all
   status = session->Run(
-    {{"serving_default_attention_input:0", input}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
+    {{"serving_default_lstm_input:0", input}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
   std::cout << status.message() << std::endl;
   ASSERT_TRUE(status.ok());
   ASSERT_TRUE(outputs[0].shape() == tensorflow::TensorShape({1, 6}));

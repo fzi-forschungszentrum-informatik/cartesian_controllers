@@ -11,6 +11,26 @@ from tensorflow.keras.layers import (
 )
 
 
+class LSTMEncoderLayer(Layer):
+    def __init__(self, n_nodes, **kwargs):
+        with tf.name_scope("lstm"):
+            self.n_nodes = n_nodes
+            self.lstm = tf.keras.layers.LSTM(
+                self.n_nodes,
+                stateful=False,
+                return_state=False,
+                return_sequences=True,
+                dropout=0.5,
+                recurrent_dropout=0.5,
+            )
+        super().__init__(name="lstm", **kwargs)
+
+    def call(self, x, training=None, dynamic_batch_size=True):
+        with tf.name_scope("lstm"):
+            x = self.lstm(x, training=training)
+            return x
+
+
 class MultiHeadAttentionLayer(Layer):
     def __init__(self, n_heads, key_dim, **kwargs):
         with tf.name_scope("attention"):

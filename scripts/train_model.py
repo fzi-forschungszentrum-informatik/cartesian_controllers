@@ -15,7 +15,7 @@ def main():
     model.train(
         training_data,
         evaluation_data,
-        training_iterations=30000,
+        training_iterations=10000,
         batch_size=128,
         learning_rate=0.0005,
     )
