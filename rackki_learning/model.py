@@ -10,6 +10,7 @@ from rackki_learning.components import (
 import os
 from os.path import expanduser
 from datetime import datetime
+from subprocess import check_output, PIPE
 
 
 class Model(object):
@@ -20,6 +21,9 @@ class Model(object):
         n_heads: int = 8,
         n_gaussians: int = 4,
     ):
+        self.n_nodes = n_nodes
+        self.key_dim = key_dim
+        self.n_heads = n_heads
         self.n_gaussians = n_gaussians
         self.model = tf.keras.models.Sequential()
         self.model.add(LSTMEncoderLayer(n_nodes))
@@ -42,10 +46,14 @@ class Model(object):
             expanduser("~"), "tensorboard", datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         ),
     ) -> bool:
+        self.training_iterations = training_iterations
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
         self.model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate),
             loss=NegLogLikelihood(self.n_gaussians),
         )
+        self.sequence_length = training_data.sequence_length
         self.input_scaling = training_data.input_scaling
         writer = tf.summary.create_file_writer(log_dir)
         with writer.as_default():
@@ -77,4 +85,17 @@ class Model(object):
         with open(os.path.join(model_dir, "input_scaling.yaml"), "w") as f:
             f.write(f"mean: {self.input_scaling['mean']}\n")
             f.write(f"sigma: {self.input_scaling['sigma']}\n")
+        with open(os.path.join(model_dir, "training_parameters.yaml"), "w") as f:
+            model_version = check_output(
+                "git rev-parse HEAD", stdin=PIPE, cwd=os.getcwd(), shell=True
+            ).decode("utf-8")
+            f.write(f"model_version: {model_version}\n")
+            f.write(f"n_nodes: {self.n_nodes}\n")
+            f.write(f"n_heads: {self.n_heads}\n")
+            f.write(f"n_gaussians: {self.n_gaussians}\n")
+            f.write(f"key_dim: {self.key_dim}\n")
+            f.write(f"sequence_length: {self.sequence_length}\n")
+            f.write(f"batch_size: {self.batch_size}\n")
+            f.write(f"learning_rate: {self.learning_rate}\n")
+            f.write(f"training_iterations: {self.training_iterations}\n")
         return True
