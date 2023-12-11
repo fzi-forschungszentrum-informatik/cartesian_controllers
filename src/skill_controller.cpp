@@ -182,8 +182,10 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
     {
       auto inputs  = buildInputTensor();
       auto outputs = std::vector<tensorflow::Tensor>();
-      auto status  = m_bundle.GetSession()->Run(
-        {{"serving_default_lstm_input:0", inputs}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
+      auto status  = m_bundle.GetSession()->Run({{"serving_default_embedding_input:0", inputs}},
+                                               {"StatefulPartitionedCall:0"},
+                                               {},
+                                               &outputs);
       if (status.ok())
       {
         auto target_wrench = processOutputTensor(outputs[0]);
