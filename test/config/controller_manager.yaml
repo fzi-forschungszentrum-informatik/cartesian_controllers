@@ -16,6 +16,7 @@ skill_controller:
     max_torque: 3.0
     prediction_memory: 30
     prediction_rate: 10
+    done_when_in: [0.0, 0.002]  # min, max Cartesian distance to target
     joints:
       - joint1
       - joint2

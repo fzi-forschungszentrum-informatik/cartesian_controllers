@@ -17,6 +17,7 @@
 #include <tensorflow/core/framework/tensor.h>
 #include <tensorflow/core/framework/tensor_shape.h>
 #include <tensorflow/core/public/session.h>
+#include <vector>
 
 namespace rackki_learning {
 
@@ -45,11 +46,12 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<std::string>("robot_description", "");
   auto_declare<std::string>("robot_base_link", "");
   auto_declare<std::string>("end_effector_link", "");
-  auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
+  auto_declare<std::vector<std::string> >("joints", {});
   auto_declare<double>("max_force", 30.0);
   auto_declare<double>("max_torque", 3.0);
   auto_declare<int>("prediction_memory", 30);
   auto_declare<int>("prediction_rate", 10);
+  auto_declare<std::vector<double> >("done_when_in", {0.0, 0.0});
   return CallbackReturn::SUCCESS;
 }
 
@@ -136,6 +138,9 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
   m_end_effector_solver     = std::make_unique<KDL::ChainFkSolverPos_recursive>(m_robot_chain);
   m_target_wrench_publisher = get_node()->create_publisher<geometry_msgs::msg::WrenchStamped>(
     std::string(get_node()->get_name()) + "/target_wrench", 1);
+  m_controller_state_publisher =
+    get_node()->create_publisher<rackki_interfaces::msg::ControllerState>(
+      std::string(get_node()->get_name()) + "/controller_state", 1);
 
   m_tf_buffer   = std::make_unique<tf2_ros::Buffer>(get_node()->get_clock());
   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(*m_tf_buffer);
@@ -178,6 +183,13 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
 
   m_active         = true;
   m_serving_thread = std::thread([this]() {
+    using ControllerState       = rackki_interfaces::msg::ControllerState;
+    auto publishControllerState = [this](const ControllerState::_state_type& state) -> void {
+      auto controller_state  = ControllerState();
+      controller_state.state = state;
+      m_controller_state_publisher->publish(controller_state);
+    };
+
     while (m_active)
     {
       auto inputs  = buildInputTensor();
@@ -188,6 +200,7 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
                                                &outputs);
       if (status.ok())
       {
+        publishControllerState(ControllerState::STATE_RUNNING);
         auto target_wrench = processOutputTensor(outputs[0]);
         m_target_wrench_publisher->publish(target_wrench);
         using namespace std::chrono;
@@ -197,9 +210,19 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
       }
       else
       {
+        publishControllerState(ControllerState::STATE_ERROR);
         auto clock = *get_node()->get_clock();
         RCLCPP_WARN_STREAM_THROTTLE(
           get_node()->get_logger(), clock, 3000, "Error in model prediction: " << status.message());
+      }
+
+      if (done())
+      {
+        publishControllerState(ControllerState::STATE_DONE);
+        auto zero_wrench            = geometry_msgs::msg::WrenchStamped();
+        zero_wrench.header.stamp    = this->get_node()->now();
+        zero_wrench.header.frame_id = get_node()->get_parameter("robot_base_link").as_string();
+        m_target_wrench_publisher->publish(zero_wrench);
       }
     }
   });
@@ -240,16 +263,7 @@ SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& pre
 
 tensorflow::Tensor SkillController::buildInputTensor()
 {
-  // Compute current end effector pose w.r.t the robot base link
-  KDL::Frame end_effector;
-  m_joint_mutex.lock();
-  m_end_effector_solver->JntToCart(m_joint_positions, end_effector);
-  m_joint_mutex.unlock();
-
-  // The neural network expects all inputs with respect to the target frame.
-  m_target_mutex.lock();
-  KDL::Frame current_pose = m_target_pose.Inverse() * end_effector;
-  m_target_mutex.unlock();
+  auto current_pose = getCurrentPoseToTarget();
   double current_pose_qx;
   double current_pose_qy;
   double current_pose_qz;
@@ -363,6 +377,28 @@ bool SkillController::setTarget(const std::string& target)
   m_target_mutex.unlock();
   m_has_target = true;
   return true;
+}
+
+bool SkillController::done()
+{
+  auto dist  = getCurrentPoseToTarget().p.Norm();
+  auto range = get_node()->get_parameter("done_when_in").as_double_array();
+  return range[0] < dist && dist < range[1];
+}
+
+KDL::Frame SkillController::getCurrentPoseToTarget()
+{
+  // Compute current end effector pose w.r.t the robot base link
+  KDL::Frame end_effector;
+  m_joint_mutex.lock();
+  m_end_effector_solver->JntToCart(m_joint_positions, end_effector);
+  m_joint_mutex.unlock();
+
+  // The neural network expects all inputs with respect to the target frame.
+  m_target_mutex.lock();
+  KDL::Frame current_pose = m_target_pose.Inverse() * end_effector;
+  m_target_mutex.unlock();
+  return current_pose;
 }
 
 } // namespace rackki_learning
