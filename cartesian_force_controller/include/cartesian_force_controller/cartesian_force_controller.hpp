@@ -69,6 +69,15 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     return false;
   }
 
+  if(nh.hasParam("hand_frame_control"))
+  {
+    if (!nh.getParam("hand_frame_control",m_hand_frame_control))
+    {
+      ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/hand_frame_control" << " from parameter server");
+      return false;
+    }
+  }
+
   // Make sure sensor link is part of the robot chain
   if(!Base::robotChainContains(m_ft_sensor_ref_link))
   {

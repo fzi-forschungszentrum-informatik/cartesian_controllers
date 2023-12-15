@@ -24,6 +24,7 @@ my_cartesian_force_controller:
     end_effector_link: "tool0"
     robot_base_link: "base_link"
     ft_sensor_ref_link: "sensor_link"
+    hand_frame_control: true
     joints:
     - joint1
     - joint2
