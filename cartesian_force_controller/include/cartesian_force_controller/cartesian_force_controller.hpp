@@ -88,7 +88,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Make sure sensor wrenches are interpreted correctly
-  setFtSensorReferenceFrame(Base::m_end_effector_link);
+  setFtSensorReferenceFrame(Base::m_end_effector_link,m_end_effector_transform_offset);
 
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
@@ -187,7 +187,7 @@ computeForceError()
   ctrl::Vector6D target_wrench;
   if (m_hand_frame_control) // Assume end-effector frame by convention
   {
-    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
+    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link,m_end_effector_transform_offset);
   }
   else // Default to robot base frame
   {

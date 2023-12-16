@@ -121,6 +121,8 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector3D        m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
     KDL::Frame            m_ft_sensor_transform;
+    KDL::Frame            m_end_effector_transform_offset; // only used when m_hand_frame_control = True
+
 
     /**
      * Allow users to choose whether to specify their target wrenches in the
