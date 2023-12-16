@@ -274,7 +274,7 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
 
 template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
-displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
+displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_offset)
 {
   // Adjust format
   KDL::Wrench wrench_kdl;
@@ -288,6 +288,9 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
       m_ik_solver->getPositions(),
       transform_kdl,
       from);
+
+  // Apply offset
+  transform_kdl = transform_kdl * from_offset;
 
   // Rotate into new reference frame
   wrench_kdl = transform_kdl.M * wrench_kdl;

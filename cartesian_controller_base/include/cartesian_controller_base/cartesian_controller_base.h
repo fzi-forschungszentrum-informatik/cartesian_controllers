@@ -96,6 +96,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     virtual void starting(const ros::Time& time);
 
+    static const KDL::Frame identity_transform_kdl;
   protected:
     /**
      * @brief Write joint control commands to the real hardware
@@ -123,7 +124,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      *
      * @return The quantity in the robot base frame
      */
-    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
+    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_offset=identity_transform_kdl);
 
     /**
      * @brief Display the given tensor in the robot base frame
