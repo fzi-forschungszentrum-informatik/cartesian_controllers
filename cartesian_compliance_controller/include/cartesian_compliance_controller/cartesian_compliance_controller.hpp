@@ -126,6 +126,15 @@ update(const ros::Time& time, const ros::Duration& period)
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_handles);
 
+  // Update end-effector offset
+  Base::updateEndEffectorOffset();
+
+  // Reset FTS Reference frame when end effector offset has been updated
+  if(Base::m_end_effector_offset_updated)
+  {
+    ForceBase::setFtSensorReferenceFrame(Base::m_end_effector_link,Base::m_end_effector_offset);
+  }
+
   // Control the robot motion in such a way that the resulting net force
   // vanishes. This internal control needs some simulation time steps.
   for (int i = 0; i < Base::m_iterations; ++i)

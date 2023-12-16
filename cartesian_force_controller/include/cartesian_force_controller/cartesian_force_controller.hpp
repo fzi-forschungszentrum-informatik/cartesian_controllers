@@ -79,7 +79,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Make sure sensor wrenches are interpreted correctly
-  setFtSensorReferenceFrame(Base::m_end_effector_link);
+  setFtSensorReferenceFrame(Base::m_end_effector_link,Base::m_end_effector_offset);
 
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
@@ -156,6 +156,15 @@ update(const ros::Time& time, const ros::Duration& period)
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_handles);
 
+  // Update end-effector offset
+  Base::updateEndEffectorOffset();
+
+  // Reset FTS Reference frame when end effector offset has been updated
+  if(Base::m_end_effector_offset_updated)
+  {
+    setFtSensorReferenceFrame(Base::m_end_effector_link,Base::m_end_effector_offset);
+  }
+
   // Control the robot motion in such a way that the resulting net force
   // vanishes.  The internal 'simulation time' is deliberately independent of
   // the outer control cycle.
@@ -178,7 +187,7 @@ computeForceError()
   ctrl::Vector6D target_wrench;
   if (m_hand_frame_control) // Assume end-effector frame by convention
   {
-    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
+    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link,Base::m_end_effector_offset);
   }
   else // Default to robot base frame
   {
@@ -186,7 +195,7 @@ computeForceError()
   }
 
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref)
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref,Base::m_end_effector_offset)
     + target_wrench
     + compensateGravity();
 }

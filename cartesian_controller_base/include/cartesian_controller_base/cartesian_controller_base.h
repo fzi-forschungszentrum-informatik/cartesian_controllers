@@ -57,6 +57,7 @@
 
 // Project
 #include <cartesian_controller_base/IKSolver.h>
+#include <cartesian_controller_base/PoseParameterHandle.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
 
@@ -184,6 +185,14 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     std::vector<hardware_interface::JointHandle>      m_joint_handles;
 
     /**
+     * Allow users to specify a transform offset from the end-effector frame.
+     */
+    void updateEndEffectorOffset();
+
+    KDL::Frame m_end_effector_offset;
+    std::atomic<bool> m_end_effector_offset_updated = false;
+
+    /**
      * Whether or not to publish the controller's current end-effector pose and
      * twist.
      */
@@ -209,6 +218,9 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
 
     // Against multi initialization in multi inheritance scenarios
     bool m_already_initialized;
+
+    // Handles end effector offset pose, configurable using dynamic reconfigure
+    PoseParameterHandle m_end_effector_offset_handle;
 
     // Dynamic reconfigure
     typedef cartesian_controller_base::CartesianControllerConfig ControllerConfig;
