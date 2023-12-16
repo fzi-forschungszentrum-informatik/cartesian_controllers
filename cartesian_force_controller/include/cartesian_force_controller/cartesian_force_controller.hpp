@@ -78,6 +78,26 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
     }
   }
 
+  // Optionnaly add end effector transform offset
+  if(nh.hasParam("end_effector_transform_offset"))
+  {
+    std::array<std::string, 7> pose_params_str{"x", "y", "z", "qx", "qy", "qz", "qw"};
+    std::array<double, 7> pose_params_val;
+
+    for (size_t i = 0; i < pose_params_str.size(); ++i)
+    {
+      if (!nh.getParam("end_effector_transform_offset/" + pose_params_str[i],pose_params_val[i]))
+      {
+        ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_transform_offset/" << pose_params_str[i] << " from parameter server");
+        return false;
+      }
+    }
+    KDL::Vector vector = KDL::Vector(pose_params_val[0],pose_params_val[1],pose_params_val[2]);
+    KDL::Rotation rotation = KDL::Rotation::Quaternion(pose_params_val[3],pose_params_val[4],pose_params_val[5],pose_params_val[6]);
+
+    m_end_effector_transform_offset = KDL::Frame(rotation,vector);
+  }
+
   // Make sure sensor link is part of the robot chain
   if(!Base::robotChainContains(m_ft_sensor_ref_link))
   {
