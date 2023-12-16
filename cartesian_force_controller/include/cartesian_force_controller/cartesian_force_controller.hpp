@@ -193,7 +193,7 @@ computeForceError()
 
 template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
-setFtSensorReferenceFrame(const std::string& new_ref)
+setFtSensorReferenceFrame(const std::string& new_ref, const KDL::Frame& new_ref_offset)
 {
   // Compute static transform from the force torque sensor to the new reference
   // frame of interest.
@@ -214,6 +214,8 @@ setFtSensorReferenceFrame(const std::string& new_ref)
       jnts,
       new_sensor_ref,
       m_new_ft_sensor_ref);
+
+  new_sensor_ref = new_sensor_ref * new_ref_offset;
 
   m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
 }
