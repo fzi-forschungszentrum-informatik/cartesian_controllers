@@ -144,10 +144,12 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/SpatialPDController.cpp
   src/PDController.cpp
+  src/PoseParameterHandle.cpp
   include/cartesian_controller_base/cartesian_controller_base.h
   include/cartesian_controller_base/cartesian_controller_base.hpp
   include/cartesian_controller_base/SpatialPDController.h
   include/cartesian_controller_base/PDController.h
+  include/cartesian_controller_base/PoseParameterHandle.h
   include/cartesian_controller_base/Utility.h
   src/IKSolver.cpp
   include/cartesian_controller_base/IKSolver.h
