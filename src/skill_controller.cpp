@@ -226,6 +226,7 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
       }
     }
   });
+  m_serving_thread.detach();
 
   return CallbackReturn::SUCCESS;
 }
@@ -340,11 +341,6 @@ void SkillController::cleanup()
 {
   m_active     = false;
   m_has_target = false;
-
-  if (m_serving_thread.joinable())
-  {
-    m_serving_thread.join();
-  }
 
   m_input_sequence.clear();
   m_joint_state_pos_handles.clear();
