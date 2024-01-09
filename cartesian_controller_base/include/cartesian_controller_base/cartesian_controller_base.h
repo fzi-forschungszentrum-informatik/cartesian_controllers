@@ -181,7 +181,7 @@ protected:
    *
    * @return True if the controller is active, false otherwise
    */
-  bool isActive() const {return m_active;};
+  bool isActive() const { return m_active; };
 
   KDL::Chain m_robot_chain;
 
