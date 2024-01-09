@@ -66,7 +66,6 @@ CartesianForceController::on_init()
   auto_declare<bool>("hand_frame_control", true);
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-  ;
 }
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianForceController::init(
