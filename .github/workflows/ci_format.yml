@@ -1,0 +1,18 @@
+# Pre-commit as a Github action.
+# See: https://github.com/pre-commit/action
+# This will run all hooks from the .pre-commit-config.yaml against all files.
+
+name: Format
+
+on:
+  pull_request:
+  push:
+    branches: [ros2]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.0
