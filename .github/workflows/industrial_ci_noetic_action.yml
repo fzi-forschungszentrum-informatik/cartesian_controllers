@@ -8,7 +8,6 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {ROS_DISTRO: noetic, ROS_REPO: testing}
           - {ROS_DISTRO: noetic, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
