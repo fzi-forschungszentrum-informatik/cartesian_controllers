@@ -40,14 +40,16 @@
 #ifndef DAMPED_LEAST_SQUARES_SOLVER_H_INCLUDED
 #define DAMPED_LEAST_SQUARES_SOLVER_H_INCLUDED
 
-#include "rclcpp/node.hpp"
 #include <cartesian_controller_base/IKSolver.h>
+
 #include <kdl/jacobian.hpp>
 #include <memory>
 
-namespace cartesian_controller_base{
+#include "rclcpp/node.hpp"
 
-  /**
+namespace cartesian_controller_base
+{
+/**
    * \brief A damped least squares IK solver for Cartesian controllers
    *
    *
@@ -62,15 +64,15 @@ namespace cartesian_controller_base{
    *  with a unit stiffness.
    *
    *  The damped least squares formulation is according to Wampler
-   *  https://ieeexplore.ieee.org/abstract/document/4075580  
+   *  https://ieeexplore.ieee.org/abstract/document/4075580
    */
 class DampedLeastSquaresSolver : public IKSolver
 {
-  public:
-    DampedLeastSquaresSolver();
-    ~DampedLeastSquaresSolver();
+public:
+  DampedLeastSquaresSolver();
+  ~DampedLeastSquaresSolver();
 
-    /**
+  /**
      * \brief Compute joint target commands with damped least squares
      *
      * \param period The duration in sec for this simulation step
@@ -78,11 +80,10 @@ class DampedLeastSquaresSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force) override;
+  trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+    rclcpp::Duration period, const ctrl::Vector6D & net_force) override;
 
-    /**
+  /**
      * \brief Initialize the solver
      *
      * \param nh A node handle for namespace-local parameter management
@@ -93,25 +94,23 @@ class DampedLeastSquaresSolver : public IKSolver
      * \return True, if everything went well
      */
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+  bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-    bool init(std::shared_ptr<rclcpp::Node> nh,
+  bool init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-              const KDL::Chain& chain,
-              const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits) override;
+            const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+            const KDL::JntArray & lower_pos_limits) override;
 
-  private:
-    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
-    KDL::Jacobian m_jnt_jacobian;
+private:
+  std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+  KDL::Jacobian m_jnt_jacobian;
 
-    // Dynamic parameters
-    std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
-    const std::string m_params = "solver/damped_least_squares"; ///< namespace for parameter access
-    double m_alpha; ///< damping coefficient
-
+  // Dynamic parameters
+  std::shared_ptr<rclcpp::Node> m_handle;  ///< handle for dynamic parameter interaction
+  const std::string m_params = "solver/damped_least_squares";  ///< namespace for parameter access
+  double m_alpha;                                              ///< damping coefficient
 };
 
-}
+}  // namespace cartesian_controller_base
 
 #endif

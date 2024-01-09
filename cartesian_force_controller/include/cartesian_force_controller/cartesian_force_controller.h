@@ -40,14 +40,15 @@
 #ifndef CARTESIAN_FORCE_CONTROLLER_H_INCLUDED
 #define CARTESIAN_FORCE_CONTROLLER_H_INCLUDED
 
-#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include <cartesian_controller_base/ROS2VersionConfig.h>
 #include <cartesian_controller_base/cartesian_controller_base.h>
+
 #include <controller_interface/controller_interface.hpp>
+
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace cartesian_force_controller
 {
-
 /**
  * @brief A ROS2-control controller for Cartesian force control
  *
@@ -72,65 +73,67 @@ namespace cartesian_force_controller
  */
 class CartesianForceController : public virtual cartesian_controller_base::CartesianControllerBase
 {
-  public:
-    CartesianForceController();
+public:
+  CartesianForceController();
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    virtual controller_interface::return_type init(const std::string & controller_name) override;
+  virtual controller_interface::return_type init(const std::string & controller_name) override;
 #endif
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  controller_interface::return_type update(const rclcpp::Time & time,
+                                           const rclcpp::Duration & period) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    controller_interface::return_type update() override;
+  controller_interface::return_type update() override;
 #endif
 
-    using Base = cartesian_controller_base::CartesianControllerBase;
+  using Base = cartesian_controller_base::CartesianControllerBase;
 
-  protected:
-    /**
+protected:
+  /**
      * @brief Compute the net force of target wrench and measured sensor wrench
      *
      * @return The remaining error wrench, given in robot base frame
      */
-    ctrl::Vector6D        computeForceError();
-    std::string           m_new_ft_sensor_ref;
-    void setFtSensorReferenceFrame(const std::string& new_ref);
+  ctrl::Vector6D computeForceError();
+  std::string m_new_ft_sensor_ref;
+  void setFtSensorReferenceFrame(const std::string & new_ref);
 
-  private:
-    ctrl::Vector6D        compensateGravity();
+private:
+  ctrl::Vector6D compensateGravity();
 
-    void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
-    void ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
+  void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
+  void ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
 
-    rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
-    rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_ft_sensor_wrench_subscriber;
-    ctrl::Vector6D        m_target_wrench;
-    ctrl::Vector6D        m_ft_sensor_wrench;
-    std::string           m_ft_sensor_ref_link;
-    KDL::Frame            m_ft_sensor_transform;
+  rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
+  rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_ft_sensor_wrench_subscriber;
+  ctrl::Vector6D m_target_wrench;
+  ctrl::Vector6D m_ft_sensor_wrench;
+  std::string m_ft_sensor_ref_link;
+  KDL::Frame m_ft_sensor_transform;
 
-    /**
+  /**
      * Allow users to choose whether to specify their target wrenches in the
      * end-effector frame (= True) or the base frame (= False). The first one
      * is easier for explicit task programming, while the second one is more
      * intuitive for tele-manipulation.
      */
-    bool m_hand_frame_control;
-
+  bool m_hand_frame_control;
 };
 
-}
+}  // namespace cartesian_force_controller
 
 #endif

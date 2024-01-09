@@ -45,35 +45,43 @@ import numpy as np
 import sys
 import time
 
+
 class buttons(Node):
-    """ React to button events """
+    """React to button events"""
 
     def __init__(self):
-        super().__init__('spacenav_buttons')
+        super().__init__("spacenav_buttons")
 
-        self.repeat_same_button = self.declare_parameter('repeat_same_button', False).value
-        self.button_sleep = self.declare_parameter('button_sleep', 0.1).value
-        self.button_cmds = self.declare_parameter('button_cmds', ['']).value
-        self.cmd_dirs = self.declare_parameter('cmd_dirs', ['']).value
+        self.repeat_same_button = self.declare_parameter(
+            "repeat_same_button", False
+        ).value
+        self.button_sleep = self.declare_parameter("button_sleep", 0.1).value
+        self.button_cmds = self.declare_parameter("button_cmds", [""]).value
+        self.cmd_dirs = self.declare_parameter("cmd_dirs", [""]).value
         self.last_button_cmds = None
 
-        self.joystick_topic = self.declare_parameter('joystick_topic', '').value
-        self.sub = self.create_subscription(Joy, self.joystick_topic, self.event_callback, 1)
+        self.joystick_topic = self.declare_parameter("joystick_topic", "").value
+        self.sub = self.create_subscription(
+            Joy, self.joystick_topic, self.event_callback, 1
+        )
 
-    def event_callback(self,data):
+    def event_callback(self, data):
         # Have some buttons been repeatedly pressed?
-        if self.last_button_cmds and any(np.bitwise_and(data.buttons,self.last_button_cmds)):
+        if self.last_button_cmds and any(
+            np.bitwise_and(data.buttons, self.last_button_cmds)
+        ):
             return
         for idx, val in enumerate(data.buttons):
             if val == 1:
                 exec_dir = self.cmd_dirs[idx]
-                if not exec_dir:    # Empty string
+                if not exec_dir:  # Empty string
                     exec_dir = None
                 subprocess.Popen(
                     self.button_cmds[idx],
                     stdin=subprocess.PIPE,
                     cwd=exec_dir,
-                    shell=True)
+                    shell=True,
+                )
                 # Prevent pressing the same buttons in a row
                 if not self.repeat_same_button:
                     self.last_button_cmds = data.buttons
@@ -87,7 +95,8 @@ def main(args=None):
     rclpy.spin(node)
     rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:

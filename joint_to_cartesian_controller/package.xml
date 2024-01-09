@@ -17,13 +17,13 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url>
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
   <!-- Authors do not have to be maintainers, but could be -->
   <!-- Example: -->
-  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
 
 
   <!-- The *_depend tags are used to specify dependencies -->

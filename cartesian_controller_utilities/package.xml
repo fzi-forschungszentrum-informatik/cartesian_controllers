@@ -6,7 +6,7 @@
   <description>Make the spacemouse a teach device for contact-based teleoperation</description>
   <maintainer email="scherzin@fzi.de">Stefan Scherzinger</maintainer>
   <license>BSD-3-Clause</license>
-  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

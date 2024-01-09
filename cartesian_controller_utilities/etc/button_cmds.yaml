@@ -6,11 +6,11 @@ spacenav_buttons:
     # Can be used to force alternation between to buttons, e.g. when doing `start recording`
     # - `stop recording` tasks.
     repeat_same_button : False
-    
+
     # Minimum duration in seconds to pass between two buttons pressed.
     # Can be used to control the rate of pressing.
     button_sleep: 1.0
-    
+
     # Define which commands to execute on pressing buttons
     button_cmds :
             [
@@ -19,7 +19,7 @@ spacenav_buttons:
                     # button 1
                     "echo 'stop recording' && screen -X stuff '^C'"
             ]
-    
+
     # Directories where the commands are executed
     cmd_dirs :
             [

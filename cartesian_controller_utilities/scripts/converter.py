@@ -45,15 +45,15 @@ from geometry_msgs.msg import WrenchStamped
 
 
 class converter(Node):
-    """ Convert Twist messages to WrenchStamped """
+    """Convert Twist messages to WrenchStamped"""
 
     def __init__(self):
-        super().__init__('converter')
+        super().__init__("converter")
 
-        self.twist_topic = self.declare_parameter('twist_topic', 'my_twist').value
-        self.wrench_topic = self.declare_parameter('wrench_topic', 'my_wrench').value
-        self.frame_id = self.declare_parameter('frame_id', 'world').value
-        period = 1.0 / self.declare_parameter('publishing_rate', 100).value
+        self.twist_topic = self.declare_parameter("twist_topic", "my_twist").value
+        self.wrench_topic = self.declare_parameter("wrench_topic", "my_wrench").value
+        self.frame_id = self.declare_parameter("frame_id", "world").value
+        period = 1.0 / self.declare_parameter("publishing_rate", 100).value
         self.timer = self.create_timer(period, self.publish)
 
         self.buffer = WrenchStamped()
@@ -61,32 +61,32 @@ class converter(Node):
         self.pub = self.create_publisher(WrenchStamped, self.wrench_topic, 3)
         self.sub = self.create_subscription(Twist, self.twist_topic, self.twist_cb, 1)
 
-
-    def twist_cb(self,data):
-        self.buffer.header.stamp     = self.get_clock().now().to_msg()
-        self.buffer.header.frame_id  = self.frame_id
-        self.buffer.wrench.force.x   = data.linear.x
-        self.buffer.wrench.force.y   = data.linear.y
-        self.buffer.wrench.force.z   = data.linear.z
-        self.buffer.wrench.torque.x  = data.angular.x
-        self.buffer.wrench.torque.y  = data.angular.y
-        self.buffer.wrench.torque.z  = data.angular.z
-
+    def twist_cb(self, data):
+        self.buffer.header.stamp = self.get_clock().now().to_msg()
+        self.buffer.header.frame_id = self.frame_id
+        self.buffer.wrench.force.x = data.linear.x
+        self.buffer.wrench.force.y = data.linear.y
+        self.buffer.wrench.force.z = data.linear.z
+        self.buffer.wrench.torque.x = data.angular.x
+        self.buffer.wrench.torque.y = data.angular.y
+        self.buffer.wrench.torque.z = data.angular.z
 
     def publish(self):
         try:
             self.pub.publish(self.buffer)
-        except:
+        except Exception:
             # Swallow 'publish() to closed topic' error.
             # This rarely happens on killing this node.
             pass
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = converter()
     rclpy.spin(node)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:

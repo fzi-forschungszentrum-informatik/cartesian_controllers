@@ -37,139 +37,125 @@
  */
 //-----------------------------------------------------------------------------
 
-#include "hardware_interface/types/hardware_interface_type_values.hpp"
-#include "rclcpp/node.hpp"
-#include <algorithm>
 #include <cartesian_controller_base/IKSolver.h>
+
+#include <algorithm>
 #include <functional>
 #include <kdl/framevel.hpp>
 #include <kdl/jntarrayvel.hpp>
 #include <map>
 #include <sstream>
 
-namespace cartesian_controller_base{
+#include "hardware_interface/types/hardware_interface_type_values.hpp"
+#include "rclcpp/node.hpp"
 
-  IKSolver::IKSolver()
+namespace cartesian_controller_base
+{
+IKSolver::IKSolver() {}
+
+IKSolver::~IKSolver() {}
+
+const KDL::Frame & IKSolver::getEndEffectorPose() const { return m_end_effector_pose; }
+
+const ctrl::Vector6D & IKSolver::getEndEffectorVel() const { return m_end_effector_vel; }
+
+const KDL::JntArray & IKSolver::getPositions() const { return m_current_positions; }
+
+bool IKSolver::setStartState(
+  const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> > &
+    joint_pos_handles)
+{
+  // Copy into internal buffers.
+  for (size_t i = 0; i < joint_pos_handles.size(); ++i)
   {
-  }
-
-  IKSolver::~IKSolver(){}
-
-
-  const KDL::Frame& IKSolver::getEndEffectorPose() const
-  {
-    return m_end_effector_pose;
-  }
-
-  const ctrl::Vector6D& IKSolver::getEndEffectorVel() const
-  {
-    return m_end_effector_vel;
-  }
-
-  const KDL::JntArray& IKSolver::getPositions() const
-  {
-    return m_current_positions;
-  }
-
-
-  bool IKSolver::setStartState(
-    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
-      joint_pos_handles)
-  {
-    // Copy into internal buffers.
-    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
+    // Interface type should be checked by the caller.
+    // Add additional plausibility check just in case.
+    if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
     {
-      // Interface type should be checked by the caller.
-      // Add additional plausibility check just in case.
-      if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
-      {
-        m_current_positions(i)     = joint_pos_handles[i].get().get_value();
-        m_current_velocities(i)    = 0.0;
-        m_current_accelerations(i) = 0.0;
-        m_last_positions(i)        = m_current_positions(i);
-        m_last_velocities(i)       = m_current_velocities(i);
-      }
-      else
-      {
-        return false;
-      }
+      m_current_positions(i) = joint_pos_handles[i].get().get_value();
+      m_current_velocities(i) = 0.0;
+      m_current_accelerations(i) = 0.0;
+      m_last_positions(i) = m_current_positions(i);
+      m_last_velocities(i) = m_current_velocities(i);
     }
-    return true;
-  }
-
-
-  void IKSolver::synchronizeJointPositions(
-    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
-      joint_pos_handles)
-  {
-    for (size_t i = 0; i < joint_pos_handles.size(); ++i)
+    else
     {
-      // Interface type should be checked by the caller.
-      // Add additional plausibility check just in case.
-      if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
-      {
-        m_current_positions(i) = joint_pos_handles[i].get().get_value();
-        m_last_positions(i)    = m_current_positions(i);
-      }
+      return false;
     }
   }
+  return true;
+}
 
+void IKSolver::synchronizeJointPositions(
+  const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> > &
+    joint_pos_handles)
+{
+  for (size_t i = 0; i < joint_pos_handles.size(); ++i)
+  {
+    // Interface type should be checked by the caller.
+    // Add additional plausibility check just in case.
+    if (joint_pos_handles[i].get().get_interface_name() == hardware_interface::HW_IF_POSITION)
+    {
+      m_current_positions(i) = joint_pos_handles[i].get().get_value();
+      m_last_positions(i) = m_current_positions(i);
+    }
+  }
+}
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-  bool IKSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
+bool IKSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
 #else
-  bool IKSolver::init(std::shared_ptr<rclcpp::Node> /*nh*/,
+bool IKSolver::init(std::shared_ptr<rclcpp::Node> /*nh*/,
 #endif
-                      const KDL::Chain& chain,
-                      const KDL::JntArray& upper_pos_limits,
-                      const KDL::JntArray& lower_pos_limits)
+                    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+                    const KDL::JntArray & lower_pos_limits)
+{
+  // Initialize
+  m_chain = chain;
+  m_number_joints = m_chain.getNrOfJoints();
+  m_current_positions.data = ctrl::VectorND::Zero(m_number_joints);
+  m_current_velocities.data = ctrl::VectorND::Zero(m_number_joints);
+  m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
+  m_last_positions.data = ctrl::VectorND::Zero(m_number_joints);
+  m_last_velocities.data = ctrl::VectorND::Zero(m_number_joints);
+  m_upper_pos_limits = upper_pos_limits;
+  m_lower_pos_limits = lower_pos_limits;
+
+  // Forward kinematics
+  m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
+  m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(m_chain));
+
+  return true;
+}
+
+void IKSolver::updateKinematics()
+{
+  // Pose w. r. t. base
+  m_fk_pos_solver->JntToCart(m_current_positions, m_end_effector_pose);
+
+  // Absolute velocity w. r. t. base
+  KDL::FrameVel vel;
+  m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions, m_current_velocities), vel);
+  m_end_effector_vel[0] = vel.deriv().vel.x();
+  m_end_effector_vel[1] = vel.deriv().vel.y();
+  m_end_effector_vel[2] = vel.deriv().vel.z();
+  m_end_effector_vel[3] = vel.deriv().rot.x();
+  m_end_effector_vel[4] = vel.deriv().rot.y();
+  m_end_effector_vel[5] = vel.deriv().rot.z();
+}
+
+void IKSolver::applyJointLimits()
+{
+  for (int i = 0; i < m_number_joints; ++i)
   {
-    // Initialize
-    m_chain = chain;
-    m_number_joints              = m_chain.getNrOfJoints();
-    m_current_positions.data     = ctrl::VectorND::Zero(m_number_joints);
-    m_current_velocities.data    = ctrl::VectorND::Zero(m_number_joints);
-    m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
-    m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
-    m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
-    m_upper_pos_limits           = upper_pos_limits;
-    m_lower_pos_limits           = lower_pos_limits;
-
-    // Forward kinematics
-    m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
-    m_fk_vel_solver.reset(new KDL::ChainFkSolverVel_recursive(m_chain));
-
-    return true;
-  }
-
-  void IKSolver::updateKinematics()
-  {
-    // Pose w. r. t. base
-    m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
-
-    // Absolute velocity w. r. t. base
-    KDL::FrameVel vel;
-    m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
-    m_end_effector_vel[0] = vel.deriv().vel.x();
-    m_end_effector_vel[1] = vel.deriv().vel.y();
-    m_end_effector_vel[2] = vel.deriv().vel.z();
-    m_end_effector_vel[3] = vel.deriv().rot.x();
-    m_end_effector_vel[4] = vel.deriv().rot.y();
-    m_end_effector_vel[5] = vel.deriv().rot.z();
-  }
-
-  void IKSolver::applyJointLimits()
-  {
-    for (int i = 0; i < m_number_joints; ++i)
+    if (std::isnan(m_lower_pos_limits(i)) || std::isnan(m_upper_pos_limits(i)))
     {
-      if (std::isnan(m_lower_pos_limits(i)) || std::isnan(m_upper_pos_limits(i)))
-      {
-        // Joint marked as continuous.
-        continue;
-      }
-      m_current_positions(i) = std::clamp(
-          m_current_positions(i),m_lower_pos_limits(i),m_upper_pos_limits(i));
+      // Joint marked as continuous.
+      continue;
     }
+    m_current_positions(i) =
+      std::clamp(m_current_positions(i), m_lower_pos_limits(i), m_upper_pos_limits(i));
   }
+}
 
-} // namespace
+}  // namespace cartesian_controller_base

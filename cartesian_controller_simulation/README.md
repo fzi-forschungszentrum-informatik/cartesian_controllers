@@ -48,4 +48,3 @@ Exposed interfaces per joint:
 
 - `command_interfaces`: position, velocity, stiffness, damping
 - `state_interfaces`: position, velocity
-

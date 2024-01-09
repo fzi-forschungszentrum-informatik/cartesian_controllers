@@ -38,10 +38,11 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/DampedLeastSquaresSolver.h>
+
 #include <pluginlib/class_list_macros.hpp>
 
 /**
- * \class cartesian_controller_base::DampedLeastSquaresSolver 
+ * \class cartesian_controller_base::DampedLeastSquaresSolver
  *
  * Users may explicitly specify this solver with \a "damped_least_squares" as \a
  * ik_solver in their controllers.yaml configuration file for each controller:
@@ -59,81 +60,75 @@
  * \endcode
  *
  */
-PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::DampedLeastSquaresSolver, cartesian_controller_base::IKSolver)
+PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::DampedLeastSquaresSolver,
+                       cartesian_controller_base::IKSolver)
 
+namespace cartesian_controller_base
+{
+DampedLeastSquaresSolver::DampedLeastSquaresSolver() : m_alpha(0.01) {}
 
+DampedLeastSquaresSolver::~DampedLeastSquaresSolver() {}
 
+trajectory_msgs::msg::JointTrajectoryPoint DampedLeastSquaresSolver::getJointControlCmds(
+  rclcpp::Duration period, const ctrl::Vector6D & net_force)
+{
+  // Compute joint jacobian
+  m_jnt_jacobian_solver->JntToJac(m_current_positions, m_jnt_jacobian);
 
+  // Compute joint velocities according to:
+  // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
+  ctrl::MatrixND identity;
+  identity.setIdentity(m_number_joints, m_number_joints);
+  m_handle->get_parameter(m_params + "/alpha", m_alpha);
 
-namespace cartesian_controller_base{
+  m_current_velocities.data =
+    (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data + m_alpha * m_alpha * identity)
+      .inverse() *
+    m_jnt_jacobian.data.transpose() * net_force;
 
-  DampedLeastSquaresSolver::DampedLeastSquaresSolver()
-    : m_alpha(0.01)
+  // Integrate once, starting with zero motion
+  m_current_positions.data =
+    m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
+
+  // Make sure positions stay in allowed margins
+  applyJointLimits();
+
+  // Apply results
+  trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
+  for (int i = 0; i < m_number_joints; ++i)
   {
+    control_cmd.positions.push_back(m_current_positions(i));
+    control_cmd.velocities.push_back(m_current_velocities(i));
+
+    // Accelerations should be left empty. Those values will be interpreted
+    // by most hardware joint drivers as max. tolerated values. As a
+    // consequence, the robot will move very slowly.
   }
+  control_cmd.time_from_start = period;  // valid for this duration
 
-  DampedLeastSquaresSolver::~DampedLeastSquaresSolver(){}
+  // Update for the next cycle
+  m_last_positions = m_current_positions;
 
-  trajectory_msgs::msg::JointTrajectoryPoint DampedLeastSquaresSolver::getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force)
-  {
-    // Compute joint jacobian
-    m_jnt_jacobian_solver->JntToJac(m_current_positions,m_jnt_jacobian);
-
-    // Compute joint velocities according to:
-    // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
-    ctrl::MatrixND identity;
-    identity.setIdentity(m_number_joints, m_number_joints);
-    m_handle->get_parameter(m_params + "/alpha", m_alpha);
-
-    m_current_velocities.data =
-      (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data
-       + m_alpha * m_alpha * identity).inverse() * m_jnt_jacobian.data.transpose() * net_force;
-
-    // Integrate once, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
-
-    // Make sure positions stay in allowed margins
-    applyJointLimits();
-
-    // Apply results
-    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
-    for (int i = 0; i < m_number_joints; ++i)
-    {
-      control_cmd.positions.push_back(m_current_positions(i));
-      control_cmd.velocities.push_back(m_current_velocities(i));
-
-      // Accelerations should be left empty. Those values will be interpreted
-      // by most hardware joint drivers as max. tolerated values. As a
-      // consequence, the robot will move very slowly.
-    }
-    control_cmd.time_from_start = period; // valid for this duration
-
-    // Update for the next cycle
-    m_last_positions = m_current_positions;
-
-    return control_cmd;
-  }
+  return control_cmd;
+}
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-  bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-  bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
+bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-                                      const KDL::Chain& chain,
-                                      const KDL::JntArray& upper_pos_limits,
-                                      const KDL::JntArray& lower_pos_limits)
-  {
-    IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
+                                    const KDL::Chain & chain,
+                                    const KDL::JntArray & upper_pos_limits,
+                                    const KDL::JntArray & lower_pos_limits)
+{
+  IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_jacobian.resize(m_number_joints);
+  m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+  m_jnt_jacobian.resize(m_number_joints);
 
-    nh->declare_parameter<double>(m_params + "/alpha", 1.0);
+  nh->declare_parameter<double>(m_params + "/alpha", 1.0);
 
-    return true;
-  }
+  return true;
+}
 
-
-} // namespace
+}  // namespace cartesian_controller_base

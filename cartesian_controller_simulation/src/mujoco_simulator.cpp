@@ -38,36 +38,37 @@
 //-----------------------------------------------------------------------------
 
 #include "cartesian_controller_simulation/mujoco_simulator.h"
+
 #include <memory>
 
-namespace cartesian_controller_simulation {
+namespace cartesian_controller_simulation
+{
+MuJoCoSimulator::MuJoCoSimulator() {}
 
-MuJoCoSimulator::MuJoCoSimulator(){}
-
-void MuJoCoSimulator::controlCB(const mjModel* m, mjData* d)
+void MuJoCoSimulator::controlCB(const mjModel * m, mjData * d)
 {
   getInstance().controlCBImpl(m, d);
 }
 
-void MuJoCoSimulator::controlCBImpl([[maybe_unused]] const mjModel* m, mjData* d)
+void MuJoCoSimulator::controlCBImpl([[maybe_unused]] const mjModel * m, mjData * d)
 {
   command_mutex.lock();
 
   for (size_t i = 0; i < pos_cmd.size(); ++i)
   {
     // Joint-level impedance control
-    d->ctrl[i] = stiff[i] * (pos_cmd[i] - d->qpos[i]) +            // stiffness
-                 damp[i] * (vel_cmd[i] - d->actuator_velocity[i]); // damping
+    d->ctrl[i] = stiff[i] * (pos_cmd[i] - d->qpos[i]) +             // stiffness
+                 damp[i] * (vel_cmd[i] - d->actuator_velocity[i]);  // damping
   }
   command_mutex.unlock();
 }
 
-int MuJoCoSimulator::simulate(const std::string& model_xml)
+int MuJoCoSimulator::simulate(const std::string & model_xml)
 {
   return getInstance().simulateImpl(model_xml);
 }
 
-int MuJoCoSimulator::simulateImpl(const std::string& model_xml)
+int MuJoCoSimulator::simulateImpl(const std::string & model_xml)
 {
   // Make sure that the ROS2-control system_interface only gets valid data in read().
   // We lock until we are done with simulation setup.
@@ -75,7 +76,7 @@ int MuJoCoSimulator::simulateImpl(const std::string& model_xml)
 
   // load and compile model
   char error[1000] = "Could not load binary model";
-  m                = mj_loadXML(model_xml.c_str(), nullptr, error, 1000);
+  m = mj_loadXML(model_xml.c_str(), nullptr, error, 1000);
   if (!m)
   {
     mju_error_s("Load model error: %s", error);
@@ -116,7 +117,8 @@ int MuJoCoSimulator::simulateImpl(const std::string& model_xml)
   return 0;
 }
 
-void MuJoCoSimulator::read(std::vector<double>& pos, std::vector<double>& vel, std::vector<double>& eff)
+void MuJoCoSimulator::read(std::vector<double> & pos, std::vector<double> & vel,
+                           std::vector<double> & eff)
 {
   // Realtime in ROS2-control is more important than fresh data exchange.
   if (state_mutex.try_lock())
@@ -128,10 +130,8 @@ void MuJoCoSimulator::read(std::vector<double>& pos, std::vector<double>& vel, s
   }
 }
 
-void MuJoCoSimulator::write(const std::vector<double>& pos,
-                            const std::vector<double>& vel,
-                            const std::vector<double>& stiff,
-                            const std::vector<double>& damp)
+void MuJoCoSimulator::write(const std::vector<double> & pos, const std::vector<double> & vel,
+                            const std::vector<double> & stiff, const std::vector<double> & damp)
 {
   // Realtime in ROS2-control is more important than fresh data exchange.
   if (command_mutex.try_lock())
@@ -154,4 +154,4 @@ void MuJoCoSimulator::syncStates()
   }
 }
 
-} // namespace cartesian_controller_simulation
+}  // namespace cartesian_controller_simulation

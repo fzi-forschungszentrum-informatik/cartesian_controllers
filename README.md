@@ -29,7 +29,7 @@ slides](https://roscon.ros.org/2019/talks/roscon2019_cartesiancontrollers.pdf)
 to get an overview.
 
 ## Why this package?
-Users may refer to `MoveIt` for end-effector motion planning, but 
+Users may refer to `MoveIt` for end-effector motion planning, but
 integrating a full planning stack is often unnecessary for simple applications.
 Additionally, there are a lot of use cases where direct control in task space is mandatory:
 dynamic following of target poses, such as **visual servoing**, **teleoperation**, **Cartesian teaching,** or
@@ -88,4 +88,3 @@ If you are interested in more details, have a look at
 - *Virtual Forward Dynamics Models for Cartesian Robot Control* ([Paper](https://arxiv.org/pdf/2009.11888.pdf))
 - *Contact Skill Imitation Learning for Robot-Independent Assembly Programming* ([Paper](https://arxiv.org/pdf/1908.06272.pdf))
 - *Human-Inspired Compliant Controllers for Robotic Assembly* ([PhD Thesis](https://publikationen.bibliothek.kit.edu/1000139834), especially Chapter 4)
-

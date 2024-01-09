@@ -41,14 +41,14 @@
 
 #include <cstdio>
 #include <cstring>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 #include "mujoco.h"
 
-namespace cartesian_controller_simulation {
-
+namespace cartesian_controller_simulation
+{
 /**
  * @brief MuJoCo's physics engine with rendering and basic window mouse interaction
  *
@@ -70,21 +70,21 @@ private:
 
 public:
   // Modern singleton approach
-  MuJoCoSimulator(const MuJoCoSimulator&) = delete;
-  MuJoCoSimulator& operator=(const MuJoCoSimulator &) = delete;
+  MuJoCoSimulator(const MuJoCoSimulator &) = delete;
+  MuJoCoSimulator & operator=(const MuJoCoSimulator &) = delete;
   MuJoCoSimulator(MuJoCoSimulator &&) = delete;
   MuJoCoSimulator & operator=(MuJoCoSimulator &&) = delete;
 
   // Use this in ROS2 code
-  static MuJoCoSimulator& getInstance()
+  static MuJoCoSimulator & getInstance()
   {
     static MuJoCoSimulator simulator;
     return simulator;
   }
 
   // MuJoCo data structures
-  mjModel* m = NULL; // MuJoCo model
-  mjData* d  = NULL; // MuJoCo data
+  mjModel * m = NULL;  // MuJoCo model
+  mjData * d = NULL;   // MuJoCo data
 
   // Buffers for data exchange with ROS2-control
   std::vector<double> pos_cmd;
@@ -92,28 +92,25 @@ public:
   std::vector<double> pos_state;
   std::vector<double> vel_state;
   std::vector<double> eff_state;
-  std::vector<double> stiff; // Proportional gain
-  std::vector<double> damp;  // Derivative gain
+  std::vector<double> stiff;  // Proportional gain
+  std::vector<double> damp;   // Derivative gain
 
   // Safety guards for buffers
   std::mutex state_mutex;
   std::mutex command_mutex;
 
   // Control input callback for the solver
-  static void controlCB(const mjModel* m, mjData* d);
-  void controlCBImpl(const mjModel* m, mjData* d);
+  static void controlCB(const mjModel * m, mjData * d);
+  void controlCBImpl(const mjModel * m, mjData * d);
 
   // Call this in a separate thread
-  static int simulate(const std::string& model_xml);
-  int simulateImpl(const std::string& model_xml);
+  static int simulate(const std::string & model_xml);
+  int simulateImpl(const std::string & model_xml);
 
   // Non-blocking
-  void read(std::vector<double>& pos, std::vector<double>& vel, std::vector<double>& eff);
-  void write(const std::vector<double>& pos,
-             const std::vector<double>& vel,
-             const std::vector<double>& stiff,
-             const std::vector<double>& damp);
-
+  void read(std::vector<double> & pos, std::vector<double> & vel, std::vector<double> & eff);
+  void write(const std::vector<double> & pos, const std::vector<double> & vel,
+             const std::vector<double> & stiff, const std::vector<double> & damp);
 };
 
-} // namespace cartesian_controller_simulation
+}  // namespace cartesian_controller_simulation

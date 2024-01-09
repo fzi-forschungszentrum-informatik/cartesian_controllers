@@ -48,12 +48,14 @@ from builtin_interfaces.msg import Duration
 
 class JointGui(Node):
     def __init__(self):
-        super().__init__('joint_gui')
+        super().__init__("joint_gui")
 
         # Check the available ROS2 nodes for the joint trajectory controller.
         # We assume it's called /joint_trajectory_controller.
-        nodes = subprocess.check_output("ros2 node list", stderr=subprocess.STDOUT, shell=True)
-        nodes = nodes.decode("utf-8").split('\n')
+        nodes = subprocess.check_output(
+            "ros2 node list", stderr=subprocess.STDOUT, shell=True
+        )
+        nodes = nodes.decode("utf-8").split("\n")
         if "/joint_trajectory_controller" in nodes:
             controller = "/joint_trajectory_controller"
         else:
@@ -63,25 +65,33 @@ class JointGui(Node):
 
         # Control the hand with publishing joint trajectories.
         self.publisher = self.create_publisher(
-            JointTrajectory, f'{controller}/joint_trajectory', 10)
+            JointTrajectory, f"{controller}/joint_trajectory", 10
+        )
 
         # Configuration presets
         self.joint_names = [
-            'joint1',
-            'joint2',
-            'joint3',
-            'joint4',
-            'joint5',
-            'joint6',
+            "joint1",
+            "joint2",
+            "joint3",
+            "joint4",
+            "joint5",
+            "joint6",
         ]
         self.fully_streched = [0, 0, 0, 0, 0, 0]
-        self.home = [np.pi/4, -np.pi/2, np.pi/2, -np.pi/2, -np.pi/2, 2 * np.pi]
+        self.home = [
+            np.pi / 4,
+            -np.pi / 2,
+            np.pi / 2,
+            -np.pi / 2,
+            -np.pi / 2,
+            2 * np.pi,
+        ]
 
     def gui(self):
-        """ A GUI with a single slider for opening/closing the JointGui """
+        """A GUI with a single slider for opening/closing the JointGui"""
         self.percent = 100
         self.window = Tk()
-        self.window.title('joint_gui')
+        self.window.title("joint_gui")
         self.slider = Scale(self.window, from_=self.percent, to=0)
         self.slider.set(0)
         self.slider.bind("<ButtonRelease-1>", self.slider_changed)
@@ -93,12 +103,13 @@ class JointGui(Node):
         rclpy.spin_once(self, timeout_sec=0)
 
     def publish(self, opening):
-        """ Publish a new joint trajectory with an interpolated state
+        """Publish a new joint trajectory with an interpolated state
 
         We scale linearly with opening=[0,1] between `fully_streched` and `home`.
         """
-        jpos = opening * np.array(self.home) + \
-            (self.percent - opening) * np.array(self.fully_streched)
+        jpos = opening * np.array(self.home) + (self.percent - opening) * np.array(
+            self.fully_streched
+        )
         jpos = jpos / self.percent
         msg = JointTrajectory()
         msg.joint_names = self.joint_names
@@ -117,5 +128,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

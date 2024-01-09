@@ -44,11 +44,11 @@
 #include <cartesian_controller_base/cartesian_controller_base.h>
 #include <cartesian_force_controller/cartesian_force_controller.h>
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
+
 #include <controller_interface/controller_interface.hpp>
 
 namespace cartesian_compliance_controller
 {
-
 /**
  * @brief A ROS2-control controller for Cartesian compliance control
  *
@@ -69,51 +69,52 @@ namespace cartesian_compliance_controller
  * where the additional forces are applied.
  *
  */
-class CartesianComplianceController
-: public cartesian_motion_controller::CartesianMotionController
-, public cartesian_force_controller::CartesianForceController
+class CartesianComplianceController : public cartesian_motion_controller::CartesianMotionController,
+                                      public cartesian_force_controller::CartesianForceController
 {
-  public:
-    CartesianComplianceController();
+public:
+  CartesianComplianceController();
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    virtual controller_interface::return_type init(const std::string & controller_name) override;
+  virtual controller_interface::return_type init(const std::string & controller_name) override;
 #endif
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  controller_interface::return_type update(const rclcpp::Time & time,
+                                           const rclcpp::Duration & period) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    controller_interface::return_type update() override;
+  controller_interface::return_type update() override;
 #endif
 
-    using Base = cartesian_controller_base::CartesianControllerBase;
-    using MotionBase = cartesian_motion_controller::CartesianMotionController;
-    using ForceBase = cartesian_force_controller::CartesianForceController;
+  using Base = cartesian_controller_base::CartesianControllerBase;
+  using MotionBase = cartesian_motion_controller::CartesianMotionController;
+  using ForceBase = cartesian_force_controller::CartesianForceController;
 
-  private:
-    /**
+private:
+  /**
      * @brief Compute the net force of target wrench and stiffness-related pose offset
      *
      * @return The remaining error wrench, given in robot base frame
      */
-    ctrl::Vector6D        computeComplianceError();
+  ctrl::Vector6D computeComplianceError();
 
-    ctrl::Matrix6D        m_stiffness;
-    std::string           m_compliance_ref_link;
-
+  ctrl::Matrix6D m_stiffness;
+  std::string m_compliance_ref_link;
 };
 
-}
+}  // namespace cartesian_compliance_controller
 
 #endif

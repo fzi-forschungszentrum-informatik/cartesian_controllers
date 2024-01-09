@@ -39,6 +39,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
     spacenav_node = Node(
         package="spacenav",
@@ -68,6 +69,5 @@ def generate_launch_description():
         ],
         output="both",
     )
-
 
     return LaunchDescription([spacenav_node, converter_node])

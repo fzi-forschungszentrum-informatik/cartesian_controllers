@@ -41,12 +41,13 @@
 #define JACOBIAN_TRANSPOSE_SOLVER_H_INCLUDED
 
 #include <cartesian_controller_base/IKSolver.h>
+
 #include <kdl/jacobian.hpp>
 #include <memory>
 
-namespace cartesian_controller_base{
-
-  /**
+namespace cartesian_controller_base
+{
+/**
    * \brief A Jacobian transpose IK solver for Cartesian controllers
    *
    *
@@ -62,11 +63,11 @@ namespace cartesian_controller_base{
    */
 class JacobianTransposeSolver : public IKSolver
 {
-  public:
-    JacobianTransposeSolver();
-    ~JacobianTransposeSolver();
+public:
+  JacobianTransposeSolver();
+  ~JacobianTransposeSolver();
 
-    /**
+  /**
      * \brief Compute joint target commands with the Jacobian transpose
      *
      * \param period The duration in sec for this simulation step
@@ -74,11 +75,10 @@ class JacobianTransposeSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force) override;
+  trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+    rclcpp::Duration period, const ctrl::Vector6D & net_force) override;
 
-    /**
+  /**
      * \brief Initialize the solver
      *
      * \param chain The kinematic chain of the robot
@@ -88,19 +88,18 @@ class JacobianTransposeSolver : public IKSolver
      * \return True, if everything went well
      */
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
+  bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
 #else
-    bool init(std::shared_ptr<rclcpp::Node> /*nh*/,
+  bool init(std::shared_ptr<rclcpp::Node> /*nh*/,
 #endif
-              const KDL::Chain& chain,
-              const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits) override;
+            const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+            const KDL::JntArray & lower_pos_limits) override;
 
-  private:
-    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
-    KDL::Jacobian m_jnt_jacobian;
+private:
+  std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+  KDL::Jacobian m_jnt_jacobian;
 };
 
-}
+}  // namespace cartesian_controller_base
 
 #endif

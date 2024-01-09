@@ -38,14 +38,18 @@
 
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    PathJoinSubstitution,
+)
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 import os
-distro = os.environ['ROS_DISTRO']
-if distro in ['galactic', 'humble', 'iron']:
+
+distro = os.environ["ROS_DISTRO"]
+if distro in ["galactic", "humble", "iron"]:
     spawner = "spawner"
 else:  # foxy
     spawner = "spawner.py"
@@ -62,12 +66,20 @@ def generate_launch_description():
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("cartesian_controller_simulation"), "urdf", "robot.urdf.xacro"]
+                [
+                    FindPackageShare("cartesian_controller_simulation"),
+                    "urdf",
+                    "robot.urdf.xacro",
+                ]
             ),
             " ",
             "mujoco_model:=",
             PathJoinSubstitution(
-                [FindPackageShare("cartesian_controller_simulation"), "etc", "robot_mujoco.xml"]
+                [
+                    FindPackageShare("cartesian_controller_simulation"),
+                    "etc",
+                    "robot_mujoco.xml",
+                ]
             ),
         ]
     )
@@ -75,7 +87,9 @@ def generate_launch_description():
 
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare("cartesian_controller_simulation"), "config", "controller_manager.yaml",
+            FindPackageShare("cartesian_controller_simulation"),
+            "config",
+            "controller_manager.yaml",
         ]
     )
 
@@ -85,17 +99,17 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
-        #prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",
+        # prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",  # noqa: E501
         output="both",
         remappings=[
-            ('motion_control_handle/target_frame', 'target_frame'),
-            ('cartesian_motion_controller/target_frame', 'target_frame'),
-            ('cartesian_compliance_controller/target_frame', 'target_frame'),
-            ('cartesian_force_controller/target_wrench', 'target_wrench'),
-            ('cartesian_compliance_controller/target_wrench', 'target_wrench'),
-            ('cartesian_force_controller/ft_sensor_wrench', 'ft_sensor_wrench'),
-            ('cartesian_compliance_controller/ft_sensor_wrench', 'ft_sensor_wrench'),
-            ]
+            ("motion_control_handle/target_frame", "target_frame"),
+            ("cartesian_motion_controller/target_frame", "target_frame"),
+            ("cartesian_compliance_controller/target_frame", "target_frame"),
+            ("cartesian_force_controller/target_wrench", "target_wrench"),
+            ("cartesian_compliance_controller/target_wrench", "target_wrench"),
+            ("cartesian_force_controller/ft_sensor_wrench", "ft_sensor_wrench"),
+            ("cartesian_compliance_controller/ft_sensor_wrench", "ft_sensor_wrench"),
+        ],
     )
 
     # Convenience function for easy spawner construction
@@ -123,7 +137,7 @@ def generate_launch_description():
         "invalid_cartesian_compliance_controller",
         "invalid_cartesian_force_controller",
     ]
-    state = "--inactive" if distro in ['humble', 'iron'] else "--stopped"
+    state = "--inactive" if distro in ["humble", "iron"] else "--stopped"
     inactive_spawners = [
         controller_spawner(controller, state) for controller in inactive_list
     ]
@@ -145,7 +159,7 @@ def generate_launch_description():
         executable="rviz2",
         name="rviz2",
         output="log",
-        arguments=["-d", rviz_config]
+        arguments=["-d", rviz_config],
     )
 
     # Nodes to start
