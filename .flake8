@@ -1,0 +1,4 @@
+
+[flake8]
+# Use black's line length (default 88) instead of the flake8 default of 79:
+max-line-length = 88
