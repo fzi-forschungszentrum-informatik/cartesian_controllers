@@ -37,13 +37,13 @@
  */
 //-----------------------------------------------------------------------------
 
+#include <cartesian_compliance_controller/cartesian_compliance_controller.h>
+
 #include "cartesian_controller_base/Utility.h"
 #include "controller_interface/controller_interface.hpp"
-#include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 
 namespace cartesian_compliance_controller
 {
-
 CartesianComplianceController::CartesianComplianceController()
 // Base constructor won't be called in diamond inheritance, so call that
 // explicitly
@@ -53,8 +53,10 @@ CartesianComplianceController::CartesianComplianceController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_init()
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+CartesianComplianceController::on_init()
 {
   using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
   if (MotionBase::on_init() != TYPE::SUCCESS || ForceBase::on_init() != TYPE::SUCCESS)
@@ -76,7 +78,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return TYPE::SUCCESS;
 }
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianComplianceController::init(const std::string & controller_name)
+controller_interface::return_type CartesianComplianceController::init(
+  const std::string & controller_name)
 {
   using TYPE = controller_interface::return_type;
   if (MotionBase::init(controller_name) != TYPE::OK || ForceBase::init(controller_name) != TYPE::OK)
@@ -90,23 +93,24 @@ controller_interface::return_type CartesianComplianceController::init(const std:
 }
 #endif
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_configure(
-    const rclcpp_lifecycle::State & previous_state)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+CartesianComplianceController::on_configure(const rclcpp_lifecycle::State & previous_state)
 {
   using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
-  if (MotionBase::on_configure(previous_state) != TYPE::SUCCESS || ForceBase::on_configure(previous_state) != TYPE::SUCCESS)
+  if (MotionBase::on_configure(previous_state) != TYPE::SUCCESS ||
+      ForceBase::on_configure(previous_state) != TYPE::SUCCESS)
   {
     return TYPE::ERROR;
   }
 
   // Make sure compliance link is part of the robot chain
   m_compliance_ref_link = get_node()->get_parameter("compliance_ref_link").as_string();
-  if(!Base::robotChainContains(m_compliance_ref_link))
+  if (!Base::robotChainContains(m_compliance_ref_link))
   {
-    RCLCPP_ERROR_STREAM(get_node()->get_logger(),
-                        m_compliance_ref_link << " is not part of the kinematic chain from "
-                                              << Base::m_robot_base_link << " to "
-                                              << Base::m_end_effector_link);
+    RCLCPP_ERROR_STREAM(get_node()->get_logger(), m_compliance_ref_link
+                                                    << " is not part of the kinematic chain from "
+                                                    << Base::m_robot_base_link << " to "
+                                                    << Base::m_end_effector_link);
     return TYPE::ERROR;
   }
 
@@ -116,33 +120,36 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Cartes
   return TYPE::SUCCESS;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_activate(
-    const rclcpp_lifecycle::State & previous_state)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+CartesianComplianceController::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   // Base::on_activation(..) will get called twice,
   // but that's fine.
   using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
-  if (MotionBase::on_activate(previous_state) != TYPE::SUCCESS || ForceBase::on_activate(previous_state) != TYPE::SUCCESS)
+  if (MotionBase::on_activate(previous_state) != TYPE::SUCCESS ||
+      ForceBase::on_activate(previous_state) != TYPE::SUCCESS)
   {
     return TYPE::ERROR;
   }
   return TYPE::SUCCESS;
 }
 
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn CartesianComplianceController::on_deactivate(
-    const rclcpp_lifecycle::State & previous_state)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+CartesianComplianceController::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   using TYPE = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
-  if (MotionBase::on_deactivate(previous_state) != TYPE::SUCCESS || ForceBase::on_deactivate(previous_state) != TYPE::SUCCESS)
+  if (MotionBase::on_deactivate(previous_state) != TYPE::SUCCESS ||
+      ForceBase::on_deactivate(previous_state) != TYPE::SUCCESS)
   {
     return TYPE::ERROR;
   }
   return TYPE::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-controller_interface::return_type CartesianComplianceController::update(const rclcpp::Time& time,
-                                                                   const rclcpp::Duration& period)
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+controller_interface::return_type CartesianComplianceController::update(
+  const rclcpp::Time & time, const rclcpp::Duration & period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type CartesianComplianceController::update()
 #endif
@@ -162,7 +169,7 @@ controller_interface::return_type CartesianComplianceController::update()
     ctrl::Vector6D error = computeComplianceError();
 
     // Turn Cartesian error into joint motion
-    Base::computeJointControlCmds(error,internal_period);
+    Base::computeJointControlCmds(error, internal_period);
   }
 
   // Write final commands to the hardware interface
@@ -186,7 +193,7 @@ ctrl::Vector6D CartesianComplianceController::computeComplianceError()
   ctrl::Vector6D net_force =
 
     // Spring force in base orientation
-    Base::displayInBaseLink(m_stiffness,m_compliance_ref_link) * MotionBase::computeMotionError()
+    Base::displayInBaseLink(m_stiffness, m_compliance_ref_link) * MotionBase::computeMotionError()
 
     // Sensor and target force in base orientation
     + ForceBase::computeForceError();
@@ -194,10 +201,10 @@ ctrl::Vector6D CartesianComplianceController::computeComplianceError()
   return net_force;
 }
 
-} // namespace
-
+}  // namespace cartesian_compliance_controller
 
 // Pluginlib
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(cartesian_compliance_controller::CartesianComplianceController, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(cartesian_compliance_controller::CartesianComplianceController,
+                       controller_interface::ControllerInterface)

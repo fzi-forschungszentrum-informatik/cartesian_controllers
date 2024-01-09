@@ -45,9 +45,9 @@
 #include <sensor_msgs/JointState.h>
 
 // ROS control
-#include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
+#include <hardware_interface/robot_hw.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 
 // KDL
@@ -58,39 +58,38 @@
 
 namespace joint_to_cartesian_controller
 {
-
 /**
  * @brief A controller adapter in form of a ROS-control hardware interface
  */
 class JointControllerAdapter : public hardware_interface::RobotHW
 {
-  public:
+public:
+  JointControllerAdapter();
+  ~JointControllerAdapter();
 
-    JointControllerAdapter();
-    ~JointControllerAdapter();
+  bool init(const std::vector<hardware_interface::JointStateHandle> & handles,
+            ros::NodeHandle & nh);
 
-    bool init(const std::vector<hardware_interface::JointStateHandle>& handles, ros::NodeHandle& nh);
+  void write(KDL::JntArray & positions);
 
-    void write(KDL::JntArray& positions);
+private:
+  //! Number of actuated joints
+  size_t m_number_joints;
 
-  private:
-    //! Number of actuated joints
-    size_t m_number_joints;
+  //! Actuated joints in order from base to tip
+  std::vector<std::string> m_joint_names;
 
-    //! Actuated joints in order from base to tip
-    std::vector<std::string> m_joint_names;
+  hardware_interface::JointStateInterface m_state_interface;
+  hardware_interface::PositionJointInterface m_pos_interface;
 
-    hardware_interface::JointStateInterface m_state_interface;
-    hardware_interface::PositionJointInterface m_pos_interface;
+  joint_limits_interface::PositionJointSoftLimitsInterface m_limits_interface;
 
-    joint_limits_interface::PositionJointSoftLimitsInterface m_limits_interface;
+  std::vector<hardware_interface::JointHandle> m_joint_handles;
+  std::vector<joint_limits_interface::PositionJointSoftLimitsHandle> m_limits_handles;
 
-    std::vector<hardware_interface::JointHandle>                        m_joint_handles;
-    std::vector<joint_limits_interface::PositionJointSoftLimitsHandle>  m_limits_handles;
-
-    std::vector<double> m_cmd;
+  std::vector<double> m_cmd;
 };
 
-} // end namespace
+}  // namespace joint_to_cartesian_controller
 
 #endif

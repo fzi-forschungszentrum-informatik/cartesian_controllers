@@ -48,12 +48,10 @@
 
 namespace joint_to_cartesian_controller
 {
+JointControllerAdapter::JointControllerAdapter() {}
 
-JointControllerAdapter::JointControllerAdapter()
-{
-}
-
-bool JointControllerAdapter::init(const std::vector<hardware_interface::JointStateHandle>& state_handles, ros::NodeHandle& nh)
+bool JointControllerAdapter::init(
+  const std::vector<hardware_interface::JointStateHandle> & state_handles, ros::NodeHandle & nh)
 {
   for (size_t i = 0; i < state_handles.size(); ++i)
   {
@@ -79,9 +77,7 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   for (size_t i = 0; i < m_number_joints; ++i)
   {
     m_joint_handles.push_back(
-        hardware_interface::JointHandle(
-          m_state_interface.getHandle(m_joint_names[i]),
-          &m_cmd[i]));
+      hardware_interface::JointHandle(m_state_interface.getHandle(m_joint_names[i]), &m_cmd[i]));
 
     m_pos_interface.registerHandle(m_joint_handles[i]);
   }
@@ -91,10 +87,7 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   joint_limits_interface::JointLimits limits;
   for (size_t i = 0; i < m_number_joints; ++i)
   {
-    joint_limits_interface::getJointLimits(
-        m_joint_names[i],
-        nh,
-        limits);
+    joint_limits_interface::getJointLimits(m_joint_names[i], nh, limits);
   }
 
   joint_limits_interface::SoftJointLimits soft_limits;
@@ -102,12 +95,10 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   // Initialize and register handles to the joint limits
   for (size_t i = 0; i < m_number_joints; ++i)
   {
-    m_limits_handles.push_back(
-        joint_limits_interface::PositionJointSoftLimitsHandle(
-          m_joint_handles[i],
-          limits,
-          soft_limits // deliberately empty
-          ));
+    m_limits_handles.push_back(joint_limits_interface::PositionJointSoftLimitsHandle(
+      m_joint_handles[i], limits,
+      soft_limits  // deliberately empty
+      ));
   }
 
   for (size_t i = 0; i < m_number_joints; ++i)
@@ -118,11 +109,9 @@ bool JointControllerAdapter::init(const std::vector<hardware_interface::JointSta
   return true;
 }
 
-JointControllerAdapter::~JointControllerAdapter()
-{
-}
+JointControllerAdapter::~JointControllerAdapter() {}
 
-void JointControllerAdapter::write(KDL::JntArray& positions)
+void JointControllerAdapter::write(KDL::JntArray & positions)
 {
   if (static_cast<size_t>(positions.data.size()) != m_cmd.size())
   {
@@ -136,4 +125,4 @@ void JointControllerAdapter::write(KDL::JntArray& positions)
   }
 }
 
-} // end namespace
+}  // namespace joint_to_cartesian_controller

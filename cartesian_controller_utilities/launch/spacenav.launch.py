@@ -40,6 +40,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
     spacenav_node = Node(
         package="spacenav",
@@ -47,8 +48,8 @@ def generate_launch_description():
         parameters=[
             {"zero_when_static": True},
             {"static_count_threshold": 30},
-            {"linear_scale": [50,50,50]},
-            {"angular_scale": [5,5,5]},
+            {"linear_scale": [50, 50, 50]},
+            {"angular_scale": [5, 5, 5]},
         ],
         output="both",
     )

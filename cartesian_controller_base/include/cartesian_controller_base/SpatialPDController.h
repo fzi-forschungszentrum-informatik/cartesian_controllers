@@ -42,11 +42,11 @@
 
 #include <cartesian_controller_base/PDController.h>
 #include <cartesian_controller_base/Utility.h>
+
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace cartesian_controller_base
 {
-
 /**
  * @brief A 6-dimensional PD controller class
  *
@@ -55,16 +55,16 @@ namespace cartesian_controller_base
  */
 class SpatialPDController
 {
-  public:
-    SpatialPDController();
+public:
+  SpatialPDController();
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> params);
+  bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> params);
 #else
-    bool init(std::shared_ptr<rclcpp::Node> params);
+  bool init(std::shared_ptr<rclcpp::Node> params);
 #endif
 
-    /**
+  /**
      * @brief Call operator for one control cycle
      *
      * @param error The control error to reduce. Target - current.
@@ -72,14 +72,13 @@ class SpatialPDController
      *
      * @return The controlled 6-dim vector (translational, rotational).
      */
-    ctrl::Vector6D operator()(const ctrl::Vector6D& error, const rclcpp::Duration& period);
+  ctrl::Vector6D operator()(const ctrl::Vector6D & error, const rclcpp::Duration & period);
 
-  private:
-    ctrl::Vector6D m_cmd;
-    std::vector<PDController> m_pd_controllers;
-
+private:
+  ctrl::Vector6D m_cmd;
+  std::vector<PDController> m_pd_controllers;
 };
 
-} // namespace
+}  // namespace cartesian_controller_base
 
 #endif

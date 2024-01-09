@@ -37,13 +37,11 @@
  */
 //-----------------------------------------------------------------------------
 
-
 #ifndef IKSOLVER_H_INCLUDED
 #define IKSOLVER_H_INCLUDED
 
-#include "rclcpp/node.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include <cartesian_controller_base/Utility.h>
+
 #include <functional>
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -59,8 +57,11 @@
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <vector>
 
-namespace cartesian_controller_base{
+#include "rclcpp/node.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
+namespace cartesian_controller_base
+{
 /*! \brief Base class to compute manipulator joint motion from Cartesian force inputs.
  *
  *  This is a base class for solvers, whose child classes will implement
@@ -68,11 +69,11 @@ namespace cartesian_controller_base{
  */
 class IKSolver
 {
-  public:
-    IKSolver();
-    virtual ~IKSolver();
+public:
+  IKSolver();
+  virtual ~IKSolver();
 
-    /**
+  /**
      * @brief Compute joint target commands, using specific IK algorithms
      *
      * The resulting motion will be forwarded as reference to the low-level
@@ -83,11 +84,10 @@ class IKSolver
      *
      * @return A point holding positions, velocities and accelerations of each joint
      */
-    virtual trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force) = 0;
+  virtual trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+    rclcpp::Duration period, const ctrl::Vector6D & net_force) = 0;
 
-    /**
+  /**
      * @brief Get the current end effector pose of the simulated robot
      *
      * The last link in the chain from the init() function is taken as end
@@ -97,9 +97,9 @@ class IKSolver
      * @return The end effector pose with respect to the robot base link. This
      * link is the same as the one implicitly given in the init() function.
      */
-    const KDL::Frame& getEndEffectorPose() const;
+  const KDL::Frame & getEndEffectorPose() const;
 
-    /**
+  /**
      * @brief Get the current end effector velocity of the simulated robot
      *
      * The last link in the chain from the init() function is taken as end
@@ -108,21 +108,21 @@ class IKSolver
      * @return The end effector vel with respect to the robot base link. The
      * order is first translation, then rotation.
      */
-    const ctrl::Vector6D& getEndEffectorVel() const;
+  const ctrl::Vector6D & getEndEffectorVel() const;
 
-    /**
+  /**
      * @brief Get the current joint positions of the simulated robot
      *
      * @return The current joint positions
      */
-    const KDL::JntArray& getPositions() const;
+  const KDL::JntArray & getPositions() const;
 
-    //! Set initial joint configuration
-    bool setStartState(
-      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
-        joint_pos_handles);
+  //! Set initial joint configuration
+  bool setStartState(
+    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> > &
+      joint_pos_handles);
 
-    /**
+  /**
      * @brief Synchronize joint positions with the real robot
      *
      * Call this periodically in the controller's update() function.
@@ -132,11 +132,11 @@ class IKSolver
      *
      * @param joint_pos_handles Read handles to the joint positions.
      */
-    void synchronizeJointPositions(
-      const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >&
-        joint_pos_handles);
+  void synchronizeJointPositions(
+    const std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> > &
+      joint_pos_handles);
 
-    /**
+  /**
      * @brief Initialize the solver
      *
      * @param nh A handle to the node's parameter management
@@ -147,25 +147,23 @@ class IKSolver
      * @return True, if everything went well
      */
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+  virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-    virtual bool init(std::shared_ptr<rclcpp::Node> nh,
+  virtual bool init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-                      const KDL::Chain& chain,
-                      const KDL::JntArray& upper_pos_limits,
-                      const KDL::JntArray& lower_pos_limits);
+                    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+                    const KDL::JntArray & lower_pos_limits);
 
-    /**
+  /**
      * @brief Update the robot kinematics of the solver
      *
      * Call this periodically to update the internal simulation's forward
      * kinematics.
      */
-    void updateKinematics();
+  void updateKinematics();
 
-  protected:
-
-    /**
+protected:
+  /**
      * @brief Make sure positions stay in allowed margins
      *
      * Limit internal joint buffers to the position limits provided by URDF.
@@ -173,33 +171,32 @@ class IKSolver
      * If both upper and lower limits are zero, the joint appears fixed.  Note
      * that this is the default urdf initializer if limits are omitted.
      */
-    void applyJointLimits();
+  void applyJointLimits();
 
-    //! The underlying physical system
-    KDL::Chain m_chain;
+  //! The underlying physical system
+  KDL::Chain m_chain;
 
-    //! Number of controllable joint
-    int m_number_joints;
+  //! Number of controllable joint
+  int m_number_joints;
 
-    // Internal buffers
-    KDL::JntArray m_current_positions;
-    KDL::JntArray m_current_velocities;
-    KDL::JntArray m_current_accelerations;
-    KDL::JntArray m_last_positions;
-    KDL::JntArray m_last_velocities;
+  // Internal buffers
+  KDL::JntArray m_current_positions;
+  KDL::JntArray m_current_velocities;
+  KDL::JntArray m_current_accelerations;
+  KDL::JntArray m_last_positions;
+  KDL::JntArray m_last_velocities;
 
-    // Joint limits
-    KDL::JntArray m_upper_pos_limits;
-    KDL::JntArray m_lower_pos_limits;
+  // Joint limits
+  KDL::JntArray m_upper_pos_limits;
+  KDL::JntArray m_lower_pos_limits;
 
-    // Forward kinematics
-    std::shared_ptr<KDL::ChainFkSolverPos_recursive>  m_fk_pos_solver;
-    std::shared_ptr<KDL::ChainFkSolverVel_recursive>  m_fk_vel_solver;
-    KDL::Frame      m_end_effector_pose;
-    ctrl::Vector6D  m_end_effector_vel;
+  // Forward kinematics
+  std::shared_ptr<KDL::ChainFkSolverPos_recursive> m_fk_pos_solver;
+  std::shared_ptr<KDL::ChainFkSolverVel_recursive> m_fk_vel_solver;
+  KDL::Frame m_end_effector_pose;
+  ctrl::Vector6D m_end_effector_vel;
 };
 
-
-} // namespace
+}  // namespace cartesian_controller_base
 
 #endif

@@ -37,17 +37,17 @@
  */
 //-----------------------------------------------------------------------------
 
-#include <algorithm>
 #include <cartesian_controller_base/ForwardDynamicsSolver.h>
+
+#include <algorithm>
 #include <kdl/framevel.hpp>
 #include <kdl/jntarrayvel.hpp>
 #include <map>
 #include <pluginlib/class_list_macros.hpp>
 #include <sstream>
 
-
 /**
- * \class cartesian_controller_base::ForwardDynamicsSolver 
+ * \class cartesian_controller_base::ForwardDynamicsSolver
  *
  * Users may explicitly specify it with \a "forward_dynamics" as \a ik_solver
  * in their controllers.yaml configuration file for each controller:
@@ -65,135 +65,122 @@
  * \endcode
  *
  */
-PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver, cartesian_controller_base::IKSolver)
+PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::ForwardDynamicsSolver,
+                       cartesian_controller_base::IKSolver)
 
+namespace cartesian_controller_base
+{
+ForwardDynamicsSolver::ForwardDynamicsSolver() {}
 
+ForwardDynamicsSolver::~ForwardDynamicsSolver() {}
 
+trajectory_msgs::msg::JointTrajectoryPoint ForwardDynamicsSolver::getJointControlCmds(
+  rclcpp::Duration period, const ctrl::Vector6D & net_force)
+{
+  // Compute joint space inertia matrix with actualized link masses
+  buildGenericModel();
+  m_jnt_space_inertia_solver->JntToMass(m_current_positions, m_jnt_space_inertia);
 
+  // Compute joint jacobian
+  m_jnt_jacobian_solver->JntToJac(m_current_positions, m_jnt_jacobian);
 
-namespace cartesian_controller_base{
+  // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
+  m_current_accelerations.data =
+    m_jnt_space_inertia.data.inverse() * m_jnt_jacobian.data.transpose() * net_force;
 
-  ForwardDynamicsSolver::ForwardDynamicsSolver()
+  // Numerical time integration with the Euler forward method
+  m_current_positions.data = m_last_positions.data + m_last_velocities.data * period.seconds();
+  m_current_velocities.data =
+    m_last_velocities.data + m_current_accelerations.data * period.seconds();
+  m_current_velocities.data *= 0.9;  // 10 % global damping against unwanted null space motion.
+                                     // Will cause exponential slow-down without input.
+  // Make sure positions stay in allowed margins
+  applyJointLimits();
+
+  // Apply results
+  trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
+  for (int i = 0; i < m_number_joints; ++i)
   {
+    control_cmd.positions.push_back(m_current_positions(i));
+    control_cmd.velocities.push_back(m_current_velocities(i));
+
+    // Accelerations should be left empty. Those values will be interpreted
+    // by most hardware joint drivers as max. tolerated values. As a
+    // consequence, the robot will move very slowly.
   }
+  control_cmd.time_from_start = period;  // valid for this duration
 
-  ForwardDynamicsSolver::~ForwardDynamicsSolver(){}
+  // Update for the next cycle
+  m_last_positions = m_current_positions;
+  m_last_velocities = m_current_velocities;
 
-  trajectory_msgs::msg::JointTrajectoryPoint ForwardDynamicsSolver::getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force)
-  {
-
-    // Compute joint space inertia matrix with actualized link masses
-    buildGenericModel();
-    m_jnt_space_inertia_solver->JntToMass(m_current_positions,m_jnt_space_inertia);
-
-    // Compute joint jacobian
-    m_jnt_jacobian_solver->JntToJac(m_current_positions,m_jnt_jacobian);
-
-    // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
-    m_current_accelerations.data = m_jnt_space_inertia.data.inverse() * m_jnt_jacobian.data.transpose() * net_force;
-
-    // Numerical time integration with the Euler forward method
-    m_current_positions.data = m_last_positions.data + m_last_velocities.data * period.seconds();
-    m_current_velocities.data = m_last_velocities.data + m_current_accelerations.data * period.seconds();
-    m_current_velocities.data *= 0.9;  // 10 % global damping against unwanted null space motion.
-                                       // Will cause exponential slow-down without input.
-    // Make sure positions stay in allowed margins
-    applyJointLimits();
-
-    // Apply results
-    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
-    for (int i = 0; i < m_number_joints; ++i)
-    {
-      control_cmd.positions.push_back(m_current_positions(i));
-      control_cmd.velocities.push_back(m_current_velocities(i));
-
-      // Accelerations should be left empty. Those values will be interpreted
-      // by most hardware joint drivers as max. tolerated values. As a
-      // consequence, the robot will move very slowly.
-    }
-    control_cmd.time_from_start = period; // valid for this duration
-
-    // Update for the next cycle
-    m_last_positions = m_current_positions;
-    m_last_velocities = m_current_velocities;
-
-    return control_cmd;
-  }
-
+  return control_cmd;
+}
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-  bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-  bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp::Node> nh,
+bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-                                   const KDL::Chain& chain,
-                                   const KDL::JntArray& upper_pos_limits,
-                                   const KDL::JntArray& lower_pos_limits)
+                                 const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+                                 const KDL::JntArray & lower_pos_limits)
+{
+  IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
+
+  if (!buildGenericModel())
   {
-    IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
-
-    if (!buildGenericModel())
-    {
-      RCLCPP_ERROR(nh->get_logger(), "Something went wrong in setting up the internal model.");
-      return false;
-    }
-
-    // Forward dynamics
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
-    m_jnt_jacobian.resize(m_number_joints);
-    m_jnt_space_inertia.resize(m_number_joints);
-
-    // Set the initial value if provided at runtime, else use default value.
-    m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.1);
-
-    RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver initialized");
-    RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver has control over %i joints", m_number_joints);
-
-    return true;
+    RCLCPP_ERROR(nh->get_logger(), "Something went wrong in setting up the internal model.");
+    return false;
   }
 
-  bool ForwardDynamicsSolver::buildGenericModel()
+  // Forward dynamics
+  m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+  m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain, KDL::Vector::Zero()));
+  m_jnt_jacobian.resize(m_number_joints);
+  m_jnt_space_inertia.resize(m_number_joints);
+
+  // Set the initial value if provided at runtime, else use default value.
+  m_min = nh->declare_parameter<double>(m_params + "/link_mass", 0.1);
+
+  RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver initialized");
+  RCLCPP_INFO(nh->get_logger(), "Forward dynamics solver has control over %i joints",
+              m_number_joints);
+
+  return true;
+}
+
+bool ForwardDynamicsSolver::buildGenericModel()
+{
+  // Set all masses and inertias to minimal (yet stable) values.
+  double ip_min = 0.000001;
+  for (size_t i = 0; i < m_chain.segments.size(); ++i)
   {
-    // Set all masses and inertias to minimal (yet stable) values.
-    double ip_min = 0.000001;
-    for (size_t i = 0; i < m_chain.segments.size(); ++i)
+    // Fixed joint segment
+    if (m_chain.segments[i].getJoint().getType() == KDL::Joint::None)
     {
-      // Fixed joint segment
-      if (m_chain.segments[i].getJoint().getType() == KDL::Joint::None)
-      {
-        m_chain.segments[i].setInertia(
-            KDL::RigidBodyInertia::Zero());
-      }
-      else  // relatively moving segment
-      {
-        m_chain.segments[i].setInertia(
-            KDL::RigidBodyInertia(
-              m_min,                // mass
-              KDL::Vector::Zero(),  // center of gravity
-              KDL::RotationalInertia(
-                ip_min,             // ixx
-                ip_min,             // iyy
-                ip_min              // izz
-                // ixy, ixy, iyz default to 0.0
-                )));
-      }
+      m_chain.segments[i].setInertia(KDL::RigidBodyInertia::Zero());
     }
-
-    // Only give the last segment a generic mass and inertia.
-    // See https://arxiv.org/pdf/1908.06252.pdf for a motivation for this setting.
-    double m = 1;
-    double ip = 1;
-    m_chain.segments[m_chain.segments.size()-1].setInertia(
-        KDL::RigidBodyInertia(
-          m,
-          KDL::Vector::Zero(),
-          KDL::RotationalInertia(ip, ip, ip)));
-
-    return true;
+    else  // relatively moving segment
+    {
+      m_chain.segments[i].setInertia(
+        KDL::RigidBodyInertia(m_min,                          // mass
+                              KDL::Vector::Zero(),            // center of gravity
+                              KDL::RotationalInertia(ip_min,  // ixx
+                                                     ip_min,  // iyy
+                                                     ip_min   // izz
+                                                     // ixy, ixy, iyz default to 0.0
+                                                     )));
+    }
   }
 
+  // Only give the last segment a generic mass and inertia.
+  // See https://arxiv.org/pdf/1908.06252.pdf for a motivation for this setting.
+  double m = 1;
+  double ip = 1;
+  m_chain.segments[m_chain.segments.size() - 1].setInertia(
+    KDL::RigidBodyInertia(m, KDL::Vector::Zero(), KDL::RotationalInertia(ip, ip, ip)));
 
-} // namespace
+  return true;
+}
+
+}  // namespace cartesian_controller_base

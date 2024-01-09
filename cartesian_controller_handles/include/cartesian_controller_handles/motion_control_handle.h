@@ -40,12 +40,6 @@
 #ifndef MOTION_CONTROL_HANDLE_H_INCLUDED
 #define MOTION_CONTROL_HANDLE_H_INCLUDED
 
-#include "cartesian_controller_base/ROS2VersionConfig.h"
-#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "rclcpp/publisher.hpp"
-#include "visualization_msgs/msg/interactive_marker.hpp"
-#include "visualization_msgs/msg/interactive_marker_feedback.hpp"
 #include <controller_interface/controller_interface.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -55,9 +49,15 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 
+#include "cartesian_controller_base/ROS2VersionConfig.h"
+#include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "rclcpp/publisher.hpp"
+#include "visualization_msgs/msg/interactive_marker.hpp"
+#include "visualization_msgs/msg/interactive_marker_feedback.hpp"
+
 namespace cartesian_controller_handles
 {
-
 /**
  * @brief Implements a drag-and-drop control handle in RViz
  *
@@ -71,53 +71,57 @@ namespace cartesian_controller_handles
  */
 class MotionControlHandle : public controller_interface::ControllerInterface
 {
-  public:
-    MotionControlHandle();
-    ~MotionControlHandle();
+public:
+  MotionControlHandle();
+  ~MotionControlHandle();
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    virtual controller_interface::return_type init(const std::string & controller_name) override;
+  virtual controller_interface::return_type init(const std::string & controller_name) override;
 #endif
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    controller_interface::InterfaceConfiguration command_interface_configuration() const override;
-    controller_interface::InterfaceConfiguration state_interface_configuration() const override;
+  controller_interface::InterfaceConfiguration command_interface_configuration() const override;
+  controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  controller_interface::return_type update(const rclcpp::Time & time,
+                                           const rclcpp::Duration & period) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    controller_interface::return_type update() override;
+  controller_interface::return_type update() override;
 #endif
 
-
-  private:
-    /**
+private:
+  /**
      * @brief Move visual marker in RViz according to user interaction
      *
      * This function also stores the marker pose internally.
      *
      * @param feedback The message containing the current pose of the marker
      */
-    void updateMotionControlCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+  void updateMotionControlCallback(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback);
 
-    /**
+  /**
      * @brief React to changes in the interactive marker menu
      *
      * @param feedback The message containing the current menu configuration
      */
-    void updateMarkerMenuCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+  void updateMarkerMenuCallback(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback);
 
-    /**
+  /**
      * @brief Add all relevant marker controls for interaction in RViz
      *
      * You must call \a applyChanges() on the marker server for the controls to
@@ -125,9 +129,9 @@ class MotionControlHandle : public controller_interface::ControllerInterface
      *
      * @param marker The marker to add the controls to
      */
-    static void prepareMarkerControls(visualization_msgs::msg::InteractiveMarker& marker);
+  static void prepareMarkerControls(visualization_msgs::msg::InteractiveMarker & marker);
 
-    /**
+  /**
      * @brief Adds interactive controls (arrows) to a marker.
      *
      * Both move and rotate controls are added along the specified
@@ -138,47 +142,46 @@ class MotionControlHandle : public controller_interface::ControllerInterface
      * @param y Y-axis component
      * @param z Z-axis component
      */
-    static void addAxisControl(visualization_msgs::msg::InteractiveMarker& marker, double x, double y, double z);
+  static void addAxisControl(visualization_msgs::msg::InteractiveMarker & marker, double x,
+                             double y, double z);
 
-    /**
+  /**
      * @brief Add a sphere visualization to the interactive marker
      *
      * @param marker The marker to add the visualization to
      * @param scale The scale of the visualization. Bounding box in meter.
      */
-    static void addMarkerVisualization(visualization_msgs::msg::InteractiveMarker& marker, double scale);
+  static void addMarkerVisualization(visualization_msgs::msg::InteractiveMarker & marker,
+                                     double scale);
 
-    /**
+  /**
      * @brief Get the current pose of the specified end-effector
      *
      * @return The current end-effector pose with respect to the specified base link
      */
-    geometry_msgs::msg::PoseStamped getEndEffectorPose();
+  geometry_msgs::msg::PoseStamped getEndEffectorPose();
 
-    // Handles to the joints
-    std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface>> m_joint_handles;
+  // Handles to the joints
+  std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface>> m_joint_handles;
 
-    std::vector<std::string>  m_joint_names;
+  std::vector<std::string> m_joint_names;
 
-    // Kinematics
-    std::string   m_robot_base_link;
-    std::string   m_end_effector_link;
-    std::string   m_target_frame_topic;
-    KDL::Chain    m_robot_chain;
-    std::shared_ptr<
-      KDL::ChainFkSolverPos_recursive>  m_fk_solver;
+  // Kinematics
+  std::string m_robot_base_link;
+  std::string m_end_effector_link;
+  std::string m_target_frame_topic;
+  KDL::Chain m_robot_chain;
+  std::shared_ptr<KDL::ChainFkSolverPos_recursive> m_fk_solver;
 
-    geometry_msgs::msg::PoseStamped  m_current_pose;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr  m_pose_publisher;
+  geometry_msgs::msg::PoseStamped m_current_pose;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr m_pose_publisher;
 
-    // Interactive marker
-    std::shared_ptr<
-      interactive_markers::InteractiveMarkerServer> m_server;
+  // Interactive marker
+  std::shared_ptr<interactive_markers::InteractiveMarkerServer> m_server;
 
-    visualization_msgs::msg::InteractiveMarker           m_marker; //!< Controller handle for RViz
-
+  visualization_msgs::msg::InteractiveMarker m_marker;  //!< Controller handle for RViz
 };
 
-} // cartesian_controller_handles
+}  // namespace cartesian_controller_handles
 
 #endif

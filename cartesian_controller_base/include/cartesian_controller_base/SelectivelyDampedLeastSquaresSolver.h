@@ -41,12 +41,13 @@
 #define SELECTIVELY_DAMPED_LEAST_SQUARES_SOLVER_H_INCLUDED
 
 #include <cartesian_controller_base/IKSolver.h>
+
 #include <kdl/jacobian.hpp>
 #include <memory>
 
-namespace cartesian_controller_base{
-
-  /**
+namespace cartesian_controller_base
+{
+/**
    * \brief A selectively damped least squares (SDLS) IK solver for Cartesian controllers
    *
    *  This implements the SDLS method by Buss and Kim from 2005.
@@ -65,11 +66,11 @@ namespace cartesian_controller_base{
    */
 class SelectivelyDampedLeastSquaresSolver : public IKSolver
 {
-  public:
-    SelectivelyDampedLeastSquaresSolver();
-    ~SelectivelyDampedLeastSquaresSolver();
+public:
+  SelectivelyDampedLeastSquaresSolver();
+  ~SelectivelyDampedLeastSquaresSolver();
 
-    /**
+  /**
      * \brief Compute joint target commands with selectively damped least squares
      *
      * \param period The duration in sec for this simulation step
@@ -77,11 +78,10 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
      *
      * \return A point holding positions, velocities and accelerations of each joint
      */
-    trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force) override;
+  trajectory_msgs::msg::JointTrajectoryPoint getJointControlCmds(
+    rclcpp::Duration period, const ctrl::Vector6D & net_force) override;
 
-    /**
+  /**
      * \brief Initialize the solver
      *
      * \param nh A node handle for namespace-local parameter management
@@ -92,16 +92,15 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
      * \return True, if everything went well
      */
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+  bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-    bool init(std::shared_ptr<rclcpp::Node> nh,
+  bool init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-              const KDL::Chain& chain,
-              const KDL::JntArray& upper_pos_limits,
-              const KDL::JntArray& lower_pos_limits) override;
+            const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+            const KDL::JntArray & lower_pos_limits) override;
 
-  private:
-    /**
+private:
+  /**
      * @brief Helper function to clamp a column vector
      *
      * This literally implements ClampMaxAbs() from Buss' and Kim's paper.
@@ -111,14 +110,13 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
      *
      * @return The clamped vector
      */
-    Eigen::Matrix<double, Eigen::Dynamic, 1>
-    clampMaxAbs(const Eigen::Matrix<double, Eigen::Dynamic, 1>& w, double d);
+  Eigen::Matrix<double, Eigen::Dynamic, 1> clampMaxAbs(
+    const Eigen::Matrix<double, Eigen::Dynamic, 1> & w, double d);
 
-    std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
-    KDL::Jacobian m_jnt_jacobian;
-
+  std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
+  KDL::Jacobian m_jnt_jacobian;
 };
 
-}
+}  // namespace cartesian_controller_base
 
 #endif

@@ -38,21 +38,20 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/SpatialPDController.h>
+
 #include <string>
 
 namespace cartesian_controller_base
 {
+SpatialPDController::SpatialPDController() {}
 
-SpatialPDController::SpatialPDController()
-{
-}
-
-ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D& error, const rclcpp::Duration& period)
+ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D & error,
+                                               const rclcpp::Duration & period)
 {
   // Perform pd control separately on each Cartesian dimension
-  for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
+  for (int i = 0; i < 6; ++i)  // 3 transition, 3 rotation
   {
-    m_cmd(i) = m_pd_controllers[i](error[i],period);
+    m_cmd(i) = m_pd_controllers[i](error[i], period);
   }
   return m_cmd;
 }
@@ -64,7 +63,7 @@ bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)
 #endif
 {
   // Create pd controllers for each Cartesian dimension
-  for (int i = 0; i < 6; ++i) // 3 transition, 3 rotation
+  for (int i = 0; i < 6; ++i)  // 3 transition, 3 rotation
   {
     m_pd_controllers.push_back(PDController());
   }
@@ -82,4 +81,4 @@ bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)
   return true;
 }
 
-} // namespace
+}  // namespace cartesian_controller_base

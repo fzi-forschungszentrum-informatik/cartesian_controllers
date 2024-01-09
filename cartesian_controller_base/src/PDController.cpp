@@ -28,7 +28,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-
 //-----------------------------------------------------------------------------
 /*!\file    PDController.cpp
  *
@@ -39,31 +38,26 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/PDController.h>
+
 #include <utility>
 
 namespace cartesian_controller_base
 {
+PDController::PDController() : m_last_p_error(0.0) {}
 
-PDController::PDController()
-  : m_last_p_error(0.0)
-{
-}
-
-PDController::~PDController()
-{
-}
-
+PDController::~PDController() {}
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-void PDController::init(const std::string& params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
+void PDController::init(const std::string & params,
+                        std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
 #else
-void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node> handle)
+void PDController::init(const std::string & params, std::shared_ptr<rclcpp::Node> handle)
 #endif
 {
   m_params = params;
   m_handle = std::move(handle);
 
-  auto auto_declare = [this](const std::string& s)
+  auto auto_declare = [this](const std::string & s)
   {
     if (!m_handle->has_parameter(s))
     {
@@ -76,8 +70,7 @@ void PDController::init(const std::string& params, std::shared_ptr<rclcpp::Node>
   auto_declare(m_params + ".d");
 }
 
-
-double PDController::operator()(const double& error, const rclcpp::Duration& period)
+double PDController::operator()(const double & error, const rclcpp::Duration & period)
 {
   if (period == rclcpp::Duration::from_seconds(0.0))
   {
@@ -93,5 +86,4 @@ double PDController::operator()(const double& error, const rclcpp::Duration& per
   return result;
 }
 
-
-}
+}  // namespace cartesian_controller_base

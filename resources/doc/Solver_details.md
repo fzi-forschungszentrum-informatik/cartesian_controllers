@@ -91,4 +91,3 @@ Building in Release mode can give you a 10-times speed-up, and makes sure that
 the implementation of the control loop is not the performance bottle neck.
 If you use a higher number of iterations,
 then this in fact becomes a requirement.
-

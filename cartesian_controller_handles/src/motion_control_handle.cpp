@@ -37,35 +37,33 @@
  */
 //-----------------------------------------------------------------------------
 
+#include <cartesian_controller_handles/motion_control_handle.h>
+#include <urdf/model.h>
+
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/time.hpp"
 #include "visualization_msgs/msg/detail/interactive_marker_feedback__struct.hpp"
-#include <cartesian_controller_handles/motion_control_handle.h>
-#include <kdl/tree.hpp>
-#include <kdl_parser/kdl_parser.hpp>
-#include <urdf/model.h>
 
-
-namespace cartesian_controller_handles {
-
+namespace cartesian_controller_handles
+{
 MotionControlHandle::MotionControlHandle() {}
 
 MotionControlHandle::~MotionControlHandle() {}
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MotionControlHandle::on_activate(const rclcpp_lifecycle::State& previous_state)
+MotionControlHandle::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   // Get state handles.
   if (!controller_interface::get_ordered_interfaces(
         state_interfaces_, m_joint_names, hardware_interface::HW_IF_POSITION, m_joint_handles))
   {
-    RCLCPP_ERROR(get_node()->get_logger(),
-                 "Expected %zu '%s' state interfaces, got %zu.",
-                 m_joint_names.size(),
-                 hardware_interface::HW_IF_POSITION,
-                 m_joint_handles.size());
+    RCLCPP_ERROR(get_node()->get_logger(), "Expected %zu '%s' state interfaces, got %zu.",
+                 m_joint_names.size(), hardware_interface::HW_IF_POSITION, m_joint_handles.size());
     return CallbackReturn::ERROR;
   }
 
@@ -76,22 +74,23 @@ MotionControlHandle::on_activate(const rclcpp_lifecycle::State& previous_state)
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MotionControlHandle::on_deactivate(const rclcpp_lifecycle::State& previous_state)
+MotionControlHandle::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   m_joint_handles.clear();
   this->release_interfaces();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-controller_interface::return_type MotionControlHandle::update(const rclcpp::Time& time,
-                                                              const rclcpp::Duration& period)
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+controller_interface::return_type MotionControlHandle::update(const rclcpp::Time & time,
+                                                              const rclcpp::Duration & period)
 #elif defined CARTESIAN_CONTROLLERS_FOXY
 controller_interface::return_type MotionControlHandle::update()
 #endif
 {
   // Publish marker pose
-  m_current_pose.header.stamp    = get_node()->now();
+  m_current_pose.header.stamp = get_node()->now();
   m_current_pose.header.frame_id = m_robot_base_link;
   m_pose_publisher->publish(m_current_pose);
   m_server->applyChanges();
@@ -99,34 +98,34 @@ controller_interface::return_type MotionControlHandle::update()
   return controller_interface::return_type::OK;
 }
 
-controller_interface::InterfaceConfiguration
-MotionControlHandle::command_interface_configuration() const
+controller_interface::InterfaceConfiguration MotionControlHandle::command_interface_configuration()
+  const
 {
   controller_interface::InterfaceConfiguration conf;
   conf.type = controller_interface::interface_configuration_type::NONE;
   return conf;
 }
 
-controller_interface::InterfaceConfiguration
-MotionControlHandle::state_interface_configuration() const
+controller_interface::InterfaceConfiguration MotionControlHandle::state_interface_configuration()
+  const
 {
   controller_interface::InterfaceConfiguration conf;
   conf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  conf.names.reserve(m_joint_names.size()); // Only position
-  for (const auto& joint_name : m_joint_names)
+  conf.names.reserve(m_joint_names.size());  // Only position
+  for (const auto & joint_name : m_joint_names)
   {
     conf.names.push_back(joint_name + "/position");
   }
   return conf;
 }
 
-
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_init()
 {
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type MotionControlHandle::init(const std::string& controller_name)
+controller_interface::return_type MotionControlHandle::init(const std::string & controller_name)
 {
   // Initialize lifecycle node
   const auto ret = ControllerInterface::init(controller_name);
@@ -141,7 +140,8 @@ controller_interface::return_type MotionControlHandle::init(const std::string& c
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
   return controller_interface::return_type::OK;
@@ -149,7 +149,7 @@ controller_interface::return_type MotionControlHandle::init(const std::string& c
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MotionControlHandle::on_configure(const rclcpp_lifecycle::State& previous_state)
+MotionControlHandle::on_configure(const rclcpp_lifecycle::State & previous_state)
 {
   // Get kinematics specific configuration
   urdf::Model robot_model;
@@ -187,9 +187,10 @@ MotionControlHandle::on_configure(const rclcpp_lifecycle::State& previous_state)
   }
   if (!robot_tree.getChain(m_robot_base_link, m_end_effector_link, m_robot_chain))
   {
-    const std::string error = ""
-                              "Failed to parse robot chain from urdf model. "
-                              "Do robot_base_link and end_effector_link exist?";
+    const std::string error =
+      ""
+      "Failed to parse robot chain from urdf model. "
+      "Do robot_base_link and end_effector_link exist?";
     RCLCPP_ERROR(get_node()->get_logger(), "%s", error.c_str());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
@@ -214,11 +215,11 @@ MotionControlHandle::on_configure(const rclcpp_lifecycle::State& previous_state)
   m_server.reset(
     new interactive_markers::InteractiveMarkerServer(get_node()->get_name(), get_node()));
   m_marker.header.frame_id = m_robot_base_link;
-  m_marker.header.stamp    = get_node()->now();
-  m_marker.scale           = 0.1;
-  m_marker.name            = "motion_control_handle";
-  m_marker.pose            = m_current_pose.pose;
-  m_marker.description     = "6D control of link: " + m_end_effector_link;
+  m_marker.header.stamp = get_node()->now();
+  m_marker.scale = 0.1;
+  m_marker.name = "motion_control_handle";
+  m_marker.pose = m_current_pose.pose;
+  m_marker.description = "6D control of link: " + m_end_effector_link;
 
   prepareMarkerControls(m_marker);
 
@@ -244,24 +245,23 @@ MotionControlHandle::on_configure(const rclcpp_lifecycle::State& previous_state)
 }
 
 void MotionControlHandle::updateMotionControlCallback(
-  const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+  const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback)
 {
   // Move marker in RViz
   m_server->setPose(feedback->marker_name, feedback->pose);
   m_server->applyChanges();
 
   // Store for later broadcasting
-  m_current_pose.pose         = feedback->pose;
+  m_current_pose.pose = feedback->pose;
   m_current_pose.header.stamp = get_node()->now();
 }
 
-
 void MotionControlHandle::updateMarkerMenuCallback(
-  const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+  const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback)
 {
 }
 
-void MotionControlHandle::prepareMarkerControls(visualization_msgs::msg::InteractiveMarker& marker)
+void MotionControlHandle::prepareMarkerControls(visualization_msgs::msg::InteractiveMarker & marker)
 {
   // Add colored sphere as visualization
   constexpr double marker_scale = 0.05;
@@ -273,13 +273,13 @@ void MotionControlHandle::prepareMarkerControls(visualization_msgs::msg::Interac
   addAxisControl(marker, 0, 0, 1);
 }
 
-void MotionControlHandle::addMarkerVisualization(visualization_msgs::msg::InteractiveMarker& marker,
-                                                 double scale)
+void MotionControlHandle::addMarkerVisualization(
+  visualization_msgs::msg::InteractiveMarker & marker, double scale)
 {
   // Create a sphere as a handle
   visualization_msgs::msg::Marker visual;
-  visual.type    = visualization_msgs::msg::Marker::SPHERE;
-  visual.scale.x = scale; // bounding box in meter
+  visual.type = visualization_msgs::msg::Marker::SPHERE;
+  visual.scale.x = scale;  // bounding box in meter
   visual.scale.y = scale;
   visual.scale.z = scale;
   visual.color.r = 1.0;
@@ -294,10 +294,8 @@ void MotionControlHandle::addMarkerVisualization(visualization_msgs::msg::Intera
   marker.controls.push_back(visual_control);
 }
 
-void MotionControlHandle::addAxisControl(visualization_msgs::msg::InteractiveMarker& marker,
-                                         double x,
-                                         double y,
-                                         double z)
+void MotionControlHandle::addAxisControl(visualization_msgs::msg::InteractiveMarker & marker,
+                                         double x, double y, double z)
 {
   if (x == 0 && y == 0 && z == 0)
   {
@@ -306,7 +304,7 @@ void MotionControlHandle::addAxisControl(visualization_msgs::msg::InteractiveMar
 
   visualization_msgs::msg::InteractiveMarkerControl control;
 
-  double norm           = std::sqrt(1 + x * x + y * y + z * z);
+  double norm = std::sqrt(1 + x * x + y * y + z * z);
   control.orientation.w = 1 / norm;
   control.orientation.x = x / norm;
   control.orientation.y = y / norm;
@@ -334,16 +332,13 @@ geometry_msgs::msg::PoseStamped MotionControlHandle::getEndEffectorPose()
   current.pose.position.x = tmp.p.x();
   current.pose.position.y = tmp.p.y();
   current.pose.position.z = tmp.p.z();
-  tmp.M.GetQuaternion(current.pose.orientation.x,
-                      current.pose.orientation.y,
-                      current.pose.orientation.z,
-                      current.pose.orientation.w);
+  tmp.M.GetQuaternion(current.pose.orientation.x, current.pose.orientation.y,
+                      current.pose.orientation.z, current.pose.orientation.w);
 
   return current;
 }
 
-} // namespace cartesian_controller_handles
-
+}  // namespace cartesian_controller_handles
 
 // Pluginlib
 #include <pluginlib/class_list_macros.hpp>

@@ -38,10 +38,11 @@
 //-----------------------------------------------------------------------------
 
 #include <cartesian_controller_base/JacobianTransposeSolver.h>
+
 #include <pluginlib/class_list_macros.hpp>
 
 /**
- * \class cartesian_controller_base::JacobianTransposeSolver 
+ * \class cartesian_controller_base::JacobianTransposeSolver
  *
  * Users may explicitly specify this solver with \a "jacobian_transpose" as \a
  * ik_solver in their controllers.yaml configuration file for each controller:
@@ -54,72 +55,66 @@
  * \endcode
  *
  */
-PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::JacobianTransposeSolver, cartesian_controller_base::IKSolver)
+PLUGINLIB_EXPORT_CLASS(cartesian_controller_base::JacobianTransposeSolver,
+                       cartesian_controller_base::IKSolver)
 
+namespace cartesian_controller_base
+{
+JacobianTransposeSolver::JacobianTransposeSolver() {}
 
+JacobianTransposeSolver::~JacobianTransposeSolver() {}
 
+trajectory_msgs::msg::JointTrajectoryPoint JacobianTransposeSolver::getJointControlCmds(
+  rclcpp::Duration period, const ctrl::Vector6D & net_force)
+{
+  // Compute joint jacobian
+  m_jnt_jacobian_solver->JntToJac(m_current_positions, m_jnt_jacobian);
 
+  // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
+  m_current_accelerations.data = m_jnt_jacobian.data.transpose() * net_force;
 
-namespace cartesian_controller_base{
+  // Integrate once, starting with zero motion
+  m_current_velocities.data = 0.5 * m_current_accelerations.data * period.seconds();
 
-  JacobianTransposeSolver::JacobianTransposeSolver()
+  // Integrate twice, starting with zero motion
+  m_current_positions.data =
+    m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
+
+  // Make sure positions stay in allowed margins
+  applyJointLimits();
+
+  // Apply results
+  trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
+  for (int i = 0; i < m_number_joints; ++i)
   {
+    control_cmd.positions.push_back(m_current_positions(i));
+    control_cmd.velocities.push_back(m_current_velocities(i));
+
+    // Accelerations should be left empty. Those values will be interpreted
+    // by most hardware joint drivers as max. tolerated values. As a
+    // consequence, the robot will move very slowly.
   }
+  control_cmd.time_from_start = period;  // valid for this duration
 
-  JacobianTransposeSolver::~JacobianTransposeSolver(){}
+  // Update for the next cycle
+  m_last_positions = m_current_positions;
 
-  trajectory_msgs::msg::JointTrajectoryPoint JacobianTransposeSolver::getJointControlCmds(
-        rclcpp::Duration period,
-        const ctrl::Vector6D& net_force)
-  {
-    // Compute joint jacobian
-    m_jnt_jacobian_solver->JntToJac(m_current_positions,m_jnt_jacobian);
-
-    // Compute joint accelerations according to: \f$ \ddot{q} = H^{-1} ( J^T f) \f$
-    m_current_accelerations.data = m_jnt_jacobian.data.transpose() * net_force;
-
-    // Integrate once, starting with zero motion
-    m_current_velocities.data = 0.5 * m_current_accelerations.data * period.seconds();
-
-    // Integrate twice, starting with zero motion
-    m_current_positions.data = m_last_positions.data + 0.5 * m_current_velocities.data * period.seconds();
-
-    // Make sure positions stay in allowed margins
-    applyJointLimits();
-
-    // Apply results
-    trajectory_msgs::msg::JointTrajectoryPoint control_cmd;
-    for (int i = 0; i < m_number_joints; ++i)
-    {
-      control_cmd.positions.push_back(m_current_positions(i));
-      control_cmd.velocities.push_back(m_current_velocities(i));
-
-      // Accelerations should be left empty. Those values will be interpreted
-      // by most hardware joint drivers as max. tolerated values. As a
-      // consequence, the robot will move very slowly.
-    }
-    control_cmd.time_from_start = period; // valid for this duration
-
-    // Update for the next cycle
-    m_last_positions = m_current_positions;
-
-    return control_cmd;
-  }
+  return control_cmd;
+}
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-  bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
+bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
 #else
-  bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp::Node> nh,
+bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp::Node> nh,
 #endif
-                                     const KDL::Chain& chain,
-                                     const KDL::JntArray& upper_pos_limits,
-                                     const KDL::JntArray& lower_pos_limits)
-  {
-    IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
+                                   const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+                                   const KDL::JntArray & lower_pos_limits)
+{
+  IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_jacobian.resize(m_number_joints);
+  m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+  m_jnt_jacobian.resize(m_number_joints);
 
-    return true;
-  }
-} // namespace
+  return true;
+}
+}  // namespace cartesian_controller_base

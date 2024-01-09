@@ -42,26 +42,26 @@
 
 #include <Eigen/Dense>
 
-  /*! \brief Convenience typedefs
+/*! \brief Convenience typedefs
    *
    *  Note: For 6D vectors the order is first linear, then angular
    */
-  namespace ctrl{
+namespace ctrl
+{
+typedef Eigen::Matrix<double, 6, 1> Vector6D;
 
-    typedef Eigen::Matrix<double,6,1> Vector6D;
+typedef Eigen::VectorXd VectorND;
 
-    typedef Eigen::VectorXd VectorND;
+typedef Eigen::Vector3d Vector3D;
 
-    typedef Eigen::Vector3d Vector3D;
+typedef Eigen::MatrixXd MatrixND;
 
-    typedef Eigen::MatrixXd MatrixND;
+typedef Eigen::Matrix3d Matrix3D;
 
-    typedef Eigen::Matrix3d Matrix3D;
+typedef Eigen::Matrix<double, 6, 6> Matrix6D;
 
-    typedef Eigen::Matrix<double,6,6> Matrix6D;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatrixND;
 
-    typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> MatrixND;
-
-  }
+}  // namespace ctrl
 
 #endif

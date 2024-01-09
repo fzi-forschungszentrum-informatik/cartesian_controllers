@@ -28,7 +28,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-
 //-----------------------------------------------------------------------------
 /*!\file    PDController.h
  *
@@ -47,7 +46,6 @@
 
 namespace cartesian_controller_base
 {
-
 /**
  * @brief A proportional, derivative controller
  *
@@ -60,33 +58,32 @@ namespace cartesian_controller_base
  */
 class PDController
 {
-  public:
-    PDController();
-    ~PDController();
+public:
+  PDController();
+  ~PDController();
 
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    void init(const std::string& params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle);
+  void init(const std::string & params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle);
 #else
-    void init(const std::string& params, std::shared_ptr<rclcpp::Node> handle);
+  void init(const std::string & params, std::shared_ptr<rclcpp::Node> handle);
 #endif
 
-    double operator()(const double& error, const rclcpp::Duration& period);
+  double operator()(const double & error, const rclcpp::Duration & period);
 
-  private:
+private:
 #if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    std::shared_ptr<rclcpp_lifecycle::LifecycleNode> m_handle;
+  std::shared_ptr<rclcpp_lifecycle::LifecycleNode> m_handle;
 #else
-    std::shared_ptr<rclcpp::Node> m_handle; ///< handle for dynamic parameter interaction
+  std::shared_ptr<rclcpp::Node> m_handle;  ///< handle for dynamic parameter interaction
 #endif
-    std::string m_params; ///< namespace for parameter access
+  std::string m_params;  ///< namespace for parameter access
 
-    // Gain parameters
-    double m_p; ///< proportional gain
-    double m_d; ///< derivative gain
-    double m_last_p_error;
-
+  // Gain parameters
+  double m_p;  ///< proportional gain
+  double m_d;  ///< derivative gain
+  double m_last_p_error;
 };
 
-}
+}  // namespace cartesian_controller_base
 
 #endif

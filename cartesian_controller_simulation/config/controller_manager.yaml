@@ -50,7 +50,7 @@ cartesian_compliance_controller:
 
     # This is the link that the robot feels compliant about. It does not need
     # to coincide with the end_effector_link, but for many use cases, this
-    # configuration is handy. When working with a screwdriver, for instance, 
+    # configuration is handy. When working with a screwdriver, for instance,
     # setting compliance_ref_link == end_effector_link makes it easy to specify
     # downward pushing forces without generating unwanted offset moments.
     # On the other hand, an application could benefit from yielding a little in
@@ -263,4 +263,3 @@ invalid_cartesian_force_controller:
         rot_x: {p: 0.0}
         rot_y: {p: 0.0}
         rot_z: {p: 0.0}
-

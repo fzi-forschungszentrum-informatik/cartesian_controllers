@@ -48,8 +48,8 @@
 
 // ros_controls
 #include <controller_interface/controller.h>
-#include <hardware_interface/joint_state_interface.h>
 #include <controller_manager/controller_manager.h>
+#include <hardware_interface/joint_state_interface.h>
 
 // KDL
 #include <kdl/chain.hpp>
@@ -57,7 +57,6 @@
 
 namespace joint_to_cartesian_controller
 {
-
 /**
  * @brief A controller to turn joint trajectories into a moving Cartesian target pose
  *
@@ -76,41 +75,37 @@ namespace joint_to_cartesian_controller
  * target following loses explicit control over the joints and collision checking.
  */
 class JointToCartesianController
-  : public controller_interface::Controller<hardware_interface::JointStateInterface>
+: public controller_interface::Controller<hardware_interface::JointStateInterface>
 {
-  public:
-    JointToCartesianController();
+public:
+  JointToCartesianController();
 
-    bool init(hardware_interface::JointStateInterface* hw, ros::NodeHandle& nh);
+  bool init(hardware_interface::JointStateInterface * hw, ros::NodeHandle & nh);
 
-    void starting(const ros::Time& time);
+  void starting(const ros::Time & time);
 
-    void stopping(const ros::Time& time);
+  void stopping(const ros::Time & time);
 
-    void update(const ros::Time& time, const ros::Duration& period);
+  void update(const ros::Time & time, const ros::Duration & period);
 
-  private:
-    std::string                m_end_effector_link;
-    std::string                m_robot_base_link;
-    std::string                m_target_frame_topic;
-    KDL::JntArray              m_positions;
-    KDL::JntArray              m_velocities;
-    std::vector<std::string>   m_joint_names;
-    ros::Publisher             m_pose_publisher;
+private:
+  std::string m_end_effector_link;
+  std::string m_robot_base_link;
+  std::string m_target_frame_topic;
+  KDL::JntArray m_positions;
+  KDL::JntArray m_velocities;
+  std::vector<std::string> m_joint_names;
+  ros::Publisher m_pose_publisher;
 
-    JointControllerAdapter     m_controller_adapter;
+  JointControllerAdapter m_controller_adapter;
 
-    std::vector<
-      hardware_interface::JointStateHandle>   m_joint_handles;
+  std::vector<hardware_interface::JointStateHandle> m_joint_handles;
 
-    std::shared_ptr<
-      KDL::ChainFkSolverPos_recursive>        m_fk_solver;
+  std::shared_ptr<KDL::ChainFkSolverPos_recursive> m_fk_solver;
 
-    std::shared_ptr<
-      controller_manager::ControllerManager>  m_controller_manager;
-
+  std::shared_ptr<controller_manager::ControllerManager> m_controller_manager;
 };
 
-}
+}  // namespace joint_to_cartesian_controller
 
 #endif

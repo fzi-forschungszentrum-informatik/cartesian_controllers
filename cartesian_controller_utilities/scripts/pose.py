@@ -51,7 +51,7 @@ import os
 
 
 class converter(Node):
-    """ Convert Twist messages to PoseStamped
+    """Convert Twist messages to PoseStamped
 
     Use this node to integrate twist messages into a moving target pose in
     Cartesian space.  An initial TF lookup assures that the target pose always
@@ -59,12 +59,12 @@ class converter(Node):
     """
 
     def __init__(self):
-        super().__init__('converter')
+        super().__init__("converter")
 
-        self.twist_topic = self.declare_parameter('twist_topic', 'my_twist').value
-        self.pose_topic = self.declare_parameter('pose_topic', 'my_pose').value
-        self.frame_id = self.declare_parameter('frame_id', 'base_link').value
-        self.end_effector = self.declare_parameter('end_effector', 'tool0').value
+        self.twist_topic = self.declare_parameter("twist_topic", "my_twist").value
+        self.pose_topic = self.declare_parameter("pose_topic", "my_pose").value
+        self.frame_id = self.declare_parameter("frame_id", "base_link").value
+        self.end_effector = self.declare_parameter("end_effector", "tool0").value
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
@@ -76,23 +76,29 @@ class converter(Node):
         self.last = time.time()
 
         self.startup_done = False
-        period = 1.0 / self.declare_parameter('publishing_rate', 100).value
+        period = 1.0 / self.declare_parameter("publishing_rate", 100).value
         self.timer = self.create_timer(period, self.publish)
 
         self.thread = threading.Thread(target=self.startup, daemon=True)
         self.thread.start()
 
     def startup(self):
-        """ Make sure to start at the robot's current pose """
+        """Make sure to start at the robot's current pose"""
         # Wait until we entered spinning in the main thread.
         time.sleep(1)
         try:
             start = self.tf_buffer.lookup_transform(
-                target_frame=self.frame_id, source_frame=self.end_effector,
-                time=rclpy.time.Time())
+                target_frame=self.frame_id,
+                source_frame=self.end_effector,
+                time=rclpy.time.Time(),
+            )
 
-        except (tf2_ros.InvalidArgumentException, tf2_ros.LookupException,
-                tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+        except (
+            tf2_ros.InvalidArgumentException,
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ) as e:
             print(f"Startup failed: {e}")
             os._exit(1)
 
@@ -105,10 +111,8 @@ class converter(Node):
         self.rot.w = start.transform.rotation.w
         self.startup_done = True
 
-
-
     def twist_cb(self, data):
-        """ Numerically integrate twist message into a pose
+        """Numerically integrate twist message into a pose
 
         Use global self.frame_id as reference for the navigation commands.
         """
@@ -126,7 +130,9 @@ class converter(Node):
         wy = data.angular.y
         wz = data.angular.z
 
-        _, q = quaternion.integrate_angular_velocity(lambda _: (wx, wy, wz), 0, dt, self.rot)
+        _, q = quaternion.integrate_angular_velocity(
+            lambda _: (wx, wy, wz), 0, dt, self.rot
+        )
 
         self.rot = q[-1]  # the last one is after dt passed
 
@@ -146,17 +152,19 @@ class converter(Node):
             msg.pose.orientation.w = self.rot.w
 
             self.pub.publish(msg)
-        except:
+        except Exception:
             # Swallow 'publish() to closed topic' error.
             # This rarely happens on killing this node.
             pass
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = converter()
     rclpy.spin(node)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:

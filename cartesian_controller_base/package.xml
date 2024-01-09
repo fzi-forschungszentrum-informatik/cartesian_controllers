@@ -6,8 +6,8 @@
   <description>The cartesian_controller_base package</description>
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
   <license>BSD-3-Clause</license>
-  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url> 
-  <author email="scherzin@fzi.de">Stefan Scherzinger</author> 
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

@@ -40,14 +40,15 @@
 #ifndef CARTESIAN_MOTION_CONTROLLER_H_INCLUDED
 #define CARTESIAN_MOTION_CONTROLLER_H_INCLUDED
 
-#include "geometry_msgs/msg/pose_stamped.hpp"
 #include <cartesian_controller_base/ROS2VersionConfig.h>
 #include <cartesian_controller_base/cartesian_controller_base.h>
+
 #include <controller_interface/controller_interface.hpp>
+
+#include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace cartesian_motion_controller
 {
-
 /**
  * @brief A ROS2-control controller for Cartesian motion tracking
  *
@@ -72,36 +73,38 @@ namespace cartesian_motion_controller
  */
 class CartesianMotionController : public virtual cartesian_controller_base::CartesianControllerBase
 {
-  public:
-    CartesianMotionController();
-    virtual ~CartesianMotionController() = default;
+public:
+  CartesianMotionController();
+  virtual ~CartesianMotionController() = default;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    virtual controller_interface::return_type init(const std::string & controller_name) override;
+  virtual controller_interface::return_type init(const std::string & controller_name) override;
 #endif
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_activate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
-        const rclcpp_lifecycle::State & previous_state) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
+    const rclcpp_lifecycle::State & previous_state) override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
-    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
+  defined CARTESIAN_CONTROLLERS_IRON
+  controller_interface::return_type update(const rclcpp::Time & time,
+                                           const rclcpp::Duration & period) override;
 #elif defined CARTESIAN_CONTROLLERS_FOXY
-    controller_interface::return_type update() override;
+  controller_interface::return_type update() override;
 #endif
 
-    using Base = cartesian_controller_base::CartesianControllerBase;
+  using Base = cartesian_controller_base::CartesianControllerBase;
 
-
-  protected:
-    /**
+protected:
+  /**
      * @brief Compute the offset between a target pose and the current end effector pose
      *
      * The pose offset is formulated with a translational component and a rotational
@@ -111,16 +114,15 @@ class CartesianMotionController : public virtual cartesian_controller_base::Cart
      *
      * @return The error as a 6-dim vector (linear, angular) w.r.t to the robot base link
      */
-    ctrl::Vector6D        computeMotionError();
-    KDL::Frame      m_target_frame;
-    KDL::Frame      m_current_frame;
+  ctrl::Vector6D computeMotionError();
+  KDL::Frame m_target_frame;
+  KDL::Frame m_current_frame;
 
-    void targetFrameCallback(const geometry_msgs::msg::PoseStamped::SharedPtr target);
+  void targetFrameCallback(const geometry_msgs::msg::PoseStamped::SharedPtr target);
 
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr m_target_frame_subscr;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr m_target_frame_subscr;
 };
 
-}
-
+}  // namespace cartesian_motion_controller
 
 #endif

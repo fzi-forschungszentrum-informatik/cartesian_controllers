@@ -7,7 +7,7 @@
         visuals in the URDF to collisions before loading this, because MuJoCo discards
         visuals by default.  The additional elements, such as actuators, assets, etc.
         were added by hand later, since they can't be specified in URDF.
-        --> 
+        -->
         <compiler angle="radian"/>
         <size njmax="500" nconmax="100"/>
         <asset>

@@ -41,8 +41,8 @@
 #include <pluginlib/class_list_macros.h>
 
 // Project
-#include <joint_to_cartesian_controller/joint_to_cartesian_controller.h>
 #include <cartesian_controller_base/Utility.h>
+#include <joint_to_cartesian_controller/joint_to_cartesian_controller.h>
 
 // KDL
 #include <kdl/tree.hpp>
@@ -56,7 +56,7 @@
 
 namespace cartesian_controllers
 {
-  /**
+/**
    * @brief Connect joint-based controllers and transform their commands to Cartesian target poses
    *
    * This controller handles an internal controller manager, which can load
@@ -66,58 +66,53 @@ namespace cartesian_controllers
    * provide an easy interface to the rqt_joint_trajectory_controller plugin and
    * MoveIt!.
    */
-  typedef joint_to_cartesian_controller::JointToCartesianController JointControllerAdapter;
-}
+typedef joint_to_cartesian_controller::JointToCartesianController JointControllerAdapter;
+}  // namespace cartesian_controllers
 
-PLUGINLIB_EXPORT_CLASS(cartesian_controllers::JointControllerAdapter, controller_interface::ControllerBase)
-
-
-
-
-
+PLUGINLIB_EXPORT_CLASS(cartesian_controllers::JointControllerAdapter,
+                       controller_interface::ControllerBase)
 
 namespace joint_to_cartesian_controller
 {
+JointToCartesianController::JointToCartesianController() {}
 
-JointToCartesianController::JointToCartesianController()
-{
-}
-
-bool JointToCartesianController::init(hardware_interface::JointStateInterface* hw, ros::NodeHandle& nh)
+bool JointToCartesianController::init(hardware_interface::JointStateInterface * hw,
+                                      ros::NodeHandle & nh)
 {
   std::string robot_description;
   urdf::Model robot_model;
-  KDL::Tree   robot_tree;
-  KDL::Chain  robot_chain;
+  KDL::Tree robot_tree;
+  KDL::Chain robot_chain;
 
   // Get controller specific configuration
-  if (!nh.getParam("/robot_description",robot_description))
+  if (!nh.getParam("/robot_description", robot_description))
   {
     ROS_ERROR("Failed to load '/robot_description' from parameter server");
     return false;
   }
-  if (!nh.getParam("robot_base_link",m_robot_base_link))
+  if (!nh.getParam("robot_base_link", m_robot_base_link))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link" << " from parameter server");
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/robot_base_link"
+                                       << " from parameter server");
     return false;
   }
-  if (!nh.getParam("end_effector_link",m_end_effector_link))
+  if (!nh.getParam("end_effector_link", m_end_effector_link))
   {
-    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link" << " from parameter server");
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() + "/end_effector_link"
+                                       << " from parameter server");
     return false;
   }
-  if (!nh.getParam("target_frame_topic",m_target_frame_topic))
+  if (!nh.getParam("target_frame_topic", m_target_frame_topic))
   {
     m_target_frame_topic = "target_frame";
     ROS_WARN_STREAM("Failed to load "
-        << nh.getNamespace() + "/target_frame_topic"
-        << " from parameter server. "
-        << "Will default to: "
-        << nh.getNamespace() + m_target_frame_topic);
+                    << nh.getNamespace() + "/target_frame_topic"
+                    << " from parameter server. "
+                    << "Will default to: " << nh.getNamespace() + m_target_frame_topic);
   }
 
   // Publishers
-  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>(m_target_frame_topic,10);
+  m_pose_publisher = nh.advertise<geometry_msgs::PoseStamped>(m_target_frame_topic, 10);
 
   // Build a kinematic chain of the robot
   if (!robot_model.initString(robot_description))
@@ -125,16 +120,18 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
     ROS_ERROR("Failed to parse urdf model from 'robot_description'");
     return false;
   }
-  if (!kdl_parser::treeFromUrdfModel(robot_model,robot_tree))
+  if (!kdl_parser::treeFromUrdfModel(robot_model, robot_tree))
   {
-    const std::string error = ""
+    const std::string error =
+      ""
       "Failed to parse KDL tree from urdf model";
     ROS_ERROR_STREAM(error);
     throw std::runtime_error(error);
   }
-  if (!robot_tree.getChain(m_robot_base_link,m_end_effector_link,robot_chain))
+  if (!robot_tree.getChain(m_robot_base_link, m_end_effector_link, robot_chain))
   {
-    const std::string error = ""
+    const std::string error =
+      ""
       "Failed to parse robot chain from urdf model. "
       "Are you sure that both your 'robot_base_link' and 'end_effector_link' exist?";
     ROS_ERROR_STREAM(error);
@@ -142,10 +139,12 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   }
 
   // Get names of controllable joints from the parameter server
-  if (!nh.getParam("joints",m_joint_names))
+  if (!nh.getParam("joints", m_joint_names))
   {
-    const std::string error = ""
-    "Failed to load " + nh.getNamespace() + "/joints" + " from parameter server";
+    const std::string error =
+      ""
+      "Failed to load " +
+      nh.getNamespace() + "/joints" + " from parameter server";
     ROS_ERROR_STREAM(error);
     throw std::runtime_error(error);
   }
@@ -161,7 +160,7 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   m_velocities.data = ctrl::VectorND::Zero(m_joint_handles.size());
 
   // Initialize controller adapter and according manager
-  m_controller_adapter.init(m_joint_handles,nh);
+  m_controller_adapter.init(m_joint_handles, nh);
   m_controller_manager.reset(new controller_manager::ControllerManager(&m_controller_adapter, nh));
 
   // Initialize forward kinematics solver
@@ -170,7 +169,7 @@ bool JointToCartesianController::init(hardware_interface::JointStateInterface* h
   return true;
 }
 
-void JointToCartesianController::starting(const ros::Time& time)
+void JointToCartesianController::starting(const ros::Time & time)
 {
   // Get current joint positions from hardware
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
@@ -179,25 +178,23 @@ void JointToCartesianController::starting(const ros::Time& time)
   }
 }
 
-void JointToCartesianController::stopping(const ros::Time& time)
-{
-}
+void JointToCartesianController::stopping(const ros::Time & time) {}
 
-void JointToCartesianController::update(const ros::Time& time, const ros::Duration& period)
+void JointToCartesianController::update(const ros::Time & time, const ros::Duration & period)
 {
   // Note: The connected joint-based controller gets the feedback directly from
   // the joint state handles of this joint_to_cartesian_controller. So,
   // there's no need for a read() function.
 
   // Update connected joint controller
-  m_controller_manager->update(time,period);
+  m_controller_manager->update(time, period);
 
   // Get commanded positions
   m_controller_adapter.write(m_positions);
 
   // Solve forward kinematics
   KDL::Frame frame;
-  m_fk_solver->JntToCart(m_positions,frame);
+  m_fk_solver->JntToCart(m_positions, frame);
 
   // Publish end-effector pose
   geometry_msgs::PoseStamped target_pose = geometry_msgs::PoseStamped();
@@ -206,12 +203,9 @@ void JointToCartesianController::update(const ros::Time& time, const ros::Durati
   target_pose.pose.position.x = frame.p.x();
   target_pose.pose.position.y = frame.p.y();
   target_pose.pose.position.z = frame.p.z();
-  frame.M.GetQuaternion(
-      target_pose.pose.orientation.x,
-      target_pose.pose.orientation.y,
-      target_pose.pose.orientation.z,
-      target_pose.pose.orientation.w);
+  frame.M.GetQuaternion(target_pose.pose.orientation.x, target_pose.pose.orientation.y,
+                        target_pose.pose.orientation.z, target_pose.pose.orientation.w);
   m_pose_publisher.publish(target_pose);
 }
 
-}
+}  // namespace joint_to_cartesian_controller
