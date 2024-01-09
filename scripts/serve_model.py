@@ -15,8 +15,8 @@ import os
 class Server(Node):
     def __init__(self):
         super().__init__("server")
-        self.prediction_rate = self.declare_parameter("prediction_rate", 10).value
-        self.prediction_memory = self.declare_parameter("prediction_memory", 25).value
+        self.prediction_rate = self.declare_parameter("prediction_rate", 50).value
+        self.prediction_memory = self.declare_parameter("prediction_memory", 50).value
         self.model_dir = self.declare_parameter("model_dir", "").value
         self.model = tf.keras.models.load_model(self.model_dir)
         with open(os.path.join(self.model_dir, "input_scaling.yaml")) as f:
