@@ -57,6 +57,7 @@
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <vector>
 
+#include "ROS2VersionConfig.h"
 #include "rclcpp/node.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
