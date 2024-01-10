@@ -79,7 +79,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Make sure sensor wrenches are interpreted correctly
-  setFtSensorReferenceFrame(Base::m_end_effector_link);
+  setFtSensorReferenceFrame(Base::m_end_effector_link,m_end_effector_transform_offset);
 
   m_signal_taring_server = nh.advertiseService("signal_taring",&CartesianForceController<HardwareInterface>::signalTaringCallback,this);
   m_target_wrench_subscriber = nh.subscribe("target_wrench",2,&CartesianForceController<HardwareInterface>::targetWrenchCallback,this);
@@ -112,6 +112,12 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   m_target_wrench.setZero();
   m_ft_sensor_wrench.setZero();
+
+
+  // Initialize spatial pose for end effector transform offset
+  std::string spatial_pose_config = nh.getNamespace() + "/end_effector_transform_offset";
+  m_pose_parameter_handle.init(spatial_pose_config);
+
 
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
@@ -175,10 +181,19 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianForceController<HardwareInterface>::
 computeForceError()
 {
+  // Update end effector transform offset is updated through dynamic reconfigure
+  if(m_pose_parameter_handle.has_new_pose())
+  {
+    m_end_effector_transform_offset = m_pose_parameter_handle.get_pose();
+
+    // Reset FTS Reference frame
+    setFtSensorReferenceFrame(Base::m_end_effector_link,m_end_effector_transform_offset);
+  }
+
   ctrl::Vector6D target_wrench;
   if (m_hand_frame_control) // Assume end-effector frame by convention
   {
-    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link);
+    target_wrench = Base::displayInBaseLink(m_target_wrench,Base::m_end_effector_link,m_end_effector_transform_offset);
   }
   else // Default to robot base frame
   {
@@ -186,7 +201,7 @@ computeForceError()
   }
 
   // Superimpose target wrench and sensor wrench in base frame
-  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref)
+  return Base::displayInBaseLink(m_ft_sensor_wrench,m_new_ft_sensor_ref,m_end_effector_transform_offset)
     + target_wrench
     + compensateGravity();
 }
@@ -194,6 +209,13 @@ computeForceError()
 template <class HardwareInterface>
 void CartesianForceController<HardwareInterface>::
 setFtSensorReferenceFrame(const std::string& new_ref)
+{
+  setFtSensorReferenceFrame(new_ref, Base::m_identity_transform_kdl);
+}
+
+template <class HardwareInterface>
+void CartesianForceController<HardwareInterface>::
+setFtSensorReferenceFrame(const std::string& new_ref, const KDL::Frame& new_ref_transform_offset)
 {
   // Compute static transform from the force torque sensor to the new reference
   // frame of interest.
@@ -214,6 +236,8 @@ setFtSensorReferenceFrame(const std::string& new_ref)
       jnts,
       new_sensor_ref,
       m_new_ft_sensor_ref);
+
+  new_sensor_ref = new_sensor_ref * new_ref_transform_offset;
 
   m_ft_sensor_transform = new_sensor_ref.Inverse() * sensor_ref;
 }

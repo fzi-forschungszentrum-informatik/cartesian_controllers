@@ -124,6 +124,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      * @return The quantity in the robot base frame
      */
     ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
+    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_transform_offset);
 
     /**
      * @brief Display the given tensor in the robot base frame
@@ -169,6 +170,8 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     KDL::Chain m_robot_chain;
 
     std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;
+
+    const KDL::Frame m_identity_transform_kdl;
 
     /**
      * @brief Allow users to choose the IK solver type on startup

@@ -276,6 +276,13 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
 displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
 {
+ return displayInBaseLink(vector,from,m_identity_transform_kdl);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_transform_offset)
+{
   // Adjust format
   KDL::Wrench wrench_kdl;
   for (int i = 0; i < 6; ++i)
@@ -288,6 +295,9 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
       m_ik_solver->getPositions(),
       transform_kdl,
       from);
+
+  // Apply offset
+  transform_kdl = transform_kdl * from_transform_offset;
 
   // Rotate into new reference frame
   wrench_kdl = transform_kdl.M * wrench_kdl;

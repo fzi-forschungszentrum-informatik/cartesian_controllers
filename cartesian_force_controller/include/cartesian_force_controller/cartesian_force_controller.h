@@ -42,6 +42,7 @@
 
 // Project
 #include <cartesian_controller_base/cartesian_controller_base.h>
+#include <cartesian_controller_base/PoseParameterHandle.h>
 
 // ROS
 #include <std_srvs/Trigger.h>
@@ -102,6 +103,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector6D        computeForceError();
     std::string           m_new_ft_sensor_ref;
     void setFtSensorReferenceFrame(const std::string& new_ref);
+    void setFtSensorReferenceFrame(const std::string& new_ref, const KDL::Frame& new_ref_transform_offset);
 
   private:
     ctrl::Vector6D        compensateGravity();
@@ -120,6 +122,14 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
     ctrl::Vector3D        m_center_of_mass;
     std::string           m_ft_sensor_ref_link;
     KDL::Frame            m_ft_sensor_transform;
+
+    /**
+     * Allow users to specify a transform offset from the end-effector frame. Affects
+     * FT Sensor reference frame as well as the target wrench (m_hand_frame_control = True)
+     */
+    KDL::Frame m_end_effector_transform_offset; // only used for target wrench when m_hand_frame_control = True
+
+    cartesian_controller_base::PoseParameterHandle m_pose_parameter_handle;
 
     /**
      * Allow users to choose whether to specify their target wrenches in the
