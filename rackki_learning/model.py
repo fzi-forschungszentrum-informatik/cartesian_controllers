@@ -53,8 +53,11 @@ class Model(object):
         self.training_iterations = training_iterations
         self.batch_size = batch_size
         self.learning_rate = learning_rate
+        lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+            learning_rate, decay_steps=2000, decay_rate=1, staircase=False
+        )
         self.model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate),
+            optimizer=tf.keras.optimizers.Adam(lr_schedule),
             loss=NegLogLikelihood(self.n_gaussians),
         )
         self.sequence_length = training_data.sequence_length

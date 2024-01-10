@@ -4,7 +4,7 @@ from rackki_learning.dataset import Dataset
 from rackki_learning.model import Model
 
 TYPE = "put"  # {put, get}
-SEQ_LEN = 25
+SEQ_LEN = 50
 
 
 def main():
@@ -15,14 +15,14 @@ def main():
     model_dir = os.path.join(os.getcwd(), f"../models/{TYPE}")
 
     model = Model(
-        n_nodes=100, key_dim=32, n_heads=8, n_gaussians=4, sequence_length=SEQ_LEN
+        n_nodes=64, key_dim=128, n_heads=4, n_gaussians=4, sequence_length=SEQ_LEN
     )
     model.train(
         training_data,
         evaluation_data,
         training_iterations=10000,
         batch_size=128,
-        learning_rate=0.0003,
+        learning_rate=0.001,
         log_dir=model_dir,
     )
 
