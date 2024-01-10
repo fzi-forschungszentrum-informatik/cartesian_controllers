@@ -11,17 +11,17 @@ This gives us a strong environment to realistically test control and contact phe
 We use MuJoCo in [headless mode](https://mujoco.readthedocs.io/en/latest/programming.html?highlight=headless#using-opengl)
 and don't need OpenGL-related dependencies.
 
-1. Download MuJoCo's most recent [release](https://github.com/deepmind/mujoco/releases/) and extract that somewhere.
-It's a ready-to-use, pre-built library package, and we will just point to it during the build.
+1. Download MuJoCo's pre-built [library package](https://github.com/deepmind/mujoco/releases/) and extract that somewhere.
+It's ready-to-use and we will just point to it during the build.
    ```bash
    cd $HOME
-   wget https://github.com/deepmind/mujoco/releases/download/2.1.1/mujoco-2.1.1-linux-x86_64.tar.gz
-   tar -xf mujoco-2.1.1-linux-x86_64.tar.gz
+   wget https://github.com/deepmind/mujoco/releases/download/3.0.0/mujoco-3.0.0-linux-x86_64.tar.gz
+   tar -xf mujoco-3.0.0-linux-x86_64.tar.gz
    ```
 
 3. Switch to the *root* of your ROS2 workspace and build the package (*standalone*) with
    ```bash
-   colcon build --cmake-args "-DMUJOCO_DIR=$HOME/mujoco-2.1.1" --packages-select cartesian_controller_simulation
+   colcon build --cmake-args "-DMUJOCO_DIR=$HOME/mujoco-3.0.0" --packages-select cartesian_controller_simulation
    ```
 
 
