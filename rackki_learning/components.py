@@ -116,7 +116,7 @@ class PredictionLayer(Layer):
                 return mixture_params
             else:
                 gaussian_mixture = GaussianMixture(mixture_params, self.n_gaussians)
-                return gaussian_mixture.sample()
+                return gaussian_mixture.mean()
 
 
 @saving.register_keras_serializable()
