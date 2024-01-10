@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-#include "mujoco.h"
+#include "mujoco/mujoco.h"
 
 namespace cartesian_controller_simulation
 {

@@ -23,12 +23,12 @@ find_package(rclcpp REQUIRED)
 # Mujoco comes as a pre-built library package.
 # Extract this package somewhere and point CMake towards it during the build process.
 if(NOT DEFINED MUJOCO_DIR)
-        set(MUJOCO_DIR "$ENV{HOME}/mujoco-2.1.1") # CI setting
+        set(MUJOCO_DIR "$ENV{HOME}/mujoco-3.0.0") # CI setting
         message(WARNING "MUJOCO_DIR not specified. Using default ${MUJOCO_DIR}")
 endif()
 set(MUJOCO_INCLUDE_DIRS ${MUJOCO_DIR}/include)
 set(MUJOCO_LIBRARIES
-        ${MUJOCO_DIR}/lib/libmujoco_nogl.so
+        ${MUJOCO_DIR}/lib/libmujoco.so
 )
 
 # --------------------------------------------------------------------------------
