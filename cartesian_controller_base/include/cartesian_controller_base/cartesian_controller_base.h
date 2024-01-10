@@ -176,6 +176,13 @@ protected:
     return false;
   }
 
+  /**
+   * @brief Helper method to check the controller's state during input callbacks
+   *
+   * @return True if the controller is active, false otherwise
+   */
+  bool isActive() const { return m_active; };
+
   KDL::Chain m_robot_chain;
 
   std::shared_ptr<KDL::TreeFkSolverPos_recursive> m_forward_kinematics_solver;

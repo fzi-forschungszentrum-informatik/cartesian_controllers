@@ -155,42 +155,43 @@ class IntegrationTest(unittest.TestCase):
         The controllers' callbacks store them even when in inactive state after startup.
         We then check if every controller can be activated normally.
         """
-        # Target pose
-        target_pose = PoseStamped()
-        target_pose.header.frame_id = "base_link"
-        target_pose.pose.position.x = float("nan")
-        target_pose.pose.position.y = float("nan")
-        target_pose.pose.position.z = float("nan")
-        target_pose.pose.orientation.x = float("nan")
-        target_pose.pose.orientation.y = float("nan")
-        target_pose.pose.orientation.z = float("nan")
-        target_pose.pose.orientation.w = float("nan")
-        self.target_pose_pub.publish(target_pose)
 
-        # Force-torque sensor
-        ft_sensor_wrench = WrenchStamped()
-        ft_sensor_wrench.wrench.force.x = float("nan")
-        ft_sensor_wrench.wrench.force.y = float("nan")
-        ft_sensor_wrench.wrench.force.z = float("nan")
-        ft_sensor_wrench.wrench.torque.x = float("nan")
-        ft_sensor_wrench.wrench.torque.y = float("nan")
-        ft_sensor_wrench.wrench.torque.z = float("nan")
-        self.ft_sensor_wrench_pub.publish(ft_sensor_wrench)
+        def publish_nan_targets():
+            # Target pose
+            target_pose = PoseStamped()
+            target_pose.header.frame_id = "base_link"
+            target_pose.pose.position.x = float("nan")
+            target_pose.pose.position.y = float("nan")
+            target_pose.pose.position.z = float("nan")
+            target_pose.pose.orientation.x = float("nan")
+            target_pose.pose.orientation.y = float("nan")
+            target_pose.pose.orientation.z = float("nan")
+            target_pose.pose.orientation.w = float("nan")
+            self.target_pose_pub.publish(target_pose)
 
-        # Target wrench
-        target_wrench = WrenchStamped()
-        target_wrench.wrench.force.x = float("nan")
-        target_wrench.wrench.force.y = float("nan")
-        target_wrench.wrench.force.z = float("nan")
-        target_wrench.wrench.torque.x = float("nan")
-        target_wrench.wrench.torque.y = float("nan")
-        target_wrench.wrench.torque.z = float("nan")
-        self.target_wrench_pub.publish(target_wrench)
+            # Force-torque sensor
+            ft_sensor_wrench = WrenchStamped()
+            ft_sensor_wrench.wrench.force.x = float("nan")
+            ft_sensor_wrench.wrench.force.y = float("nan")
+            ft_sensor_wrench.wrench.force.z = float("nan")
+            ft_sensor_wrench.wrench.torque.x = float("nan")
+            ft_sensor_wrench.wrench.torque.y = float("nan")
+            ft_sensor_wrench.wrench.torque.z = float("nan")
+            self.ft_sensor_wrench_pub.publish(ft_sensor_wrench)
 
-        time.sleep(1)  # give the controllers some time to process
+            # Target wrench
+            target_wrench = WrenchStamped()
+            target_wrench.wrench.force.x = float("nan")
+            target_wrench.wrench.force.y = float("nan")
+            target_wrench.wrench.force.z = float("nan")
+            target_wrench.wrench.torque.x = float("nan")
+            target_wrench.wrench.torque.y = float("nan")
+            target_wrench.wrench.torque.z = float("nan")
+            self.target_wrench_pub.publish(target_wrench)
 
         for name in self.our_controllers:
             self.start_controller(name)
+            publish_nan_targets()
             time.sleep(3)  # process some update() cycles
             self.assertTrue(
                 self.check_state(name, "active"), f"{name} survives inputs with NaNs"

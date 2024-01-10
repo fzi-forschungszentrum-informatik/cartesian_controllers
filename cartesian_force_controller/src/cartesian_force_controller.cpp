@@ -209,6 +209,11 @@ void CartesianForceController::setFtSensorReferenceFrame(const std::string & new
 void CartesianForceController::targetWrenchCallback(
   const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+  if (!this->isActive())
+  {
+    return;
+  }
+
   if (std::isnan(wrench->wrench.force.x) || std::isnan(wrench->wrench.force.y) ||
       std::isnan(wrench->wrench.force.z) || std::isnan(wrench->wrench.torque.x) ||
       std::isnan(wrench->wrench.torque.y) || std::isnan(wrench->wrench.torque.z))
@@ -230,6 +235,11 @@ void CartesianForceController::targetWrenchCallback(
 void CartesianForceController::ftSensorWrenchCallback(
   const geometry_msgs::msg::WrenchStamped::SharedPtr wrench)
 {
+  if (!this->isActive())
+  {
+    return;
+  }
+
   if (std::isnan(wrench->wrench.force.x) || std::isnan(wrench->wrench.force.y) ||
       std::isnan(wrench->wrench.force.z) || std::isnan(wrench->wrench.torque.x) ||
       std::isnan(wrench->wrench.torque.y) || std::isnan(wrench->wrench.torque.z))
