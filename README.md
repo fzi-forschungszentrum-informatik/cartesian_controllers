@@ -4,14 +4,6 @@
 ![build badge](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/actions/workflows/industrial_ci_iron_action.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
----
-
-This is the **ROS2** version of the `cartesian_controllers`.
-Checkout each controller's updated README.md with detailed explanations.
-Any issue, PR, or feedback on *your* special robot and use case is highly appreciated :)
-
----
-
 # Cartesian Controllers
 This package provides a set of Cartesian `motion`, `force` and `compliance controllers` for the `ros2_control` framework.
 The controllers are meant for `joint position` and `joint velocity` interfaces on the manipulators.
@@ -24,9 +16,10 @@ The controllers from this package are designed to trade smooth and stable behavi
 appropriate, and behave physically plausible for targets outside the robots reach.
 The package is for users who require interfaces to direct task space control
 without the need for collision checking.
-See [this talk at ROSCon'19](https://vimeo.com/378682968) and [the
+
+The **ROS1** version is [here](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers/tree/ros1). Also see [this talk at ROSCon'19](https://vimeo.com/378682968) and [these
 slides](https://roscon.ros.org/2019/talks/roscon2019_cartesiancontrollers.pdf)
-to get an overview.
+to get a brief overview.
 
 ## Why this package?
 Users may refer to `MoveIt` for end-effector motion planning, but
@@ -88,3 +81,6 @@ If you are interested in more details, have a look at
 - *Virtual Forward Dynamics Models for Cartesian Robot Control* ([Paper](https://arxiv.org/pdf/2009.11888.pdf))
 - *Contact Skill Imitation Learning for Robot-Independent Assembly Programming* ([Paper](https://arxiv.org/pdf/1908.06272.pdf))
 - *Human-Inspired Compliant Controllers for Robotic Assembly* ([PhD Thesis](https://publikationen.bibliothek.kit.edu/1000139834), especially Chapter 4)
+
+Here's an application of imitation learning for force-controlled assembly on a UR10e
+- *Learning Human-Inspired Force Strategies for Robotic Assembly* ([Paper](https://arxiv.org/abs/2303.12440))
