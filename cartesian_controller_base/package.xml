@@ -39,6 +39,10 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <!-- For reproducing #99 -->
+  <build_depend>clang</build_depend>
+  <buildtool_depend>clang</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>controller_interface</build_depend>
   <build_depend>kdl_parser</build_depend>

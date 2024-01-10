@@ -4,6 +4,11 @@ on: [push, pull_request]
 
 jobs:
   industrial_ci:
+    env:
+      # See the full documentation here:
+      # https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst
+      CXX: /usr/bin/clang++
+      CC: /usr/bin/clang
     strategy:
       fail-fast: false
       matrix:
