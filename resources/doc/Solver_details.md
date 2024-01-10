@@ -72,6 +72,8 @@ my_cartesian_controller:
         error_scale: 0.5
         iterations: 5
         publish_state_feedback: True
+        forward_dynamics:
+            link_mass: 0.1
 
     # Further specification
     # ...
