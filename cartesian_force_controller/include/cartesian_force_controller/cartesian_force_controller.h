@@ -113,8 +113,6 @@ protected:
   void setFtSensorReferenceFrame(const std::string & new_ref);
 
 private:
-  ctrl::Vector6D compensateGravity();
-
   void targetWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
   void ftSensorWrenchCallback(const geometry_msgs::msg::WrenchStamped::SharedPtr wrench);
 
