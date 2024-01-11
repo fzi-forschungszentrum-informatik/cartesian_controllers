@@ -10,7 +10,7 @@ def test_training_and_saving_models(request):
     data_path = os.path.join(request.node.fspath.dirname, "./../rosbags")
     training_data = Dataset(data_path)
     evaluation_data = Dataset(data_path)
-    model = Model(key_dim=17, n_gaussians=5)
+    model = Model(key_dim=17)
     success = model.train(training_data, evaluation_data, epochs=3, iterations=2)
     assert success
 

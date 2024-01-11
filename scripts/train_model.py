@@ -15,10 +15,7 @@ def main():
     evaluation_data = Dataset(evaluation_files, sequence_length=SEQ_LEN)
     model_dir = os.path.join(os.getcwd(), f"../models/{TYPE}")
 
-    model = Model(
-        n_nodes=128, key_dim=64, n_heads=4, n_gaussians=4, sequence_length=SEQ_LEN
-    )
-
+    model = Model(n_nodes=64, key_dim=128, n_heads=4, sequence_length=SEQ_LEN)
     try:
         model.train(
             training_data,
