@@ -123,7 +123,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      *
      * @return The quantity in the robot base frame
      */
-    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from);
+    KDL::Wrench displayInBaseLink(const KDL::Wrench& vector, const std::string& from);
 
     /**
      * @brief Display the given tensor in the robot base frame
@@ -145,7 +145,7 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      *
      * @return The quantity in the new frame
      */
-    ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
+    KDL::Wrench displayInTipLink(const KDL::Wrench& vector, const std::string& to);
 
     /**
      * @brief Check if specified links are part of the robot chain

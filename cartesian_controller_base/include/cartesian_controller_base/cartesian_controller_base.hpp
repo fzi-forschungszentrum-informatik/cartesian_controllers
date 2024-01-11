@@ -273,16 +273,9 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
 }
 
 template <class HardwareInterface>
-ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
-displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
+KDL::Wrench CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const KDL::Wrench& vector, const std::string& from)
 {
-  // Adjust format
-  KDL::Wrench wrench_kdl;
-  for (int i = 0; i < 6; ++i)
-  {
-    wrench_kdl(i) = vector[i];
-  }
-
   KDL::Frame transform_kdl;
   m_forward_kinematics_solver->JntToCart(
       m_ik_solver->getPositions(),
@@ -290,16 +283,7 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
       from);
 
   // Rotate into new reference frame
-  wrench_kdl = transform_kdl.M * wrench_kdl;
-
-  // Reassign
-  ctrl::Vector6D out;
-  for (int i = 0; i < 6; ++i)
-  {
-    out[i] = wrench_kdl(i);
-  }
-
-  return out;
+  return transform_kdl.M * vector;
 }
 
 template <class HardwareInterface>
@@ -336,16 +320,9 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
 }
 
 template <class HardwareInterface>
-ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
-displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
+KDL::Wrench CartesianControllerBase<HardwareInterface>::
+displayInTipLink(const KDL::Wrench& vector, const std::string& to)
 {
-  // Adjust format
-  KDL::Wrench wrench_kdl;
-  for (int i = 0; i < 6; ++i)
-  {
-    wrench_kdl(i) = vector[i];
-  }
-
   KDL::Frame transform_kdl;
   m_forward_kinematics_solver->JntToCart(
       m_ik_solver->getPositions(),
@@ -353,16 +330,7 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
       to);
 
   // Rotate into new reference frame
-  wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;
-
-  // Reassign
-  ctrl::Vector6D out;
-  for (int i = 0; i < 6; ++i)
-  {
-    out[i] = wrench_kdl(i);
-  }
-
-  return out;
+  return transform_kdl.M.Inverse() * vector;
 }
 
 template <class HardwareInterface>
