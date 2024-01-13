@@ -33,6 +33,7 @@ my_cartesian_force_controller:
     - joint6
 
     solver:
+        publish_state_feedback: True
         error_scale: 0.5
 
     pd_gains:
