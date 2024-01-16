@@ -24,8 +24,16 @@ class Dataset(object):
 
         rclpy.init()
         node = rclpy.create_node("dataset_creation")
+        rclpy.logging.get_logger("rosbag2_storage").set_level(
+            30
+        )  # FATAL = 50 ERROR = 40 WARN = 30 INFO = 20 DEBUG = 10 UNSET = 0  # noqa
         reader = SequentialReader()
         for file_count, file_path in enumerate(file_paths, 1):
+            print(
+                f"Reading dataset: {str(file_count)} / {str(len(file_paths))}",
+                end="\r",
+                flush=True,
+            )
             tmp_poses = []
             tmp_wrenches = []
             storage_options = StorageOptions(uri=file_path, storage_id="sqlite3")
@@ -68,13 +76,15 @@ class Dataset(object):
                     )
 
             common_length = min(len(tmp_poses), len(tmp_wrenches))
-            del tmp_poses[common_length:]
-            del tmp_wrenches[common_length:]
-            print(f" {str(file_count)} / {str(len(file_paths))}", end="\r", flush=True)
-            self.inputs.append(tmp_poses)
-            self.labels.append(tmp_wrenches)
+            # Only allow sufficiently long recordings
+            if common_length > self.sequence_length:
+                del tmp_poses[common_length:]
+                del tmp_wrenches[common_length:]
+                self.inputs.append(tmp_poses)
+                self.labels.append(tmp_wrenches)
             reader.reset_filter()
 
+        print("")
         node.destroy_node()
         rclpy.shutdown()
 
@@ -99,7 +109,10 @@ class Dataset(object):
         self.inputs = np.split(self.inputs, split_idx)
         del self.inputs[-1]  # empty element through split at the end
 
-    def get_batch(self, minibatch_size):
+    def get_file_count(self):
+        return len(self.inputs)
+
+    def get_batch(self, minibatch_size: int, index: int = None):
         """Compose a mini batch of data
 
         shape of inputs : [minibatch_size, sequence_length, in_dim]
@@ -114,14 +127,16 @@ class Dataset(object):
         labels = []
 
         for _ in range(minibatch_size):
-            while True:  # Search for a sufficiently long sequence
-                random_sequence = np.random.randint(0, len(self.inputs))
-                limit = len(self.inputs[random_sequence]) - self.sequence_length
-                if limit > 0:
-                    break
+            if index is None:
+                while True:  # Search for a sufficiently long sequence
+                    index = np.random.randint(0, len(self.inputs))
+                    if len(self.inputs[index]) - self.sequence_length > 0:
+                        break
+
+            limit = len(self.inputs[index]) - self.sequence_length
             begin = np.random.randint(0, limit)
             end = begin + self.sequence_length
 
-            inputs.append([self.inputs[random_sequence][i] for i in range(begin, end)])
-            labels.append(self.labels[random_sequence][end])
+            inputs.append([self.inputs[index][i] for i in range(begin, end)])
+            labels.append(self.labels[index][end])
         return np.array(inputs), np.array(labels)

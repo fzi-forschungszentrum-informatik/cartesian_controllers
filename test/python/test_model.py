@@ -11,7 +11,7 @@ def test_training_and_saving_models(request):
     training_data = Dataset(data_path)
     evaluation_data = Dataset(data_path)
     model = Model(key_dim=17, n_gaussians=5)
-    success = model.train(training_data, evaluation_data, training_iterations=12)
+    success = model.train(training_data, evaluation_data, epochs=3, iterations=2)
     assert success
 
     # Saving
