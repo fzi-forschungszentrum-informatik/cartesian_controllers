@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 from rackki_learning.dataset import Dataset
 from rackki_learning.model import Model
 
@@ -17,18 +18,24 @@ def main():
     model = Model(
         n_nodes=128, key_dim=64, n_heads=4, n_gaussians=4, sequence_length=SEQ_LEN
     )
-    model.train(
-        training_data,
-        evaluation_data,
-        epochs=10,
-        iterations=1,
-        batch_size=128,
-        learning_rate=0.0005,
-        log_dir=model_dir,
-    )
+
+    try:
+        model.train(
+            training_data,
+            evaluation_data,
+            epochs=10,
+            iterations=1,
+            batch_size=128,
+            learning_rate=0.0005,
+            log_dir=model_dir,
+        )
+    except KeyboardInterrupt:
+        model.save(model_dir)
+        print(f"Training canceled. Saved intermediate model here: {model_dir}")
+        sys.exit()
 
     model.save(model_dir)
-    print(f"Saved model here: {model_dir}")
+    print(f"Training finished. Saved model here: {model_dir}")
 
 
 if __name__ == "__main__":
