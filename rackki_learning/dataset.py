@@ -126,12 +126,23 @@ class Dataset(object):
         inputs = []
         labels = []
 
+        def random_index():
+            while True:
+                index = np.random.randint(0, len(self.inputs))
+                if len(self.inputs[index]) - self.sequence_length > 0:
+                    return index
+
+        def biased_index():
+            draw = np.random.randint(0, 2)
+            if draw == 0:
+                return index
+            return random_index()
+
         for _ in range(minibatch_size):
             if index is None:
-                while True:  # Search for a sufficiently long sequence
-                    index = np.random.randint(0, len(self.inputs))
-                    if len(self.inputs[index]) - self.sequence_length > 0:
-                        break
+                index = random_index()
+            else:
+                index = biased_index()
 
             limit = len(self.inputs[index]) - self.sequence_length
             begin = np.random.randint(0, limit)
