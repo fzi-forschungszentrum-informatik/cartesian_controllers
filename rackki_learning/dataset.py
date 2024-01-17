@@ -28,11 +28,6 @@ class Dataset(object):
             30
         )  # FATAL = 50 ERROR = 40 WARN = 30 INFO = 20 DEBUG = 10 UNSET = 0  # noqa
         reader = SequentialReader()
-
-        def augment(data):
-            # Mimic initial stagnation
-            return [data[0] for _ in range(self.sequence_length)] + data
-
         for file_count, file_path in enumerate(file_paths, 1):
             print(
                 f"Reading dataset: {str(file_count)} / {str(len(file_paths))}",
@@ -85,8 +80,6 @@ class Dataset(object):
             if common_length > self.sequence_length:
                 del tmp_poses[common_length:]
                 del tmp_wrenches[common_length:]
-                tmp_poses = augment(tmp_poses)
-                tmp_wrenches = augment(tmp_wrenches)
                 self.inputs.append(tmp_poses)
                 self.labels.append(tmp_wrenches)
             reader.reset_filter()
@@ -119,7 +112,7 @@ class Dataset(object):
     def get_file_count(self):
         return len(self.inputs)
 
-    def get_batch(self, minibatch_size: int, index: int = None):
+    def get_batch(self, minibatch_size: int, seq_nr: int = None):
         """Compose a mini batch of data
 
         shape of inputs : [minibatch_size, sequence_length, in_dim]
@@ -133,28 +126,41 @@ class Dataset(object):
         inputs = []
         labels = []
 
-        def random_index():
+        def random_seq_nr():
             while True:
-                index = np.random.randint(0, len(self.inputs))
-                if len(self.inputs[index]) - self.sequence_length > 0:
-                    return index
+                seq_nr = np.random.randint(0, len(self.inputs))
+                if len(self.inputs[seq_nr]) - self.sequence_length > 0:
+                    return seq_nr
 
-        def biased_index():
+        def biased_seq_nr():
             draw = np.random.randint(0, 2)
             if draw == 0:
-                return index
-            return random_index()
+                return seq_nr
+            return random_seq_nr()
+
+        def standard_case():
+            draw = np.random.randint(0, 10)
+            if draw == 0:
+                return False
+            return True
 
         for _ in range(minibatch_size):
-            if index is None:
-                index = random_index()
+            if seq_nr is None:
+                seq_nr = random_seq_nr()
             else:
-                index = biased_index()
+                seq_nr = biased_seq_nr()
 
-            limit = len(self.inputs[index]) - self.sequence_length
+            limit = len(self.inputs[seq_nr]) - self.sequence_length
             begin = np.random.randint(0, limit)
             end = begin + self.sequence_length
 
-            inputs.append([self.inputs[index][i] for i in range(begin, end)])
-            labels.append(self.labels[index][end])
+            if standard_case():
+                inputs.append([self.inputs[seq_nr][i] for i in range(begin, end)])
+                labels.append(self.labels[seq_nr][end])
+            else:
+                inputs.append(
+                    [self.inputs[seq_nr][begin] for i in range(self.sequence_length)]
+                )
+                labels.append(self.labels[seq_nr][begin + 1])
+
         return np.array(inputs), np.array(labels)
