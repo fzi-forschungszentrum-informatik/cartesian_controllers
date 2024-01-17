@@ -28,6 +28,11 @@ class Dataset(object):
             30
         )  # FATAL = 50 ERROR = 40 WARN = 30 INFO = 20 DEBUG = 10 UNSET = 0  # noqa
         reader = SequentialReader()
+
+        def augment(data):
+            # Mimic initial stagnation
+            return [data[0] for _ in range(self.sequence_length)] + data
+
         for file_count, file_path in enumerate(file_paths, 1):
             print(
                 f"Reading dataset: {str(file_count)} / {str(len(file_paths))}",
@@ -75,11 +80,13 @@ class Dataset(object):
                         ]
                     )
 
-            common_length = min(len(tmp_poses), len(tmp_wrenches))
             # Only allow sufficiently long recordings
+            common_length = min(len(tmp_poses), len(tmp_wrenches))
             if common_length > self.sequence_length:
                 del tmp_poses[common_length:]
                 del tmp_wrenches[common_length:]
+                tmp_poses = augment(tmp_poses)
+                tmp_wrenches = augment(tmp_wrenches)
                 self.inputs.append(tmp_poses)
                 self.labels.append(tmp_wrenches)
             reader.reset_filter()
