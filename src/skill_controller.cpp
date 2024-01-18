@@ -51,6 +51,7 @@ SkillController::CallbackReturn SkillController::on_init()
   auto_declare<double>("max_torque", 3.0);
   auto_declare<int>("prediction_memory", 30);
   auto_declare<int>("prediction_rate", 10);
+  auto_declare<double>("prediction_scale", 1.0);
   auto_declare<std::vector<double> >("done_when_in", {0.0, 0.0});
   return CallbackReturn::SUCCESS;
 }
@@ -307,6 +308,7 @@ SkillController::processOutputTensor(const tensorflow::Tensor& output)
 {
   double max_force           = std::abs(get_node()->get_parameter("max_force").as_double());
   double max_torque          = std::abs(get_node()->get_parameter("max_torque").as_double());
+  double scale               = std::abs(get_node()->get_parameter("prediction_scale").as_double());
   auto values                = output.flat<float>();
   auto predicted_wrench      = KDL::Wrench();
   predicted_wrench.force[0]  = values(0);
@@ -320,12 +322,18 @@ SkillController::processOutputTensor(const tensorflow::Tensor& output)
   auto target_wrench            = geometry_msgs::msg::WrenchStamped();
   target_wrench.header.stamp    = this->get_node()->now();
   target_wrench.header.frame_id = get_node()->get_parameter("robot_base_link").as_string();
-  target_wrench.wrench.force.x  = std::clamp(predicted_wrench.force[0], -max_force, max_force);
-  target_wrench.wrench.force.y  = std::clamp(predicted_wrench.force[1], -max_force, max_force);
-  target_wrench.wrench.force.z  = std::clamp(predicted_wrench.force[2], -max_force, max_force);
-  target_wrench.wrench.torque.x = std::clamp(predicted_wrench.torque[0], -max_torque, max_torque);
-  target_wrench.wrench.torque.y = std::clamp(predicted_wrench.torque[1], -max_torque, max_torque);
-  target_wrench.wrench.torque.z = std::clamp(predicted_wrench.torque[2], -max_torque, max_torque);
+  target_wrench.wrench.force.x =
+    std::clamp(predicted_wrench.force[0] * scale, -max_force, max_force);
+  target_wrench.wrench.force.y =
+    std::clamp(predicted_wrench.force[1] * scale, -max_force, max_force);
+  target_wrench.wrench.force.z =
+    std::clamp(predicted_wrench.force[2] * scale, -max_force, max_force);
+  target_wrench.wrench.torque.x =
+    std::clamp(predicted_wrench.torque[0] * scale, -max_torque, max_torque);
+  target_wrench.wrench.torque.y =
+    std::clamp(predicted_wrench.torque[1] * scale, -max_torque, max_torque);
+  target_wrench.wrench.torque.z =
+    std::clamp(predicted_wrench.torque[2] * scale, -max_torque, max_torque);
   return target_wrench;
 }
 
