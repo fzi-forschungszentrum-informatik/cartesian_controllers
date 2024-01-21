@@ -5,6 +5,7 @@
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "kdl/chain.hpp"
 #include "kdl/chainfksolver.hpp"
+#include "rackki_interfaces/msg/controller_state.hpp"
 #include "rackki_interfaces/srv/set_target.hpp"
 #include "tf2/exceptions.h"
 #include "tf2_ros/buffer.h"
@@ -45,14 +46,18 @@ public:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state) override;
 
 private:
-  void updateInputSequence();
+  constexpr static int FEATURE_DIM = 7;
+  tensorflow::Tensor buildInputTensor();
+  geometry_msgs::msg::WrenchStamped processOutputTensor(const tensorflow::Tensor& output);
   void updateJointStates();
   void cleanup();
   bool setTarget(const std::string& target);
+  bool done();
+  KDL::Frame getCurrentPoseToTarget();
 
   std::thread m_serving_thread;
   tensorflow::SavedModelBundleLite m_bundle;
-  std::deque<std::pair<std::string, tensorflow::Tensor> > m_input_sequence;
+  std::deque<std::array<float, FEATURE_DIM> > m_input_sequence;
   std::vector<double> m_mean;
   std::vector<double> m_sigma;
 
@@ -66,6 +71,8 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> m_tf_listener;
   std::unique_ptr<tf2_ros::Buffer> m_tf_buffer;
   rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_publisher;
+  rclcpp::Publisher<rackki_interfaces::msg::ControllerState>::SharedPtr
+    m_controller_state_publisher;
 
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface> >
     m_joint_state_pos_handles;

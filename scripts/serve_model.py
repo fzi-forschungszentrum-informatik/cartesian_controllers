@@ -15,8 +15,9 @@ import os
 class Server(Node):
     def __init__(self):
         super().__init__("server")
-        self.prediction_rate = self.declare_parameter("prediction_rate", 10).value
-        self.prediction_memory = self.declare_parameter("prediction_memory", 25).value
+        self.prediction_rate = self.declare_parameter("prediction_rate", 50).value
+        self.prediction_memory = self.declare_parameter("prediction_memory", 50).value
+        self.scale = self.declare_parameter("prediction_scale", 1.0).value
         self.model_dir = self.declare_parameter("model_dir", "").value
         self.model = tf.keras.models.load_model(self.model_dir)
         with open(os.path.join(self.model_dir, "input_scaling.yaml")) as f:
@@ -43,16 +44,19 @@ class Server(Node):
     def predict(self):
         self.update_input_sequence()
         input_data = tf.constant([list(self.input_sequence)], dtype=tf.float32)
-        output = self.model.signatures["serving_default"](lstm_input=input_data)
+        output = self.model.signatures["serving_default"](embedding_input=input_data)
         result = output["prediction"].numpy().tolist()[0]
+        self.scale = (
+            self.get_parameter("prediction_scale").get_parameter_value().double_value
+        )
         target_wrench = WrenchStamped()
         target_wrench.header.stamp = self.get_clock().now().to_msg()
-        target_wrench.wrench.force.x = result[0]
-        target_wrench.wrench.force.y = result[1]
-        target_wrench.wrench.force.z = result[2]
-        target_wrench.wrench.torque.x = result[3]
-        target_wrench.wrench.torque.y = result[4]
-        target_wrench.wrench.torque.z = result[5]
+        target_wrench.wrench.force.x = result[0] * self.scale
+        target_wrench.wrench.force.y = result[1] * self.scale
+        target_wrench.wrench.force.z = result[2] * self.scale
+        target_wrench.wrench.torque.x = result[3] * self.scale
+        target_wrench.wrench.torque.y = result[4] * self.scale
+        target_wrench.wrench.torque.z = result[5] * self.scale
         self.target_wrench_pub.publish(target_wrench)
 
     def msg_callback(self, pose_msg, twist_msg):

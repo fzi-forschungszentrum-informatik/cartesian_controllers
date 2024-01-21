@@ -1,13 +1,13 @@
-#include "tensorflow/cc/ops/const_op.h"
+#include <deque>
 #include <filesystem>
 #include <gtest/gtest.h>
 #include <initializer_list>
+#include <iostream>
 #include <tensorflow/cc/framework/ops.h>
 #include <tensorflow/cc/ops/standard_ops.h>
 #include <tensorflow/cc/saved_model/loader.h>
 #include <tensorflow/core/platform/env.h>
 #include <tensorflow/core/public/session.h>
-
 
 TEST(rackki_learning, test_prediction)
 {
@@ -23,17 +23,30 @@ TEST(rackki_learning, test_prediction)
   auto* session = bundle.GetSession();
   auto scope    = tensorflow::Scope::NewRootScope();
 
-  // Check the available input and output tensor names with:
-  // saved_model_cli show --dir model_1 --all
-  auto input_shape = tensorflow::TensorShape({1, 1, 7});
-  tensorflow::Input::Initializer input(
-    std::initializer_list<float>({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}), input_shape);
+  std::deque<std::array<float, 7> > input_sequence;
+  input_sequence.push_front({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0});
+  input_sequence.push_front({1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7});
 
-  std::vector<std::pair<std::string, tensorflow::Tensor> > inputs = {
-    {"serving_default_lstm_input:0", input.tensor}};
+  tensorflow::Tensor input(tensorflow::DT_FLOAT, tensorflow::TensorShape({1, 2, 7}));
+  auto data = input.tensor<float, 3>();
+
+  for (int i = 0; i < input_sequence.size(); ++i)
+  {
+    for (int j = 0; j < 7; ++j)
+    {
+      data(0, i, j) = input_sequence[i][j];
+    }
+  }
+  input.tensor<float, 3>() = data;
+
+  std::cout << "########## data:\n" << data << std::endl;
   std::vector<tensorflow::Tensor> outputs;
 
-  status = session->Run(inputs, {"StatefulPartitionedCall:0"}, {}, &outputs);
+  // Check the available input and output tensor names with:
+  // saved_model_cli show --dir model_1 --all
+  status = session->Run(
+    {{"serving_default_embedding_input:0", input}}, {"StatefulPartitionedCall:0"}, {}, &outputs);
+  std::cout << status.message() << std::endl;
   ASSERT_TRUE(status.ok());
   ASSERT_TRUE(outputs[0].shape() == tensorflow::TensorShape({1, 6}));
 
