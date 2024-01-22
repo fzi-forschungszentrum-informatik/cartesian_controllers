@@ -49,7 +49,6 @@ private:
   constexpr static int FEATURE_DIM = 7;
   tensorflow::Tensor buildInputTensor();
   geometry_msgs::msg::WrenchStamped processOutputTensor(const tensorflow::Tensor& output);
-  void updateJointStates();
   void cleanup();
   bool setTarget(const std::string& target);
   bool done();
@@ -63,7 +62,6 @@ private:
 
   std::vector<std::string> m_joint_names;
   KDL::JntArray m_joint_positions;
-  std::mutex m_joint_mutex;
   KDL::Frame m_target_pose;
   std::mutex m_target_mutex;
   std::atomic<bool> m_has_target = false;
@@ -79,7 +77,8 @@ private:
 
   KDL::Chain m_robot_chain;
   std::unique_ptr<KDL::ChainFkSolverPos_recursive> m_end_effector_solver;
-  std::atomic<bool> m_active = false;
+  std::atomic<bool> m_active   = false;
+  std::atomic<bool> m_shutdown = false;
 };
 
 } // namespace rackki_learning

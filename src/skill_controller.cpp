@@ -153,12 +153,71 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
       response->success = setTarget(request->tf_name);
     });
 
+  m_shutdown       = false;
+  m_serving_thread = std::thread([this]() {
+    using ControllerState       = rackki_interfaces::msg::ControllerState;
+    auto publishControllerState = [this](const ControllerState::_state_type& state) -> void {
+      auto controller_state  = ControllerState();
+      controller_state.state = state;
+      m_controller_state_publisher->publish(controller_state);
+    };
+
+    while (!m_shutdown)
+    {
+      while (!m_active)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+      m_input_sequence.clear();
+      while (m_active)
+      {
+        auto inputs  = buildInputTensor();
+        auto outputs = std::vector<tensorflow::Tensor>();
+        auto status  = m_bundle.GetSession()->Run({{"serving_default_embedding_input:0", inputs}},
+                                                 {"StatefulPartitionedCall:0"},
+                                                 {},
+                                                 &outputs);
+        if (status.ok())
+        {
+          publishControllerState(ControllerState::STATE_RUNNING);
+          auto target_wrench = processOutputTensor(outputs[0]);
+          m_target_wrench_publisher->publish(target_wrench);
+          using namespace std::chrono;
+          auto interval = round<milliseconds>(
+            duration<double>(1.0 / get_node()->get_parameter("prediction_rate").as_int()));
+          std::this_thread::sleep_for(interval);
+        }
+        else
+        {
+          publishControllerState(ControllerState::STATE_ERROR);
+          auto clock = *get_node()->get_clock();
+          RCLCPP_WARN_STREAM_THROTTLE(get_node()->get_logger(),
+                                      clock,
+                                      3000,
+                                      "Error in model prediction: " << status.message());
+        }
+
+        if (done())
+        {
+          publishControllerState(ControllerState::STATE_DONE);
+          auto zero_wrench            = geometry_msgs::msg::WrenchStamped();
+          zero_wrench.header.stamp    = this->get_node()->now();
+          zero_wrench.header.frame_id = get_node()->get_parameter("robot_base_link").as_string();
+          m_target_wrench_publisher->publish(zero_wrench);
+        }
+      }
+    }
+  });
+  m_serving_thread.detach();
+
   return CallbackReturn::SUCCESS;
 }
 
 SkillController::CallbackReturn
 SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
+  m_joint_state_pos_handles.clear();
+
   if (!m_has_target)
   {
     RCLCPP_WARN(get_node()->get_logger(), "No TF target specified.");
@@ -178,57 +237,7 @@ SkillController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& pre
     return CallbackReturn::ERROR;
   }
 
-  m_joint_mutex.lock();
-  updateJointStates();
-  m_joint_mutex.unlock();
-
-  m_active         = true;
-  m_serving_thread = std::thread([this]() {
-    using ControllerState       = rackki_interfaces::msg::ControllerState;
-    auto publishControllerState = [this](const ControllerState::_state_type& state) -> void {
-      auto controller_state  = ControllerState();
-      controller_state.state = state;
-      m_controller_state_publisher->publish(controller_state);
-    };
-
-    while (m_active)
-    {
-      auto inputs  = buildInputTensor();
-      auto outputs = std::vector<tensorflow::Tensor>();
-      auto status  = m_bundle.GetSession()->Run({{"serving_default_embedding_input:0", inputs}},
-                                               {"StatefulPartitionedCall:0"},
-                                               {},
-                                               &outputs);
-      if (status.ok())
-      {
-        publishControllerState(ControllerState::STATE_RUNNING);
-        auto target_wrench = processOutputTensor(outputs[0]);
-        m_target_wrench_publisher->publish(target_wrench);
-        using namespace std::chrono;
-        auto interval = round<milliseconds>(
-          duration<double>(1.0 / get_node()->get_parameter("prediction_rate").as_int()));
-        std::this_thread::sleep_for(interval);
-      }
-      else
-      {
-        publishControllerState(ControllerState::STATE_ERROR);
-        auto clock = *get_node()->get_clock();
-        RCLCPP_WARN_STREAM_THROTTLE(
-          get_node()->get_logger(), clock, 3000, "Error in model prediction: " << status.message());
-      }
-
-      if (done())
-      {
-        publishControllerState(ControllerState::STATE_DONE);
-        auto zero_wrench            = geometry_msgs::msg::WrenchStamped();
-        zero_wrench.header.stamp    = this->get_node()->now();
-        zero_wrench.header.frame_id = get_node()->get_parameter("robot_base_link").as_string();
-        m_target_wrench_publisher->publish(zero_wrench);
-      }
-    }
-  });
-  m_serving_thread.detach();
-
+  m_active = true;
   return CallbackReturn::SUCCESS;
 }
 
@@ -236,11 +245,6 @@ controller_interface::return_type
 SkillController::update([[maybe_unused]] const rclcpp::Time& time,
                         [[maybe_unused]] const rclcpp::Duration& period)
 {
-  if (m_joint_mutex.try_lock())
-  {
-    updateJointStates();
-    m_joint_mutex.unlock();
-  }
   return controller_interface::return_type::OK;
 }
 
@@ -254,6 +258,7 @@ SkillController::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& p
 SkillController::CallbackReturn
 SkillController::on_shutdown([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
+  m_shutdown = true;
   cleanup();
   auto status = m_bundle.GetSession()->Close();
   if (!status.ok())
@@ -337,21 +342,10 @@ SkillController::processOutputTensor(const tensorflow::Tensor& output)
   return target_wrench;
 }
 
-void SkillController::updateJointStates()
-{
-  for (size_t i = 0; i < m_joint_names.size(); ++i)
-  {
-    m_joint_positions(i) = m_joint_state_pos_handles[i].get().get_value();
-  }
-}
-
 void SkillController::cleanup()
 {
   m_active     = false;
   m_has_target = false;
-
-  m_input_sequence.clear();
-  m_joint_state_pos_handles.clear();
   this->release_interfaces();
 }
 
@@ -394,9 +388,11 @@ KDL::Frame SkillController::getCurrentPoseToTarget()
 {
   // Compute current end effector pose w.r.t the robot base link
   KDL::Frame end_effector;
-  m_joint_mutex.lock();
+  for (size_t i = 0; i < m_joint_names.size(); ++i)
+  {
+    m_joint_positions(i) = m_joint_state_pos_handles[i].get().get_value();
+  }
   m_end_effector_solver->JntToCart(m_joint_positions, end_effector);
-  m_joint_mutex.unlock();
 
   // The neural network expects all inputs with respect to the target frame.
   m_target_mutex.lock();
