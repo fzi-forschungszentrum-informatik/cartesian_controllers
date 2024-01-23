@@ -1,0 +1,28 @@
+controller_manager:
+  ros__parameters:
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    skill_controller:
+      type: cartesian_skill_controller/SkillController
+
+skill_controller:
+  ros__parameters:
+    #model_path: /root/target_ws/src/cartesian_skill_controller/test/models/model_1  # CI setting
+    model_path: /home/scherzin/src/robot_folders/checkout/rack-ki/colcon_ws/src/cartesian_skill_controller/test/models/model_1
+    end_effector_link: "tool0"  # Coordinate system of the active assembly part
+    robot_base_link: "base_link"
+    max_force: 30.0
+    max_torque: 3.0
+    prediction_memory: 30
+    prediction_rate: 10
+    prediction_scale: 1.0
+    done_when_in: [0.0, 0.002]  # min, max Cartesian distance to target
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6

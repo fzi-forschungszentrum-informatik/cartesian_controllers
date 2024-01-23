@@ -1,0 +1,11 @@
+<library path="skill_controller">
+
+  <class name="cartesian_skill_controller/SkillController"
+         type="cartesian_skill_controller::SkillController"
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Serve a Tensorflow model inside a ROS2 controller.
+    </description>
+  </class>
+
+</library>

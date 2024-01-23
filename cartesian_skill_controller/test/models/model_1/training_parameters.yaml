@@ -1,0 +1,11 @@
+model_version: f9e738771ef3970d40d953b7319cbbc296e88349
+
+n_nodes: 20
+n_heads: 8
+key_dim: 17
+sequence_length: 25
+training_files: 2
+batch_size: 10
+learning_rate: 0.0005
+epochs: 3
+iterations: 2

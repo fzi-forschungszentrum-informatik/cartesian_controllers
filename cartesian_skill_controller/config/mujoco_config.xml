@@ -1,0 +1,75 @@
+<mujoco model="simulator">
+        <!--
+        A simulator for teaching assembly by teleoperation.
+        Users can steer the assembly components in free space and record their control commands and the simulator's states
+        for further data processing. The recorded datasets can be used for Imitation Learning and (Offline) Reinforcement Learning.
+        -->
+        <compiler angle="radian"/>
+        <option>
+                <flag gravity="disable" override="enable"/>
+        </option>
+        <option o_solimp="0.0 0.999 0.001 0.1 1" o_solref="-100000 -10000"/>
+        <option timestep="0.005" integrator="implicitfast" sdf_iterations="10" sdf_initpoints="20"/>
+        <extension>
+                <plugin plugin="mujoco.sdf.sdflib">
+                        <instance name="sdf">
+                                <config key="aabb" value="0"/>
+                        </instance>
+                </plugin>
+        </extension>
+        <contact>
+                <pair name="passive_active_components_contact" condim="6" geom1="passive_component" geom2="active_component" friction="0.1 0.1 0.005 0.0001 0.0001" />
+                <exclude name="disassembly_target" body1="active_component" body2="disassembly_target"/>
+        </contact>
+
+        <!--
+        Allow to pass six additional parameters to each joint.
+        For the free joint, they mean damping in [x, y, z, rotx, roty, rotz]
+        -->
+        <size nuser_jnt="6" />
+        <asset>
+
+                <texture type="skybox" builtin="gradient" rgb1="0.9 0.9 0.9" rgb2="0.5 0.5 0.5" width="512" height="512"/>
+                <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="128" height="128" mark="cross" markrgb=".8 .8 .8"/>
+                <material name="matplane" reflectance="0.0" texture="texplane" texrepeat="10 10" texuniform="true"/>
+                <material name="passive_component" rgba="1.0 0.533 0.0 1.0"/>
+                <material name="active_component" rgba="0.462 0.196 0.411 1.0"/>
+                <material name="disassembly_target" rgba="0.462 0.196 0.411 0.0"/>
+                <mesh name="passive_component" file="passive_component.stl" scale="1.0 1.0 1.0">
+                        <plugin instance="sdf"/>
+                </mesh>
+                <mesh name="active_component" file="active_component.stl">
+                </mesh>
+        </asset>
+        <worldbody>
+                <light name="sun" directional="true" diffuse=".4 .4 .4" specular=".1 .1 .1" pos="0 0 100" dir="-0.1 -0.1 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="0 1 5" dir="0 -0.2 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="0 -1 5" dir="0 0.2 -1" castshadow="true"/>
+                <light directional="false" diffuse=".5 .5 .5" specular=".2 .2 .2" pos="1 0 5" dir="-0.2 0 -1" castshadow="true"/>
+                <geom name="floor" pos="0 0 -0.10" size="0 0 1" type="plane" material="matplane"/>
+
+                <!-- Fixed with the world -->
+                <body name="passive_component" pos="0 0 0.0" quat="1 0 0 0">
+                        <geom name="passive_component" type="sdf" mesh="passive_component" material="passive_component">
+                                <plugin instance="sdf"/>
+                        </geom>
+                </body>
+
+                <!-- Disassembly target-->
+                <body name="disassembly_target" pos="0.17 0 0.0" quat="1 0 0 0">
+                        <geom name="disassembly_target" type="mesh" mesh="active_component" material="disassembly_target"/>
+                </body>
+
+                <!-- Controllable with user commands. -->
+                <body name="active_component">
+                        <inertial pos="0 0 0" quat="1 0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
+                        <joint name="free_joint" type="free" user="3000 3000 3000 100 100 100"/>
+                        <geom name="active_component" type="mesh" mesh="active_component" material="active_component">
+                        </geom>
+                </body>
+        </worldbody>
+
+        <!-- Initial object poses for simulation -->
+        <include file="initial_states.xml"/>
+
+</mujoco>

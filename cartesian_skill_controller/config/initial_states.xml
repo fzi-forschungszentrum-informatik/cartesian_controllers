@@ -1,0 +1,10 @@
+<!-- Initial active component's pose at simulation startup.
+
+The 7 values represent x, y, z and the rotation quaternion qw, qx, qy, qz in world coordinates.
+-->
+<include>
+        <keyframe>
+                <key name="initial_pose" time="0"
+                        qpos="0.17 0.0 0.0 1.0 0.0 0.0 0.0" />
+        </keyframe>
+</include>
