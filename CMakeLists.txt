@@ -14,7 +14,6 @@ find_package(std_msgs REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(urdf REQUIRED)
-find_package(rackki_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -120,7 +119,6 @@ ament_target_dependencies(skill_controller
         controller_interface
         kdl_parser
         urdf
-        rackki_interfaces
         tf2
         tf2_ros
         )
