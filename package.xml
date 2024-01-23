@@ -4,8 +4,9 @@
   <name>cartesian_skill_controller</name>
   <version>0.0.0</version>
   <description>Learning-related scripts and tools for building Cartesian skills</description>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
   <maintainer email="scherzin@fzi.de">scherzin</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
