@@ -19,7 +19,7 @@
 #include <tensorflow/cc/saved_model/loader.h>
 #include <thread>
 
-namespace rackki_learning {
+namespace cartesian_skill_controller {
 
 class SkillController : public controller_interface::ControllerInterface
 {
@@ -81,6 +81,6 @@ private:
   std::atomic<bool> m_shutdown = false;
 };
 
-} // namespace rackki_learning
+} // namespace cartesian_skill_controller
 
 #endif

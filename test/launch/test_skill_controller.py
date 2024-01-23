@@ -26,14 +26,22 @@ def generate_launch_description():
             FindExecutable(name="xacro"),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("rackki_learning"), "urdf", "robot.urdf.xacro"]
+                [
+                    FindPackageShare("cartesian_skill_controller"),
+                    "urdf",
+                    "robot.urdf.xacro",
+                ]
             ),
         ]
     )
     robot_description = {"robot_description": robot_description_content}
 
     controller_manager_config = PathJoinSubstitution(
-        [FindPackageShare("rackki_learning"), "config", "controller_manager.yaml"]
+        [
+            FindPackageShare("cartesian_skill_controller"),
+            "config",
+            "controller_manager.yaml",
+        ]
     )
     control_node = Node(
         package="controller_manager",

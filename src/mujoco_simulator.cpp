@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "rackki_learning/mujoco_simulator.h"
+#include "cartesian_skill_controller/mujoco_simulator.h"
 #include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
 #include "geometry_msgs/msg/detail/twist_stamped__struct.hpp"
 #include <filesystem>
@@ -19,7 +19,7 @@
 #include <random>
 #include <vector>
 
-namespace rackki_learning {
+namespace cartesian_skill_controller {
 
 MuJoCoSimulator::MuJoCoSimulator() {}
 
@@ -384,4 +384,4 @@ int MuJoCoSimulator::simulateImpl()
   return 0;
 }
 
-} // namespace rackki_learning
+} // namespace cartesian_skill_controller

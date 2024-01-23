@@ -1,4 +1,4 @@
-# RackKI Learning
+# Cartesian Skill Controller
 
 This package contains
 
@@ -19,13 +19,13 @@ This package contains
 
 2. Switch to the *root* of your ROS2 workspace and build the package (*standalone*) with
    ```bash
-   colcon build --packages-select rackki_learning
+   colcon build --packages-select cartesian_skill_controller
    ```
 
 ## Launching the simulation
 In a sourced terminal, call
 ```bash
-ros2 launch rackki_learning simulator.launch.py
+ros2 launch cartesian_skill_controller simulator.launch.py
 ```
 
 ## Teaching in simulation
@@ -47,5 +47,5 @@ and build the workspace as usual.
 
 Now launch the teach device with
 ```bash
-ros2 launch rackki_learning teach_device.launch.py
+ros2 launch cartesian_skill_controller teach_device.launch.py
 ```

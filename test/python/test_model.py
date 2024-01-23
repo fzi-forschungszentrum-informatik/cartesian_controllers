@@ -1,5 +1,5 @@
-from rackki_learning.dataset import Dataset
-from rackki_learning.model import Model
+from cartesian_skill_controller.dataset import Dataset
+from cartesian_skill_controller.model import Model
 import tensorflow as tf
 import os
 import numpy as np

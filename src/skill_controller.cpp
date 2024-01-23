@@ -1,4 +1,4 @@
-#include "rackki_learning/skill_controller.h"
+#include "cartesian_skill_controller/skill_controller.h"
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "kdl/chainfksolverpos_recursive.hpp"
@@ -19,7 +19,7 @@
 #include <tensorflow/core/public/session.h>
 #include <vector>
 
-namespace rackki_learning {
+namespace cartesian_skill_controller {
 
 controller_interface::InterfaceConfiguration
 SkillController::command_interface_configuration() const
@@ -401,7 +401,8 @@ KDL::Frame SkillController::getCurrentPoseToTarget()
   return current_pose;
 }
 
-} // namespace rackki_learning
+} // namespace cartesian_skill_controller
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(rackki_learning::SkillController, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(cartesian_skill_controller::SkillController,
+                       controller_interface::ControllerInterface)

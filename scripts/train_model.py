@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
 import sys
-from rackki_learning.dataset import Dataset
-from rackki_learning.model import Model
+from cartesian_skill_controller.dataset import Dataset
+from cartesian_skill_controller.model import Model
 
 TYPE = "put"  # {put, get}
 SEQ_LEN = 50

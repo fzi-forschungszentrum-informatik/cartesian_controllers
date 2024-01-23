@@ -2,7 +2,7 @@
 import rclpy
 import tensorflow as tf
 from rclpy.node import Node
-from rackki_learning.model import Model  # noqa: F401 Needed for load_model
+from cartesian_skill_controller.model import Model  # noqa: F401 Needed for load_model
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import TwistStamped

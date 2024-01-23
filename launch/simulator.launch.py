@@ -6,17 +6,17 @@ from launch.substitutions import PathJoinSubstitution
 
 def generate_launch_description():
     mesh_directory = PathJoinSubstitution(
-        [FindPackageShare("rackki_learning"), "meshes"]
+        [FindPackageShare("cartesian_skill_controller"), "meshes"]
     )
     mujoco_model = PathJoinSubstitution(
-        [FindPackageShare("rackki_learning"), "config", "mujoco_config.xml"]
+        [FindPackageShare("cartesian_skill_controller"), "config", "mujoco_config.xml"]
     )
 
     return LaunchDescription(
         [
             Node(
-                package="rackki_learning",
-                executable="rackki_learning_simulator",
+                package="cartesian_skill_controller",
+                executable="simulator",
                 name="simulator",
                 output="screen",
                 emulate_tty=True,

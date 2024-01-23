@@ -1,6 +1,6 @@
 import tensorflow as tf
-from rackki_learning.dataset import Dataset
-from rackki_learning.components import (
+from cartesian_skill_controller.dataset import Dataset
+from cartesian_skill_controller.components import (
     EmbeddingLayer,
     SelfAttentionLayer,
     FeedForwardLayer,

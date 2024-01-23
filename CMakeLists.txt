@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(rackki_learning)
+project(cartesian_skill_controller)
 
 # We need C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -68,28 +68,28 @@ endif()
 # Build
 #--------------------------------------------------------------------------------
 # Simulator
-add_executable(${PROJECT_NAME}_simulator
+add_executable(simulator
         src/mujoco_simulator.cpp
         src/simulator_node.cpp
         )
-target_compile_options(${PROJECT_NAME}_simulator PUBLIC
+target_compile_options(simulator PUBLIC
         -Wall -Wextra -Wpedantic
         )
-target_compile_definitions(${PROJECT_NAME}_simulator PRIVATE
+target_compile_definitions(simulator PRIVATE
         MUJOCO_PLUGIN_DIR="${MUJOCO_DIR}/bin/mujoco_plugin"
         )
-target_include_directories(${PROJECT_NAME}_simulator PUBLIC
+target_include_directories(simulator PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         ${MUJOCO_INCLUDE_DIRS}
         ${GLFW_INCLUDE_DIRS}
         )
-ament_target_dependencies(${PROJECT_NAME}_simulator
+ament_target_dependencies(simulator
         rclcpp
         geometry_msgs
         std_srvs
         )
-target_link_libraries(${PROJECT_NAME}_simulator
+target_link_libraries(simulator
         ${MUJOCO_LIBRARIES}
         ${GLFW_LIBRARIES}
         GLEW::GLEW
@@ -133,7 +133,7 @@ install(
 
 install(
   TARGETS
-  ${PROJECT_NAME}_simulator
+  simulator
   skill_controller
   DESTINATION lib/${PROJECT_NAME}
 )

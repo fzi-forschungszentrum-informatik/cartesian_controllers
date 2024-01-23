@@ -8,7 +8,7 @@ pip3 install --user tensorflow==2.13.0 tensorflow-probability==0.21.0
 ## Run tests manually
 In the root of a sourced workspace, call
 ```bash
-colcon test --packages-select rackki_learning && colcon test-result --verbose
+colcon test --packages-select cartesian_skill_controller && colcon test-result --verbose
 ```
 to run and inspect the integration tests locally.
 

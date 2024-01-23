@@ -9,7 +9,7 @@
 #include <tensorflow/core/platform/env.h>
 #include <tensorflow/core/public/session.h>
 
-TEST(rackki_learning, test_prediction)
+TEST(cartesian_skill_controller, test_prediction)
 {
   tensorflow::SessionOptions session_options;
   tensorflow::SavedModelBundleLite bundle;

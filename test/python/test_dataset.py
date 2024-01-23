@@ -1,4 +1,4 @@
-from rackki_learning.dataset import Dataset
+from cartesian_skill_controller.dataset import Dataset
 import os
 
 

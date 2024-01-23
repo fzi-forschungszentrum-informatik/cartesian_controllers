@@ -22,11 +22,15 @@ def generate_launch_description():
     )
 
     teach_device = Node(
-        package="rackki_learning",
+        package="cartesian_skill_controller",
         executable="teach_device.py",
         parameters=[
             PathJoinSubstitution(
-                [FindPackageShare("rackki_learning"), "config", "button_cmds.yaml"]
+                [
+                    FindPackageShare("cartesian_skill_controller"),
+                    "config",
+                    "button_cmds.yaml",
+                ]
             ),
             {"joystick_topic": "/spacenav/joy"},
             {"twist_topic": "/spacenav/twist"},

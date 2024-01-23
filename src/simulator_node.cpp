@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "rackki_learning/mujoco_simulator.h"
+#include "cartesian_skill_controller/mujoco_simulator.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include <chrono>
@@ -23,14 +23,14 @@ int main(int argc, char* argv[])
   // Start the simulator in parallel.
   // Let the thread's destructor clean-up all resources
   // once users close the simulation window.
-  auto simulator = std::thread(rackki_learning::MuJoCoSimulator::simulate);
+  auto simulator = std::thread(cartesian_skill_controller::MuJoCoSimulator::simulate);
   simulator.detach();
 
-  while (!rackki_learning::MuJoCoSimulator::ready())
+  while (!cartesian_skill_controller::MuJoCoSimulator::ready())
   {
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
-  rclcpp::spin(rackki_learning::MuJoCoSimulator::getNode());
+  rclcpp::spin(cartesian_skill_controller::MuJoCoSimulator::getNode());
   rclcpp::shutdown();
   return 0;
 }

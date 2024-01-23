@@ -30,7 +30,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
-namespace rackki_learning {
+namespace cartesian_skill_controller {
 
 /**
  * @brief MuJoCo's physics engine with rendering and basic window mouse interaction
@@ -138,4 +138,4 @@ public:
   int simulateImpl();
 };
 
-} // namespace rackki_learning
+} // namespace cartesian_skill_controller

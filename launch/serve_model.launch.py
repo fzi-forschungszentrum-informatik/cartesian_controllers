@@ -7,14 +7,14 @@ from launch.substitutions import LaunchConfiguration
 def generate_launch_description():
     arg_model_dir = DeclareLaunchArgument(
         "model_dir",
-        default_value="/home/scherzin/src/robot_folders/checkout/rack-ki/colcon_ws/src/rackki_learning/models/put",  # noqa: E501
+        default_value="",  # noqa: E501
         description="Absolute path to the trained model directory.",
     )
     return LaunchDescription(
         [
             arg_model_dir,
             Node(
-                package="rackki_learning",
+                package="cartesian_skill_controller",
                 executable="serve_model.py",
                 name="model",
                 output="screen",
