@@ -14,7 +14,7 @@ import rclpy
 from rclpy.node import Node as PythonNode
 from controller_manager_msgs.srv import ListControllers
 from controller_manager_msgs.srv import SwitchController
-from rackki_interfaces.srv import SetTarget
+from cartesian_skill_controller.srv import SetTarget
 import os
 
 distro = os.environ["ROS_DISTRO"]

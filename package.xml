@@ -9,17 +9,20 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>std_srvs</depend>
   <depend>controller_interface</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
-  <depend>rackki_interfaces</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
+
+  <exec_depend>rosidl_default_generators</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
   <test_depend>python3-pytest-cov</test_depend>
@@ -31,6 +34,8 @@
   <test_depend>xacro</test_depend>
   <test_depend>joint_state_broadcaster</test_depend>
   <test_depend>robot_state_publisher</test_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
     <build_type>ament_cmake</build_type>

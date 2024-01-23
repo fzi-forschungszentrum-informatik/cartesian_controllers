@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(urdf REQUIRED)
@@ -16,6 +18,15 @@ find_package(rackki_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(yaml-cpp REQUIRED)
+
+rosidl_generate_interfaces(
+  ${PROJECT_NAME}
+    msg/ControllerState.msg
+    srv/SetTarget.srv
+  DEPENDENCIES
+    std_msgs
+)
+ament_export_dependencies(rosidl_default_runtime)
 
 # GLFW
 # With PkgConfig is the official way: https://www.glfw.org/docs/3.0/build.html#build_link_cmake_pkgconfig
@@ -116,6 +127,9 @@ ament_target_dependencies(skill_controller
 target_link_libraries(skill_controller
         ${TENSORFLOW_LIBRARIES}
         yaml-cpp
+)
+rosidl_target_interfaces(skill_controller
+      ${PROJECT_NAME} "rosidl_typesupport_cpp"
 )
 
 #--------------------------------------------------------------------------------

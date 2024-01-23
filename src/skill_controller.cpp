@@ -140,22 +140,22 @@ SkillController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& pr
   m_target_wrench_publisher = get_node()->create_publisher<geometry_msgs::msg::WrenchStamped>(
     std::string(get_node()->get_name()) + "/target_wrench", 1);
   m_controller_state_publisher =
-    get_node()->create_publisher<rackki_interfaces::msg::ControllerState>(
+    get_node()->create_publisher<cartesian_skill_controller::msg::ControllerState>(
       std::string(get_node()->get_name()) + "/controller_state", 1);
 
   m_tf_buffer   = std::make_unique<tf2_ros::Buffer>(get_node()->get_clock());
   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(*m_tf_buffer);
 
-  m_set_target_server = get_node()->create_service<rackki_interfaces::srv::SetTarget>(
+  m_set_target_server = get_node()->create_service<cartesian_skill_controller::srv::SetTarget>(
     std::string(get_node()->get_name()) + "/set_target",
-    [this](const std::shared_ptr<rackki_interfaces::srv::SetTarget::Request> request,
-           std::shared_ptr<rackki_interfaces::srv::SetTarget::Response> response) -> void {
+    [this](const std::shared_ptr<cartesian_skill_controller::srv::SetTarget::Request> request,
+           std::shared_ptr<cartesian_skill_controller::srv::SetTarget::Response> response) -> void {
       response->success = setTarget(request->tf_name);
     });
 
   m_shutdown       = false;
   m_serving_thread = std::thread([this]() {
-    using ControllerState       = rackki_interfaces::msg::ControllerState;
+    using ControllerState       = cartesian_skill_controller::msg::ControllerState;
     auto publishControllerState = [this](const ControllerState::_state_type& state) -> void {
       auto controller_state  = ControllerState();
       controller_state.state = state;
