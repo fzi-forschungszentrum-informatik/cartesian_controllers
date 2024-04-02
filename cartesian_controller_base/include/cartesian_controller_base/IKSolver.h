@@ -157,8 +157,7 @@ class IKSolver
      * Call this periodically to update the internal simulation's forward
      * kinematics.
      */
-    void updateKinematics();
-
+    void updateKinematics(const KDL::Frame& offset);
   protected:
 
     /**

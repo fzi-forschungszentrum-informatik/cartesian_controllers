@@ -222,12 +222,12 @@ template <class HardwareInterface>
 void CartesianControllerBase<HardwareInterface>::
 starting(const ros::Time& time)
 {
+  // Update end effector offset pose
+  updateEndEffectorOffset();
+
   // Copy joint state to internal simulation
   m_ik_solver->setStartState(m_joint_handles);
-  m_ik_solver->updateKinematics();
-
-  // update end effector offset pose
-  updateEndEffectorOffset();
+  m_ik_solver->updateKinematics(m_end_effector_offset);
 
   // Provide safe command buffers with starting where we are
   computeJointControlCmds(ctrl::Vector6D::Zero(), ros::Duration(0));
@@ -292,7 +292,7 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
       period,
       m_cartesian_input);
 
-  m_ik_solver->updateKinematics();
+  m_ik_solver->updateKinematics(m_end_effector_offset);
 }
 
 template <class HardwareInterface>

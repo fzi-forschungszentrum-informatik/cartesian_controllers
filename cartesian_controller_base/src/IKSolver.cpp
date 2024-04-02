@@ -128,14 +128,17 @@ namespace cartesian_controller_base{
     return true;
   }
 
-  void IKSolver::updateKinematics()
+  void IKSolver::updateKinematics(const KDL::Frame& offset)
   {
     // Pose w. r. t. base
     m_fk_pos_solver->JntToCart(m_current_positions,m_end_effector_pose);
+    m_end_effector_pose = m_end_effector_pose * offset;
 
     // Absolute velocity w. r. t. base
     KDL::FrameVel vel;
     m_fk_vel_solver->JntToCart(KDL::JntArrayVel(m_current_positions,m_current_velocities),vel);
+    vel = vel * offset;
+
     m_end_effector_vel[0] = vel.deriv().vel.x();
     m_end_effector_vel[1] = vel.deriv().vel.y();
     m_end_effector_vel[2] = vel.deriv().vel.z();
