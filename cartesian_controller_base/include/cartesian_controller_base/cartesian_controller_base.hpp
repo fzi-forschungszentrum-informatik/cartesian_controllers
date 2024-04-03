@@ -363,7 +363,7 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
 
 template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
-displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
+displayInTipLink(const ctrl::Vector6D& vector, const std::string& to, const KDL::Frame& to_offset)
 {
   // Adjust format
   KDL::Wrench wrench_kdl;
@@ -377,6 +377,9 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
       m_ik_solver->getPositions(),
       transform_kdl,
       to);
+
+  // Apply offset
+  transform_kdl = transform_kdl * to_offset;
 
   // Rotate into new reference frame
   wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;

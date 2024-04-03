@@ -144,10 +144,11 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      *
      * @param vector The quantity to transform
      * @param to The reference frame in which to formulate the quantity
+     * @param to_offset Optionnal offset
      *
      * @return The quantity in the new frame
      */
-    ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to);
+    ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to, const KDL::Frame& to_offset = identity_transform_kdl);
 
     /**
      * @brief Check if specified links are part of the robot chain
