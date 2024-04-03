@@ -85,7 +85,7 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
   }
 
   // Make sure sensor wrenches are interpreted correctly
-  ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link);
+  ForceBase::setFtSensorReferenceFrame(m_compliance_ref_link, Base::m_identity_transform_kdl);
 
   // Connect dynamic reconfigure and overwrite the default values with values
   // on the parameter server. This is done automatically if parameters with
