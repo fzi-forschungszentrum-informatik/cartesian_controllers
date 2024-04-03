@@ -96,9 +96,10 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     virtual bool init(HardwareInterface* hw, ros::NodeHandle& nh);
 
     virtual void starting(const ros::Time& time);
-
-    static const KDL::Frame identity_transform_kdl;
   protected:
+
+    const KDL::Frame m_identity_transform_kdl;
+
     /**
      * @brief Write joint control commands to the real hardware
      *
