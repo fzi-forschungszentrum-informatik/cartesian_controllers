@@ -101,7 +101,7 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
      */
     ctrl::Vector6D        computeForceError();
     std::string           m_new_ft_sensor_ref;
-    void setFtSensorReferenceFrame(const std::string& new_ref, const KDL::Frame& new_ref_offset=Base::identity_transform_kdl);
+    void setFtSensorReferenceFrame(const std::string& new_ref, const KDL::Frame& new_ref_offset);
 
   private:
     ctrl::Vector6D        compensateGravity();
