@@ -297,6 +297,20 @@ computeJointControlCmds(const ctrl::Vector6D& error, const ros::Duration& period
 
 template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from)
+{
+  return displayInBaseLink(vector, from, m_identity_transform_kdl);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const ctrl::Vector6D& vector, const KDL::Frame& from)
+{
+  return displayInBaseLink(vector, from, m_identity_transform_kdl);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
 displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_offset)
 {
   KDL::Frame transform_kdl;
@@ -367,6 +381,20 @@ displayInBaseLink(const ctrl::Matrix6D& tensor, const std::string& from)
   tmp.bottomRightCorner<3,3>() = R * tensor.bottomRightCorner<3,3>() * R.transpose();
 
   return tmp;
+}
+
+  template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
+{
+  return displayInTipLink(vector, to, m_identity_transform_kdl);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInTipLink(const ctrl::Vector6D& vector, const KDL::Frame& to)
+{
+  return displayInTipLink(vector, to, m_identity_transform_kdl);
 }
 
 template <class HardwareInterface>
