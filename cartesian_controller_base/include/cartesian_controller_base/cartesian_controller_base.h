@@ -128,6 +128,16 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_offset=identity_transform_kdl);
 
     /**
+     * @brief Display the given vector in the given robot base link
+     *
+     * @param vector The quantity to transform
+     * @param from The reference frame where the quantity was formulated
+     *
+     * @return The quantity in the robot base frame
+     */
+    ctrl::Vector6D displayInBaseLink(const ctrl::Vector6D& vector, const KDL::Frame& from, const KDL::Frame& from_offset=identity_transform_kdl);
+
+    /**
      * @brief Display the given tensor in the robot base frame
      *
      * @param tensor The quantity to transform
@@ -149,6 +159,19 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
      * @return The quantity in the new frame
      */
     ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const std::string& to, const KDL::Frame& to_offset = identity_transform_kdl);
+
+    /**
+     * @brief Display a given vector in a new reference frame
+     *
+     * The vector is assumed to be given in the robot base frame.
+     *
+     * @param vector The quantity to transform
+     * @param to The reference frame in which to formulate the quantity
+     * @param to_offset Optionnal offset
+     *
+     * @return The quantity in the new frame
+     */
+    ctrl::Vector6D displayInTipLink(const ctrl::Vector6D& vector, const KDL::Frame& to, const KDL::Frame& to_offset = identity_transform_kdl);
 
     /**
      * @brief Check if specified links are part of the robot chain

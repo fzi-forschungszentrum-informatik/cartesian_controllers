@@ -299,6 +299,19 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
 displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const KDL::Frame& from_offset)
 {
+  KDL::Frame transform_kdl;
+  m_forward_kinematics_solver->JntToCart(
+      m_ik_solver->getPositions(),
+      transform_kdl,
+      from);
+
+  return displayInBaseLink(vector, transform_kdl, from_offset);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInBaseLink(const ctrl::Vector6D& vector, const KDL::Frame& from, const KDL::Frame& from_offset)
+{
   // Adjust format
   KDL::Wrench wrench_kdl;
   for (int i = 0; i < 6; ++i)
@@ -306,14 +319,9 @@ displayInBaseLink(const ctrl::Vector6D& vector, const std::string& from, const K
     wrench_kdl(i) = vector[i];
   }
 
-  KDL::Frame transform_kdl;
-  m_forward_kinematics_solver->JntToCart(
-      m_ik_solver->getPositions(),
-      transform_kdl,
-      from);
-
   // Apply offset
-  transform_kdl = transform_kdl * from_offset;
+  KDL::Frame transform_kdl;
+  transform_kdl = from * from_offset;
 
   // Rotate into new reference frame
   wrench_kdl = transform_kdl.M * wrench_kdl;
@@ -365,6 +373,19 @@ template <class HardwareInterface>
 ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
 displayInTipLink(const ctrl::Vector6D& vector, const std::string& to, const KDL::Frame& to_offset)
 {
+  KDL::Frame transform_kdl;
+  m_forward_kinematics_solver->JntToCart(
+      m_ik_solver->getPositions(),
+      transform_kdl,
+      to);
+
+  return displayInTipLink(vector, transform_kdl, to_offset);
+}
+
+template <class HardwareInterface>
+ctrl::Vector6D CartesianControllerBase<HardwareInterface>::
+displayInTipLink(const ctrl::Vector6D& vector, const KDL::Frame& to, const KDL::Frame& to_offset)
+{
   // Adjust format
   KDL::Wrench wrench_kdl;
   for (int i = 0; i < 6; ++i)
@@ -372,14 +393,9 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to, const KDL:
     wrench_kdl(i) = vector[i];
   }
 
-  KDL::Frame transform_kdl;
-  m_forward_kinematics_solver->JntToCart(
-      m_ik_solver->getPositions(),
-      transform_kdl,
-      to);
-
   // Apply offset
-  transform_kdl = transform_kdl * to_offset;
+  KDL::Frame transform_kdl;
+  transform_kdl = to * to_offset;
 
   // Rotate into new reference frame
   wrench_kdl = transform_kdl.M.Inverse() * wrench_kdl;
