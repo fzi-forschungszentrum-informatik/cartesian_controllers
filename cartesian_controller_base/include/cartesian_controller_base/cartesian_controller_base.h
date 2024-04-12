@@ -59,6 +59,7 @@
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
+#include <cartesian_controller_base/SetKinematicChainOffsets.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -200,6 +201,20 @@ class CartesianControllerBase : public controller_interface::Controller<Hardware
     void publishStateFeedback();
 
   private:
+    /**
+     * @brief Allow users to add a chain segment before and/or after the robot chain
+     *
+     * Before:
+     * Empty segment if frame_id is empty, otherwise consist of a fixed segment that will
+     * become the parent of the robot base link.
+     *
+     * After:
+     * Empty segment if frame_id is empty,otherwise consist of a fixed segment that will
+     * be attached to the end effector link.
+     */
+    bool signalChainOffsetsCallback(SetKinematicChainOffsets::Request& req, SetKinematicChainOffsets::Response& res);
+
+    ros::ServiceServer    m_signal_chain_offsets_server;
     std::vector<std::string>                          m_joint_names;
     trajectory_msgs::JointTrajectoryPoint             m_simulated_joint_motion;
     SpatialPDController                              m_spatial_controller;

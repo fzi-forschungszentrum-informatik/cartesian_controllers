@@ -48,6 +48,7 @@
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/jntarray.hpp>
+#include <kdl_conversions/kdl_msg.h>
 
 // URDF
 #include <urdf/model.h>
@@ -184,6 +185,9 @@ init(HardwareInterface* hw, ros::NodeHandle& nh)
 
   // Initialize Cartesian pd controllers
   m_spatial_controller.init(nh);
+
+  // Update chain offsets service
+  m_signal_chain_offsets_server = nh.advertiseService("signal_chain_offsets",&CartesianControllerBase<HardwareInterface>::signalChainOffsetsCallback,this);
 
   // Controller-internal state publishing
   m_feedback_pose_publisher =
@@ -363,6 +367,61 @@ displayInTipLink(const ctrl::Vector6D& vector, const std::string& to)
   }
 
   return out;
+}
+
+template <class HardwareInterface>
+bool CartesianControllerBase<HardwareInterface>::
+signalChainOffsetsCallback(SetKinematicChainOffsets::Request& req, SetKinematicChainOffsets::Response& res)
+{
+  KDL::Chain new_chain;
+
+  // Add pre chain segment
+  if(!req.pre_robot_chain_offset.header.frame_id.empty())
+  {
+    KDL::Frame pre_chain_frame;
+    tf::poseMsgToKDL(req.pre_robot_chain_offset.pose, pre_chain_frame);
+
+    KDL::Segment pre_segment = KDL::Segment(req.pre_robot_chain_offset.header.frame_id,
+                                            KDL::Joint(KDL::Joint::None),
+                                            pre_chain_frame);
+
+    new_chain.addSegment(pre_segment);
+  }
+
+  // Add robot chain
+  new_chain.addChain(m_robot_chain);
+
+  // Add post chain segment
+  if(!req.post_robot_chain_offset.header.frame_id.empty())
+  {
+    KDL::Frame post_chain_frame;
+    tf::poseMsgToKDL(req.post_robot_chain_offset.pose, post_chain_frame);
+
+    KDL::Segment post_segment = KDL::Segment(req.post_robot_chain_offset.header.frame_id,
+                                            KDL::Joint(KDL::Joint::None),
+                                            post_chain_frame);
+
+    new_chain.addSegment(post_segment);
+  }
+
+  // Update solvers with new chain
+  if(!m_ik_solver->updateChain(new_chain))
+  {
+    res.message = "Failed to update the kinematic chain in the ik solver.";
+    res.success = false;
+
+    return false;
+  }
+
+  KDL::Tree tmp("not_relevant");
+  tmp.addChain(new_chain,"not_relevant");
+  m_forward_kinematics_solver.reset(new KDL::TreeFkSolverPos_recursive(tmp));
+
+  // Fill service result
+  res.message = "Got it.";
+  res.success = true;
+
+  return true;
 }
 
 template <class HardwareInterface>

@@ -26,6 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   control_toolbox
   eigen_conversions
+  kdl_conversions
   dynamic_reconfigure
   pluginlib
 )
@@ -122,7 +123,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cartesian_controller_base ik_solvers
-  CATKIN_DEPENDS roscpp controller_interface kdl_parser geometry_msgs trajectory_msgs control_toolbox eigen_conversions dynamic_reconfigure pluginlib
+  CATKIN_DEPENDS roscpp controller_interface kdl_parser geometry_msgs trajectory_msgs control_toolbox kdl_conversions eigen_conversions dynamic_reconfigure pluginlib
 #  DEPENDS system_lib
 )
 
