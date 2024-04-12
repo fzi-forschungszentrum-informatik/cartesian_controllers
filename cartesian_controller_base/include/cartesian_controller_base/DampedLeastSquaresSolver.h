@@ -102,6 +102,11 @@ class DampedLeastSquaresSolver : public IKSolver
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 
+    /**
+     * @brief Update the robot kinematic chain of the solver
+     */
+    virtual bool updateChain(const KDL::Chain& chain);
+
   private:
     std::shared_ptr<KDL::ChainJntToJacSolver> m_jnt_jacobian_solver;
     KDL::Jacobian m_jnt_jacobian;

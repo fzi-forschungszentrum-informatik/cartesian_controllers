@@ -101,6 +101,11 @@ class SelectivelyDampedLeastSquaresSolver : public IKSolver
               const KDL::JntArray& upper_pos_limits,
               const KDL::JntArray& lower_pos_limits);
 
+    /**
+     * @brief Update the robot kinematic chain of the solver
+     */
+    bool updateChain(const KDL::Chain& chain);
+
   private:
     /**
      * @brief Helper function to clamp a column vector

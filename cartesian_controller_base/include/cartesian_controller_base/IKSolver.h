@@ -152,6 +152,11 @@ class IKSolver
                       const KDL::JntArray& lower_pos_limits);
 
     /**
+     * @brief Update the robot kinematic chain of the solver
+     */
+    virtual bool updateChain(const KDL::Chain& chain);
+
+    /**
      * @brief Update the robot kinematics of the solver
      *
      * Call this periodically to update the internal simulation's forward
