@@ -42,6 +42,7 @@
   <build_depend>roscpp</build_depend>
   <build_depend>controller_interface</build_depend>
   <build_depend>kdl_parser</build_depend>
+  <build_depend>geometry_msgs</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>control_toolbox</build_depend>
   <build_depend>eigen_conversions</build_depend>
@@ -51,6 +52,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>controller_interface</run_depend>
   <run_depend>kdl_parser</run_depend>
+  <run_depend>geometry_msgs</run_depend>
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>control_toolbox</run_depend>
   <run_depend>eigen_conversions</run_depend>
