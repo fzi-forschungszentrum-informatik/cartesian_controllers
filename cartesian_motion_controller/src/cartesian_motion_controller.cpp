@@ -87,8 +87,10 @@ CartesianMotionController::on_configure(const rclcpp_lifecycle::State & previous
     return ret;
   }
 
+  auto_declare<std::string>("target_frame_topic",
+                            get_node()->get_name() + std::string("/target_frame"));
   m_target_frame_subscr = get_node()->create_subscription<geometry_msgs::msg::PoseStamped>(
-    get_node()->get_name() + std::string("/target_frame"), 3,
+    get_node()->get_parameter("target_frame_topic").as_string(), 3,
     std::bind(&CartesianMotionController::targetFrameCallback, this, std::placeholders::_1));
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
