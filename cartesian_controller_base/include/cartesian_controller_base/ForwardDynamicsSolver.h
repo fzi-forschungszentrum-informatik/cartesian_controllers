@@ -122,8 +122,7 @@ private:
   KDL::JntSpaceInertiaMatrix m_jnt_space_inertia;
 
   // Dynamic parameters
-  std::shared_ptr<rclcpp::Node> m_handle;  ///< handle for dynamic parameter interaction
-  const std::string m_params = "solver/forward_dynamics";  ///< namespace for parameter access
+  const std::string m_params = "solver.forward_dynamics";  ///< namespace for parameter access
 
   /**
      * Virtual link mass

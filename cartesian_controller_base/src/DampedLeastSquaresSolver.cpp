@@ -79,7 +79,7 @@ trajectory_msgs::msg::JointTrajectoryPoint DampedLeastSquaresSolver::getJointCon
   // \f$ \dot{q} = ( J^T J + \alpha^2 I )^{-1} J^T f \f$
   ctrl::MatrixND identity;
   identity.setIdentity(m_number_joints, m_number_joints);
-  m_handle->get_parameter(m_params + "/alpha", m_alpha);
+  m_handle->get_parameter(m_params + ".alpha", m_alpha);
 
   m_current_velocities.data =
     (m_jnt_jacobian.data.transpose() * m_jnt_jacobian.data + m_alpha * m_alpha * identity)
@@ -126,7 +126,7 @@ bool DampedLeastSquaresSolver::init(std::shared_ptr<rclcpp::Node> nh,
   m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
   m_jnt_jacobian.resize(m_number_joints);
 
-  nh->declare_parameter<double>(m_params + "/alpha", 1.0);
+  auto_declare(m_params + ".alpha", 1.0);
 
   return true;
 }

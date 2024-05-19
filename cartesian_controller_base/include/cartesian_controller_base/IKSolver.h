@@ -174,6 +174,25 @@ protected:
      */
   void applyJointLimits();
 
+  template <typename ParameterT>
+  auto auto_declare(const std::string & name, const ParameterT & default_value)
+  {
+    if (!m_handle->has_parameter(name))
+    {
+      return m_handle->declare_parameter<ParameterT>(name, default_value);
+    }
+    else
+    {
+      return m_handle->get_parameter(name).get_value<ParameterT>();
+    }
+  }
+
+#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+  std::shared_ptr<rclcpp_lifecycle::LifecycleNode> m_handle;
+#else
+  std::shared_ptr<rclcpp::Node> m_handle;
+#endif
+
   //! The underlying physical system
   KDL::Chain m_chain;
 
