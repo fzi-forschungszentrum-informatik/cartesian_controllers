@@ -102,13 +102,9 @@ trajectory_msgs::msg::JointTrajectoryPoint JacobianTransposeSolver::getJointCont
   return control_cmd;
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-#else
-bool JacobianTransposeSolver::init(std::shared_ptr<rclcpp::Node> nh,
-#endif
-                                   const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
-                                   const KDL::JntArray & lower_pos_limits)
+  const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+  const KDL::JntArray & lower_pos_limits)
 {
   IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 

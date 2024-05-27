@@ -62,20 +62,14 @@ public:
   PDController();
   ~PDController();
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
   void init(const std::string & params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle);
-#else
-  void init(const std::string & params, std::shared_ptr<rclcpp::Node> handle);
-#endif
 
   double operator()(const double & error, const rclcpp::Duration & period);
 
 private:
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
   std::shared_ptr<rclcpp_lifecycle::LifecycleNode> m_handle;
-#else
-  std::shared_ptr<rclcpp::Node> m_handle;  ///< handle for dynamic parameter interaction
-#endif
   std::string m_params;  ///< namespace for parameter access
 
   // Gain parameters

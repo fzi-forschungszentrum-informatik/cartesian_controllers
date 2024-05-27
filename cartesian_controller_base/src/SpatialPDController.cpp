@@ -56,11 +56,8 @@ ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D & error,
   return m_cmd;
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
 bool SpatialPDController::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
-#else
-bool SpatialPDController::init(std::shared_ptr<rclcpp::Node> handle)
-#endif
 {
   // Create pd controllers for each Cartesian dimension
   for (int i = 0; i < 6; ++i)  // 3 transition, 3 rotation

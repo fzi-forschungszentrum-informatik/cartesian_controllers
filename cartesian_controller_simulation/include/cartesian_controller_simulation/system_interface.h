@@ -52,9 +52,7 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
-#if defined CARTESIAN_CONTROLLERS_FOXY
-#include "hardware_interface/base_interface.hpp"
-#endif
+
 
 namespace cartesian_controller_simulation
 {
@@ -71,12 +69,7 @@ constexpr char HW_IF_DAMPING[] = "damping";
  * controller_manager coordinated library.
  *
  */
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
 class Simulator : public hardware_interface::SystemInterface
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-class Simulator : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
-#endif
 {
 public:
   using return_type = hardware_interface::return_type;
@@ -84,12 +77,7 @@ public:
 
   RCLCPP_SHARED_PTR_DEFINITIONS(Simulator)
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
   CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  return_type configure(const hardware_interface::HardwareInfo & info) override;
-#endif
 
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
@@ -99,19 +87,11 @@ public:
     const std::vector<std::string> & start_interfaces,
     const std::vector<std::string> & stop_interfaces) override;
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
   return_type read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
   return_type write(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
-#elif defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_FOXY
-  return_type read() override;
-  return_type write() override;
-#endif
 
-#if defined CARTESIAN_CONTROLLERS_FOXY
-  return_type start() override;
-  return_type stop() override;
-#endif
 
 private:
   // Command buffers for the controllers

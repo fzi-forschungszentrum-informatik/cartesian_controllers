@@ -81,13 +81,8 @@ MotionControlHandle::on_deactivate(const rclcpp_lifecycle::State & previous_stat
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
 controller_interface::return_type MotionControlHandle::update(const rclcpp::Time & time,
                                                               const rclcpp::Duration & period)
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type MotionControlHandle::update()
-#endif
 {
   if (m_current_pose.header.frame_id != m_robot_base_link && m_current_pose.header.frame_id != "")
   {
@@ -128,33 +123,20 @@ controller_interface::InterfaceConfiguration MotionControlHandle::state_interfac
   return conf;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_init()
 {
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type MotionControlHandle::init(const std::string & controller_name)
-{
-  // Initialize lifecycle node
-  const auto ret = ControllerInterface::init(controller_name);
-  if (ret != controller_interface::return_type::OK)
-  {
-    return ret;
-  }
-#endif
+
 
   auto_declare<std::string>("robot_description", "");
   auto_declare<std::string>("robot_base_link", "");
   auto_declare<std::string>("end_effector_link", "");
   auto_declare<std::vector<std::string> >("joints", std::vector<std::string>());
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  return controller_interface::return_type::OK;
-#endif
+
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn

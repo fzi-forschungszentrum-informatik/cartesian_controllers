@@ -147,13 +147,10 @@ public:
      *
      * @return True, if everything went well
      */
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
   virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-#else
-  virtual bool init(std::shared_ptr<rclcpp::Node> nh,
-#endif
-                    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
-                    const KDL::JntArray & lower_pos_limits);
+      const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+      const KDL::JntArray & lower_pos_limits);
 
   /**
      * @brief Update the robot kinematics of the solver

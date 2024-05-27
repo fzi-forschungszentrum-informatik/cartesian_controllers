@@ -102,13 +102,10 @@ void IKSolver::synchronizeJointPositions(
   }
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
 bool IKSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> /*nh*/,
-#else
-bool IKSolver::init(std::shared_ptr<rclcpp::Node> /*nh*/,
-#endif
-                    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
-                    const KDL::JntArray & lower_pos_limits)
+    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+    const KDL::JntArray & lower_pos_limits)
 {
   // Initialize
   m_chain = chain;

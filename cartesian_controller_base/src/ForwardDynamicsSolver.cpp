@@ -117,11 +117,7 @@ trajectory_msgs::msg::JointTrajectoryPoint ForwardDynamicsSolver::getJointContro
   return control_cmd;
 }
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-#else
-bool ForwardDynamicsSolver::init(std::shared_ptr<rclcpp::Node> nh,
-#endif
                                  const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
                                  const KDL::JntArray & lower_pos_limits)
 {

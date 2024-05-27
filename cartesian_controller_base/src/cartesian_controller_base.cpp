@@ -86,8 +86,7 @@ CartesianControllerBase::state_interface_configuration() const
   return conf;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianControllerBase::on_init()
 {
@@ -106,34 +105,6 @@ CartesianControllerBase::on_init()
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianControllerBase::init(const std::string & controller_name)
-{
-  if (!m_initialized)
-  {
-    // Initialize lifecycle node
-    const auto ret = ControllerInterface::init(controller_name);
-    if (ret != controller_interface::return_type::OK)
-    {
-      return ret;
-    }
-
-    auto_declare<std::string>("ik_solver", "forward_dynamics");
-    auto_declare<std::string>("robot_description", "");
-    auto_declare<std::string>("robot_base_link", "");
-    auto_declare<std::string>("end_effector_link", "");
-    auto_declare<std::vector<std::string>>("joints", std::vector<std::string>());
-    auto_declare<std::vector<std::string>>("command_interfaces", std::vector<std::string>());
-    auto_declare<double>("solver.error_scale", 1.0);
-    auto_declare<int>("solver.iterations", 1);
-    auto_declare<bool>("solver.publish_state_feedback", false);
-
-    m_initialized = true;
-  }
-  return controller_interface::return_type::OK;
-}
-#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianControllerBase::on_configure(const rclcpp_lifecycle::State & previous_state)
@@ -385,12 +356,7 @@ void CartesianControllerBase::writeJointControlCmds()
     RCLCPP_ERROR(
       get_node()->get_logger(),
       "NaN detected in internal model. It's unlikely to recover from this. Shutting down.");
-
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
     get_node()->shutdown();
-#elif defined CARTESIAN_CONTROLLERS_FOXY || defined CARTESIAN_CONTROLLERS_GALACTIC
-    this->shutdown();
-#endif
     return;
   }
 

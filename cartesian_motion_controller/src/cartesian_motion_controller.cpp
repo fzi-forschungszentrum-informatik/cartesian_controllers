@@ -51,8 +51,6 @@ namespace cartesian_motion_controller
 {
 CartesianMotionController::CartesianMotionController() : Base::CartesianControllerBase() {}
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianMotionController::on_init()
 {
@@ -64,19 +62,7 @@ CartesianMotionController::on_init()
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianMotionController::init(
-  const std::string & controller_name)
-{
-  const auto ret = Base::init(controller_name);
-  if (ret != controller_interface::return_type::OK)
-  {
-    return ret;
-  }
 
-  return controller_interface::return_type::OK;
-}
-#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianMotionController::on_configure(const rclcpp_lifecycle::State & previous_state)
@@ -114,13 +100,9 @@ CartesianMotionController::on_deactivate(const rclcpp_lifecycle::State & previou
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
 controller_interface::return_type CartesianMotionController::update(const rclcpp::Time & time,
                                                                     const rclcpp::Duration & period)
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianMotionController::update()
-#endif
 {
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);

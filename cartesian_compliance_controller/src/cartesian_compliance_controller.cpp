@@ -53,8 +53,6 @@ CartesianComplianceController::CartesianComplianceController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianComplianceController::on_init()
 {
@@ -77,21 +75,7 @@ CartesianComplianceController::on_init()
 
   return TYPE::SUCCESS;
 }
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianComplianceController::init(
-  const std::string & controller_name)
-{
-  using TYPE = controller_interface::return_type;
-  if (MotionBase::init(controller_name) != TYPE::OK || ForceBase::init(controller_name) != TYPE::OK)
-  {
-    return TYPE::ERROR;
-  }
 
-  auto_declare<std::string>("compliance_ref_link", "");
-
-  return TYPE::OK;
-}
-#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianComplianceController::on_configure(const rclcpp_lifecycle::State & previous_state)
@@ -146,13 +130,8 @@ CartesianComplianceController::on_deactivate(const rclcpp_lifecycle::State & pre
   return TYPE::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
 controller_interface::return_type CartesianComplianceController::update(
   const rclcpp::Time & time, const rclcpp::Duration & period)
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianComplianceController::update()
-#endif
 {
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);

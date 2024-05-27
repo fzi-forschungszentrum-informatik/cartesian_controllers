@@ -76,12 +76,8 @@ class CartesianForceController : public virtual cartesian_controller_base::Carte
 public:
   CartesianForceController();
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
   virtual LifecycleNodeInterface::CallbackReturn on_init() override;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  virtual controller_interface::return_type init(const std::string & controller_name) override;
-#endif
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
     const rclcpp_lifecycle::State & previous_state) override;
@@ -92,13 +88,9 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
   controller_interface::return_type update(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  controller_interface::return_type update() override;
-#endif
+
 
   using Base = cartesian_controller_base::CartesianControllerBase;
 

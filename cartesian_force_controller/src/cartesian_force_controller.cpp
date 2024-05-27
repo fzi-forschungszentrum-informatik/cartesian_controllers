@@ -51,8 +51,7 @@ CartesianForceController::CartesianForceController()
 {
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianForceController::on_init()
 {
@@ -67,22 +66,7 @@ CartesianForceController::on_init()
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianForceController::init(
-  const std::string & controller_name)
-{
-  const auto ret = Base::init(controller_name);
-  if (ret != controller_interface::return_type::OK)
-  {
-    return ret;
-  }
 
-  auto_declare<std::string>("ft_sensor_ref_link", "");
-  auto_declare<bool>("hand_frame_control", true);
-
-  return controller_interface::return_type::OK;
-}
-#endif
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianForceController::on_configure(const rclcpp_lifecycle::State & previous_state)
@@ -136,13 +120,9 @@ CartesianForceController::on_deactivate(const rclcpp_lifecycle::State & previous
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
+
 controller_interface::return_type CartesianForceController::update(const rclcpp::Time & time,
                                                                    const rclcpp::Duration & period)
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-controller_interface::return_type CartesianForceController::update()
-#endif
 {
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);
@@ -179,12 +159,7 @@ ctrl::Vector6D CartesianForceController::computeForceError()
   }
 
   // Superimpose target wrench and sensor wrench in base frame
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
   return Base::displayInBaseLink(m_ft_sensor_wrench, m_new_ft_sensor_ref) + target_wrench;
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  return m_ft_sensor_wrench + target_wrench;
-#endif
 }
 
 void CartesianForceController::setFtSensorReferenceFrame(const std::string & new_ref)
@@ -250,8 +225,6 @@ void CartesianForceController::ftSensorWrenchCallback(
     return;
   }
 
-#if defined CARTESIAN_CONTROLLERS_GALACTIC || defined CARTESIAN_CONTROLLERS_HUMBLE || \
-  defined CARTESIAN_CONTROLLERS_IRON
   KDL::Wrench tmp;
   tmp[0] = wrench->wrench.force.x;
   tmp[1] = wrench->wrench.force.y;
@@ -269,16 +242,6 @@ void CartesianForceController::ftSensorWrenchCallback(
   m_ft_sensor_wrench[3] = tmp[3];
   m_ft_sensor_wrench[4] = tmp[4];
   m_ft_sensor_wrench[5] = tmp[5];
-#elif defined CARTESIAN_CONTROLLERS_FOXY
-  // We assume base frame for the measurements
-  // This is currently URe-ROS2 driver-specific (branch foxy).
-  m_ft_sensor_wrench[0] = wrench->wrench.force.x;
-  m_ft_sensor_wrench[1] = wrench->wrench.force.y;
-  m_ft_sensor_wrench[2] = wrench->wrench.force.z;
-  m_ft_sensor_wrench[3] = wrench->wrench.torque.x;
-  m_ft_sensor_wrench[4] = wrench->wrench.torque.y;
-  m_ft_sensor_wrench[5] = wrench->wrench.torque.z;
-#endif
 }
 
 }  // namespace cartesian_force_controller

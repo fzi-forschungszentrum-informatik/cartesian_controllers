@@ -103,13 +103,10 @@ public:
      *
      * @return True, if everything went well
      */
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
+
   bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-#else
-  bool init(std::shared_ptr<rclcpp::Node> nh,
-#endif
-            const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
-            const KDL::JntArray & lower_pos_limits) override;
+    const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
+    const KDL::JntArray & lower_pos_limits) override;
 
 private:
   //! Build a generic robot model for control
