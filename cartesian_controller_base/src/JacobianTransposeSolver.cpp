@@ -116,6 +116,15 @@ namespace cartesian_controller_base{
   {
     IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
+    updateChain(m_chain);
+
+    return true;
+  }
+
+  bool JacobianTransposeSolver::updateChain(const KDL::Chain& chain)
+  {
+    IKSolver::updateChain(chain);
+
     m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
     m_jnt_jacobian.resize(m_number_joints);
 

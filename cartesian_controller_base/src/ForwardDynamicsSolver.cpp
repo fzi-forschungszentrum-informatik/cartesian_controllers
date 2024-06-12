@@ -138,17 +138,8 @@ namespace cartesian_controller_base{
   {
     IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
-    if (!buildGenericModel())
-    {
-      ROS_ERROR("ForwardDynamicsSolver: Something went wrong in setting up the internal model.");
+    if(!updateChain(m_chain))
       return false;
-    }
-
-    // Forward dynamics
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
-    m_jnt_jacobian.resize(m_number_joints);
-    m_jnt_space_inertia.resize(m_number_joints);
 
     // Connect dynamic reconfigure and overwrite the default values with values
     // on the parameter server. This is done automatically if parameters with
@@ -169,6 +160,26 @@ namespace cartesian_controller_base{
 
     return true;
   }
+
+  bool ForwardDynamicsSolver::updateChain(const KDL::Chain& chain)
+  {
+    IKSolver::updateChain(chain);
+
+    if (!buildGenericModel())
+    {
+      ROS_ERROR("ForwardDynamicsSolver: Something went wrong in setting up the internal model.");
+      return false;
+    }
+
+    // Forward dynamics
+    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+    m_jnt_space_inertia_solver.reset(new KDL::ChainDynParam(m_chain,KDL::Vector::Zero()));
+    m_jnt_jacobian.resize(m_number_joints);
+    m_jnt_space_inertia.resize(m_number_joints);
+
+    return true;
+  }
+
 
   bool ForwardDynamicsSolver::buildGenericModel()
   {

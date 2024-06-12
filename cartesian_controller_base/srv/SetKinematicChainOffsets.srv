@@ -1,0 +1,8 @@
+# Ability to add a chain before or after the robot chain (parsed by the URDF)
+
+# Removes the chain if the frame_id is empty. Otherwise, overwrites the previous chain.
+geometry_msgs/PoseStamped pre_robot_chain_offset    # Attached before the robot base link
+geometry_msgs/PoseStamped post_robot_chain_offset   # Attached after end effector link
+---
+bool success
+string message

@@ -125,8 +125,7 @@ namespace cartesian_controller_base{
   {
     IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 
-    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
-    m_jnt_jacobian.resize(m_number_joints);
+    updateChain(m_chain);
 
     // Connect dynamic reconfigure and overwrite the default values with values
     // on the parameter server. This is done automatically if parameters with
@@ -142,6 +141,17 @@ namespace cartesian_controller_base{
     m_dyn_conf_server->setCallback(m_callback_type);
     return true;
   }
+
+  bool DampedLeastSquaresSolver::updateChain(const KDL::Chain& chain)
+  {
+    IKSolver::updateChain(chain);
+
+    m_jnt_jacobian_solver.reset(new KDL::ChainJntToJacSolver(m_chain));
+    m_jnt_jacobian.resize(m_number_joints);
+
+    return true;
+  }
+
 
     void DampedLeastSquaresSolver::dynamicReconfigureCallback(IKConfig& config, uint32_t level)
     {

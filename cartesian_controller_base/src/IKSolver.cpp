@@ -111,6 +111,20 @@ namespace cartesian_controller_base{
                       const KDL::JntArray& lower_pos_limits)
   {
     // Initialize
+    IKSolver::updateChain(chain);
+    m_upper_pos_limits           = upper_pos_limits;
+    m_lower_pos_limits           = lower_pos_limits;
+
+    return true;
+  }
+
+  bool IKSolver::updateChain(const KDL::Chain& chain)
+  {
+    // Guard against multiple initialization
+    // Also fixes a segfault...
+    if(&chain == &m_chain)
+      return true;
+
     m_chain = chain;
     m_number_joints              = m_chain.getNrOfJoints();
     m_current_positions.data     = ctrl::VectorND::Zero(m_number_joints);
@@ -118,8 +132,6 @@ namespace cartesian_controller_base{
     m_current_accelerations.data = ctrl::VectorND::Zero(m_number_joints);
     m_last_positions.data        = ctrl::VectorND::Zero(m_number_joints);
     m_last_velocities.data       = ctrl::VectorND::Zero(m_number_joints);
-    m_upper_pos_limits           = upper_pos_limits;
-    m_lower_pos_limits           = lower_pos_limits;
 
     // Forward kinematics
     m_fk_pos_solver.reset(new KDL::ChainFkSolverPos_recursive(m_chain));
