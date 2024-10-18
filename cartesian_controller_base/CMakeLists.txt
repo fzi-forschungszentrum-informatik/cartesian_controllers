@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(ADDITIONAL_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Wno-unused-parameter)
 add_compile_options(${ADDITIONAL_COMPILE_OPTIONS})
 
+# Set build type to "Release" by default
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif(NOT CMAKE_BUILD_TYPE)
+
 # Use CMake to pass the current ROS_DISTRO via variables into a preprocessor template.
 # We then include this file and switch between the different APIs.
 if($ENV{ROS_DISTRO} STREQUAL "iron")
