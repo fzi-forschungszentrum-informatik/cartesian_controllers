@@ -1,6 +1,11 @@
-name: Foxy
+name: Jazzy
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    # Run every Friday at 6:30 am to detect breaking APIs
+    - cron: '30 6 * * 5'
 
 
 jobs:
@@ -11,9 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {ROS_DISTRO: foxy, ROS_REPO: main}
+          - {ROS_DISTRO: jazzy, ROS_REPO: testing}
+          - {ROS_DISTRO: jazzy, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}

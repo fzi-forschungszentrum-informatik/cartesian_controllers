@@ -20,6 +20,6 @@ jobs:
           - {ROS_DISTRO: iron, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
