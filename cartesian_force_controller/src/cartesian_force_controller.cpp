@@ -51,7 +51,6 @@ CartesianForceController::CartesianForceController()
 {
 }
 
-
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianForceController::on_init()
 {
@@ -66,7 +65,6 @@ CartesianForceController::on_init()
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianForceController::on_configure(const rclcpp_lifecycle::State & previous_state)
@@ -119,7 +117,6 @@ CartesianForceController::on_deactivate(const rclcpp_lifecycle::State & previous
   Base::on_deactivate(previous_state);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-
 
 controller_interface::return_type CartesianForceController::update(const rclcpp::Time & time,
                                                                    const rclcpp::Duration & period)

@@ -86,7 +86,6 @@ CartesianControllerBase::state_interface_configuration() const
   return conf;
 }
 
-
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianControllerBase::on_init()
 {

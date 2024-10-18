@@ -52,8 +52,6 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
-
-
 namespace cartesian_controller_simulation
 {
 // Two custom hardware interfaces for torque-actuated robots:
@@ -87,11 +85,8 @@ public:
     const std::vector<std::string> & start_interfaces,
     const std::vector<std::string> & stop_interfaces) override;
 
-
   return_type read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
   return_type write(const rclcpp::Time & time, const rclcpp::Duration & period) override;
-
-
 
 private:
   // Command buffers for the controllers

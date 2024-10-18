@@ -97,7 +97,6 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    "Joint '%s' needs two possible command interfaces.", joint.name.c_str());
 
       return Simulator::CallbackReturn::ERROR;
-
     }
 
     if (!(joint.command_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -109,7 +108,6 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    hardware_interface::HW_IF_VELOCITY);
 
       return Simulator::CallbackReturn::ERROR;
-
     }
 
     if (joint.state_interfaces.size() != 3)
@@ -118,7 +116,6 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    joint.name.c_str());
 
       return Simulator::CallbackReturn::ERROR;
-
     }
 
     if (!(joint.state_interfaces[0].name == hardware_interface::HW_IF_POSITION ||
@@ -131,12 +128,10 @@ Simulator::CallbackReturn Simulator::on_init(const hardware_interface::HardwareI
                    hardware_interface::HW_IF_VELOCITY, hardware_interface::HW_IF_EFFORT);
 
       return Simulator::CallbackReturn::ERROR;
-
     }
   }
 
   return Simulator::CallbackReturn::SUCCESS;
-
 }
 
 std::vector<hardware_interface::StateInterface> Simulator::export_state_interfaces()
@@ -182,9 +177,6 @@ Simulator::return_type Simulator::prepare_command_mode_switch(
   return return_type::OK;
 }
 
-
-
-
 Simulator::return_type Simulator::read([[maybe_unused]] const rclcpp::Time & time,
                                        [[maybe_unused]] const rclcpp::Duration & period)
 
@@ -207,7 +199,6 @@ Simulator::return_type Simulator::read([[maybe_unused]] const rclcpp::Time & tim
 
   return return_type::OK;
 }
-
 
 Simulator::return_type Simulator::write([[maybe_unused]] const rclcpp::Time & time,
                                         [[maybe_unused]] const rclcpp::Duration & period)

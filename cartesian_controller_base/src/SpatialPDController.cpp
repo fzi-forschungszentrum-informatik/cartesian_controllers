@@ -56,7 +56,6 @@ ctrl::Vector6D SpatialPDController::operator()(const ctrl::Vector6D & error,
   return m_cmd;
 }
 
-
 bool SpatialPDController::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
 {
   // Create pd controllers for each Cartesian dimension

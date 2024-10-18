@@ -62,13 +62,11 @@ public:
   PDController();
   ~PDController();
 
-
   void init(const std::string & params, std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle);
 
   double operator()(const double & error, const rclcpp::Duration & period);
 
 private:
-
   std::shared_ptr<rclcpp_lifecycle::LifecycleNode> m_handle;
   std::string m_params;  ///< namespace for parameter access
 

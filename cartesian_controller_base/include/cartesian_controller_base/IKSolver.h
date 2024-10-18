@@ -148,9 +148,8 @@ public:
      * @return True, if everything went well
      */
 
-  virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-      const KDL::Chain & chain, const KDL::JntArray & upper_pos_limits,
-      const KDL::JntArray & lower_pos_limits);
+  virtual bool init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh, const KDL::Chain & chain,
+                    const KDL::JntArray & upper_pos_limits, const KDL::JntArray & lower_pos_limits);
 
   /**
      * @brief Update the robot kinematics of the solver

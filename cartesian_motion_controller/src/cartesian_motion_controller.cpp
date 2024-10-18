@@ -63,7 +63,6 @@ CartesianMotionController::on_init()
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianMotionController::on_configure(const rclcpp_lifecycle::State & previous_state)
 {
@@ -99,7 +98,6 @@ CartesianMotionController::on_deactivate(const rclcpp_lifecycle::State & previou
   Base::on_deactivate(previous_state);
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
-
 
 controller_interface::return_type CartesianMotionController::update(const rclcpp::Time & time,
                                                                     const rclcpp::Duration & period)

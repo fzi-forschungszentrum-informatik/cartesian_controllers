@@ -91,7 +91,6 @@ public:
   controller_interface::return_type update(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
 
-
   using Base = cartesian_controller_base::CartesianControllerBase;
 
 protected:

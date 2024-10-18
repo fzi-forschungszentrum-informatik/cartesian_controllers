@@ -76,7 +76,6 @@ CartesianComplianceController::on_init()
   return TYPE::SUCCESS;
 }
 
-
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianComplianceController::on_configure(const rclcpp_lifecycle::State & previous_state)
 {

@@ -136,11 +136,10 @@ trajectory_msgs::msg::JointTrajectoryPoint SelectivelyDampedLeastSquaresSolver::
   return control_cmd;
 }
 
-
 bool SelectivelyDampedLeastSquaresSolver::init(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> nh,
-  const KDL::Chain & chain,
-  const KDL::JntArray & upper_pos_limits,
-  const KDL::JntArray & lower_pos_limits)
+                                               const KDL::Chain & chain,
+                                               const KDL::JntArray & upper_pos_limits,
+                                               const KDL::JntArray & lower_pos_limits)
 {
   IKSolver::init(nh, chain, upper_pos_limits, lower_pos_limits);
 

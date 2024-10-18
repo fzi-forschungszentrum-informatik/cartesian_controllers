@@ -85,7 +85,7 @@ public:
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
-    
+
   controller_interface::return_type update(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
 
