@@ -91,10 +91,11 @@ controller_interface::return_type MotionControlHandle::update()
 {
   if (m_current_pose.header.frame_id != m_robot_base_link && m_current_pose.header.frame_id != "")
   {
-    RCLCPP_ERROR(get_node()->get_logger(),
-                 "The reference frame \"%s\" selected in Rviz is not a fixed frame. Please select a "
-                 "fixed frame.",
-                 m_current_pose.header.frame_id.c_str());
+    RCLCPP_ERROR(
+      get_node()->get_logger(),
+      "The reference frame \"%s\" selected in Rviz is not a fixed frame. Please select a "
+      "fixed frame.",
+      m_current_pose.header.frame_id.c_str());
     return controller_interface::return_type::ERROR;
   }
   // Publish marker pose
