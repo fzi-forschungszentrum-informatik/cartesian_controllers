@@ -46,14 +46,6 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-import os
-
-distro = os.environ["ROS_DISTRO"]
-if distro in ["galactic", "humble", "iron"]:
-    spawner = "spawner"
-else:  # foxy
-    spawner = "spawner.py"
-
 
 def generate_launch_description():
     # Declare arguments
@@ -99,9 +91,10 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
-        # prefix="screen -d -m gdb -command=/home/scherzin/.ros/my_debug_log --ex run --args",  # noqa: E501
+        # prefix="screen -d -m gdb -command=/home/stefan/.gdb_debug_config --ex run --args",  # noqa E501
         output="both",
         remappings=[
+            ("~/robot_description", "/robot_description"),
             ("motion_control_handle/target_frame", "target_frame"),
             ("cartesian_motion_controller/target_frame", "target_frame"),
             ("cartesian_compliance_controller/target_frame", "target_frame"),
@@ -116,7 +109,7 @@ def generate_launch_description():
     def controller_spawner(name, *args):
         return Node(
             package="controller_manager",
-            executable=spawner,
+            executable="spawner",
             output="screen",
             arguments=[name] + [a for a in args],
         )
@@ -137,7 +130,7 @@ def generate_launch_description():
         "invalid_cartesian_compliance_controller",
         "invalid_cartesian_force_controller",
     ]
-    state = "--inactive" if distro in ["humble", "iron"] else "--stopped"
+    state = "--inactive"
     inactive_spawners = [
         controller_spawner(controller, state) for controller in inactive_list
     ]

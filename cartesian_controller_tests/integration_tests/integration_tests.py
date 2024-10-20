@@ -7,7 +7,6 @@ from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
-import os
 import time
 import rclpy
 from rclpy.node import Node
@@ -15,8 +14,6 @@ from controller_manager_msgs.srv import ListControllers
 from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import WrenchStamped
-
-distro = os.environ["ROS_DISTRO"]
 
 
 def generate_test_description():
@@ -118,10 +115,7 @@ class IntegrationTest(unittest.TestCase):
         controller manager contains our controllers and if they have the
         expected state.
         """
-        if os.environ["ROS_DISTRO"] == "humble" or os.environ["ROS_DISTRO"] == "iron":
-            expected_state = "unconfigured"
-        else:  # galactic, foxy
-            expected_state = "finalized"
+        expected_state = "unconfigured"
         for name in self.invalid_controllers:
             self.assertTrue(
                 self.check_state(name, expected_state),
@@ -215,19 +209,13 @@ class IntegrationTest(unittest.TestCase):
     def start_controller(self, controller):
         """Start the given controller"""
         req = SwitchController.Request()
-        if distro in ["humble", "iron"]:
-            req.activate_controllers = [controller]
-        else:
-            req.start_controllers = [controller]
+        req.activate_controllers = [controller]
         self.perform_switch(req)
 
     def stop_controller(self, controller):
         """Stop the given controller"""
         req = SwitchController.Request()
-        if distro in ["humble", "iron"]:
-            req.deactivate_controllers = [controller]
-        else:
-            req.stop_controllers = [controller]
+        req.deactivate_controllers = [controller]
         self.perform_switch(req)
 
     def perform_switch(self, req):

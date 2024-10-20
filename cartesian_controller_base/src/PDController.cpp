@@ -47,12 +47,8 @@ PDController::PDController() : m_last_p_error(0.0) {}
 
 PDController::~PDController() {}
 
-#if defined CARTESIAN_CONTROLLERS_HUMBLE || defined CARTESIAN_CONTROLLERS_IRON
 void PDController::init(const std::string & params,
                         std::shared_ptr<rclcpp_lifecycle::LifecycleNode> handle)
-#else
-void PDController::init(const std::string & params, std::shared_ptr<rclcpp::Node> handle)
-#endif
 {
   m_params = params;
   m_handle = std::move(handle);
