@@ -1,0 +1,9 @@
+<library path="joint_to_cartesian_controller">
+  <class name="joint_to_cartesian_controller/JointToCartesianController"
+    type="joint_to_cartesian_controller::JointToCartesianController"
+    base_class_type="controller_interface::ChainableControllerInterface">
+    <description>
+      Convert joint commands into Cartesian end-effector poses.
+    </description>
+  </class>
+</library>

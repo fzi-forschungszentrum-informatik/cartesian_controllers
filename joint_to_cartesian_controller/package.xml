@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>joint_to_cartesian_controller</name>
+  <version>0.0.0</version>
+  <description>The joint_to_cartesian_controller package</description>
+  <maintainer email="scherzin@fzi.de">scherzin</maintainer>
+  <license>BSD-3-Clause</license>
+  <url type="repository">https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers</url>
+  <author email="scherzin@fzi.de">Stefan Scherzinger</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>cartesian_controller_base</depend>
+  <depend>controller_interface</depend>
+  <depend>controller_manager</depend>
+  <depend>geometry_msgs</depend>
+  <depend>kdl_parser</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>urdf</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <controller_interface plugin="${prefix}/joint_to_cartesian_controller_plugin.xml"/>
+  </export>
+</package>

@@ -26,6 +26,12 @@ controller_manager:
     invalid_cartesian_force_controller:
       type: cartesian_force_controller/CartesianForceController
 
+    joint_cartesian_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    joint_to_cartesian_controller:
+      type: joint_to_cartesian_controller/JointToCartesianController
+
 cartesian_compliance_controller:
   ros__parameters:
 
@@ -192,6 +198,32 @@ joint_trajectory_controller:
     state_interfaces:
       - position
       - velocity
+
+joint_to_cartesian_controller:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    interfaces:
+      - joint1/position
+      - joint2/position
+      - joint3/position
+      - joint4/position
+      - joint5/position
+      - joint6/position
+
+joint_cartesian_trajectory_controller:
+  ros__parameters:
+    joints:
+      - joint_to_cartesian_controller/joint1
+      - joint_to_cartesian_controller/joint2
+      - joint_to_cartesian_controller/joint3
+      - joint_to_cartesian_controller/joint4
+      - joint_to_cartesian_controller/joint5
+      - joint_to_cartesian_controller/joint6
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
 
 
 #--------------------------------------------------------------------------------

@@ -98,6 +98,7 @@ def generate_launch_description():
             ("motion_control_handle/target_frame", "target_frame"),
             ("cartesian_motion_controller/target_frame", "target_frame"),
             ("cartesian_compliance_controller/target_frame", "target_frame"),
+            ("joint_to_cartesian_controller/target_frame", "target_frame"),
             ("cartesian_force_controller/target_wrench", "target_wrench"),
             ("cartesian_compliance_controller/target_wrench", "target_wrench"),
             ("cartesian_force_controller/ft_sensor_wrench", "ft_sensor_wrench"),
@@ -115,9 +116,7 @@ def generate_launch_description():
         )
 
     # Active controllers
-    active_list = [
-        "joint_state_broadcaster",
-    ]
+    active_list = ["joint_state_broadcaster", "joint_to_cartesian_controller"]
     active_spawners = [controller_spawner(controller) for controller in active_list]
 
     # Inactive controllers
@@ -127,6 +126,7 @@ def generate_launch_description():
         "cartesian_motion_controller",
         "motion_control_handle",
         "joint_trajectory_controller",
+        "joint_cartesian_trajectory_controller",
         "invalid_cartesian_compliance_controller",
         "invalid_cartesian_force_controller",
     ]
