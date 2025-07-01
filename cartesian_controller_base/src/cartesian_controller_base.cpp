@@ -131,7 +131,7 @@ CartesianControllerBase::on_configure(const rclcpp_lifecycle::State & previous_s
   urdf::Model robot_model;
   KDL::Tree robot_tree;
 
-#if defined CARTESIAN_CONTROLLERS_JAZZY
+#if defined(CARTESIAN_CONTROLLERS_JAZZY) || defined(CARTESIAN_CONTROLLERS_KILTED)
   m_robot_description = this->get_robot_description();
 #else
   m_robot_description = get_node()->get_parameter("robot_description").as_string();

@@ -141,7 +141,7 @@ MotionControlHandle::on_configure(const rclcpp_lifecycle::State & previous_state
   urdf::Model robot_model;
   KDL::Tree robot_tree;
 
-#if defined CARTESIAN_CONTROLLERS_JAZZY
+#if defined(CARTESIAN_CONTROLLERS_JAZZY) || defined(CARTESIAN_CONTROLLERS_KILTED)
   std::string robot_description = this->get_robot_description();
 #else
   std::string robot_description = get_node()->get_parameter("robot_description").as_string();
