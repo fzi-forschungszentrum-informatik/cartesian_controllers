@@ -2,7 +2,7 @@
 
   <class name="cartesian_motion_controller/CartesianMotionController"
          type="cartesian_motion_controller::CartesianMotionController"
-         base_class_type="controller_interface::ControllerInterface">
+         base_class_type="controller_interface::ChainableControllerInterface">
     <description>
       Steer your robot's end-effector with poses in Cartesian space.
       Parameterize the controller between smoothness and exactness.

@@ -45,7 +45,7 @@
 #include <cartesian_force_controller/cartesian_force_controller.h>
 #include <cartesian_motion_controller/cartesian_motion_controller.h>
 
-#include <controller_interface/controller_interface.hpp>
+#include <controller_interface/chainable_controller_interface.hpp>
 
 namespace cartesian_compliance_controller
 {
@@ -86,8 +86,10 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  controller_interface::return_type update(const rclcpp::Time & time,
+  controller_interface::return_type update_and_write_commands(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
+
+  controller_interface::return_type update_reference_from_subscribers() override;
 
   using Base = cartesian_controller_base::CartesianControllerBase;
   using MotionBase = cartesian_motion_controller::CartesianMotionController;
@@ -100,6 +102,9 @@ private:
      * @return The remaining error wrench, given in robot base frame
      */
   ctrl::Vector6D computeComplianceError();
+  realtime_tools::RealtimeBuffer<geometry_msgs::msg::WrenchStamped::SharedPtr> rt_buffer_ptr_;
+
+  bool target_available_;
 
   ctrl::Matrix6D m_stiffness;
   std::string m_compliance_ref_link;

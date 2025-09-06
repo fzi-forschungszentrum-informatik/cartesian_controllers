@@ -45,7 +45,7 @@
 #include <cartesian_controller_base/Utility.h>
 #include <realtime_tools/realtime_publisher.h>
 
-#include <controller_interface/controller_interface.hpp>
+#include <controller_interface/chainable_controller_interface.hpp>
 #include <functional>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -75,7 +75,7 @@ namespace cartesian_controller_base
  * writeJointControlCmds.
  *
  */
-class CartesianControllerBase : public controller_interface::ControllerInterface
+class CartesianControllerBase : public controller_interface::ChainableControllerInterface
 {
 public:
   CartesianControllerBase();
@@ -86,6 +86,8 @@ public:
 
   virtual controller_interface::InterfaceConfiguration state_interface_configuration()
     const override;
+  
+  virtual std::vector<hardware_interface::CommandInterface> on_export_reference_interfaces() override;
 
   virtual LifecycleNodeInterface::CallbackReturn on_init() override;
 
@@ -100,7 +102,8 @@ public:
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_shutdown(
     const rclcpp_lifecycle::State & previous_state) override;
-
+  
+  bool on_set_chained_mode(bool chained_mode) override;
 protected:
   /**
      * @brief Write joint control commands to the real hardware
@@ -192,10 +195,19 @@ protected:
   std::string m_end_effector_link;
   std::string m_robot_base_link;
   int m_iterations;
+  mutable std::vector<std::string> reference_interface_names_;
 
   std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface>>
     m_joint_state_pos_handles;
+  
+  bool chained_mode_available_ = {false};
 
+  /**
+   * @brief controller_mode_ is to select the references interfaces to export. 
+   *
+   * @return true will export cartesian motion controller reference interfaces and false for cartesian force or compliance controller
+   */
+  bool controller_mode_ = {true};
 private:
   /**
      * @brief Stop joint motion when in velocity control

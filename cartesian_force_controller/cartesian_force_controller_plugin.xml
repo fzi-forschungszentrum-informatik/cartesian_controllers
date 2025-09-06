@@ -2,7 +2,7 @@
 
   <class name="cartesian_force_controller/CartesianForceController"
          type="cartesian_force_controller::CartesianForceController"
-         base_class_type="controller_interface::ControllerInterface">
+         base_class_type="controller_interface::ChainableControllerInterface">
     <description>
       Steer your robot's end-effector with forces and torques.
       It's ideal for teleoperation with contacts.

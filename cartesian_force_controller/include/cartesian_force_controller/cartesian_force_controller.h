@@ -43,7 +43,8 @@
 #include <cartesian_controller_base/ROS2VersionConfig.h>
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
-#include <controller_interface/controller_interface.hpp>
+#include "realtime_tools/realtime_buffer.hpp"
+#include <controller_interface/chainable_controller_interface.hpp>
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
@@ -87,8 +88,10 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  controller_interface::return_type update(const rclcpp::Time & time,
+  controller_interface::return_type update_and_write_commands(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
+
+  controller_interface::return_type update_reference_from_subscribers() override;
 
   using Base = cartesian_controller_base::CartesianControllerBase;
 
@@ -100,6 +103,7 @@ protected:
      */
   ctrl::Vector6D computeForceError();
   std::string m_new_ft_sensor_ref;
+  ctrl::Vector6D m_target_wrench;
   void setFtSensorReferenceFrame(const std::string & new_ref);
 
 private:
@@ -108,10 +112,11 @@ private:
 
   rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_target_wrench_subscriber;
   rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr m_ft_sensor_wrench_subscriber;
-  ctrl::Vector6D m_target_wrench;
+  
   ctrl::Vector6D m_ft_sensor_wrench;
   std::string m_ft_sensor_ref_link;
   KDL::Frame m_ft_sensor_transform;
+  realtime_tools::RealtimeBuffer<geometry_msgs::msg::WrenchStamped::SharedPtr> rt_buffer_ptr_;
 
   /**
      * Allow users to choose whether to specify their target wrenches in the
@@ -120,6 +125,7 @@ private:
      * intuitive for tele-manipulation.
      */
   bool m_hand_frame_control;
+  bool target_available_;
 };
 
 }  // namespace cartesian_force_controller

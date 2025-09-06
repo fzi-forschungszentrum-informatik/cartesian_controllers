@@ -43,7 +43,8 @@
 #include <cartesian_controller_base/ROS2VersionConfig.h>
 #include <cartesian_controller_base/cartesian_controller_base.h>
 
-#include <controller_interface/controller_interface.hpp>
+#include "realtime_tools/realtime_buffer.hpp"
+#include <controller_interface/chainable_controller_interface.hpp>
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
 
@@ -78,7 +79,7 @@ public:
   virtual ~CartesianMotionController() = default;
 
   virtual LifecycleNodeInterface::CallbackReturn on_init() override;
-
+  
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
     const rclcpp_lifecycle::State & previous_state) override;
 
@@ -88,8 +89,10 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  controller_interface::return_type update(const rclcpp::Time & time,
+  controller_interface::return_type update_and_write_commands(const rclcpp::Time & time,
                                            const rclcpp::Duration & period) override;
+  controller_interface::return_type update_reference_from_subscribers() override;
+  
 
   using Base = cartesian_controller_base::CartesianControllerBase;
 
@@ -107,6 +110,10 @@ protected:
   ctrl::Vector6D computeMotionError();
   KDL::Frame m_target_frame;
   KDL::Frame m_current_frame;
+
+  bool target_available_;
+  
+  realtime_tools::RealtimeBuffer<geometry_msgs::msg::PoseStamped::SharedPtr> rt_buffer_ptr_;
 
   void targetFrameCallback(const geometry_msgs::msg::PoseStamped::SharedPtr target);
 

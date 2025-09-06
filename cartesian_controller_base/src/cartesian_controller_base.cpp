@@ -46,7 +46,7 @@
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
 #include "controller_interface/helpers.hpp"
 #include "geometry_msgs/msg/detail/pose_stamped__struct.hpp"
 #include "geometry_msgs/msg/detail/twist_stamped__struct.hpp"
@@ -101,6 +101,7 @@ CartesianControllerBase::on_init()
     auto_declare<int>("solver.iterations", 1);
     auto_declare<bool>("solver.publish_state_feedback", false);
     m_initialized = true;
+    chained_mode_available_ = false;
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -317,6 +318,10 @@ CartesianControllerBase::on_activate(const rclcpp_lifecycle::State & previous_st
   writeJointControlCmds();
 
   m_active = true;
+
+  std::fill(reference_interfaces_.begin(), reference_interfaces_.end(),
+            std::numeric_limits<double>::quiet_NaN());
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -334,6 +339,46 @@ CartesianControllerBase::on_shutdown(const rclcpp_lifecycle::State & previous_st
     m_active = false;
   }
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+bool CartesianControllerBase::on_set_chained_mode(bool /*chained_mode*/)
+{
+  chained_mode_available_ = true;
+  RCLCPP_INFO(get_node()->get_logger(), "in chained mode");
+  return true;
+}
+
+std::vector<hardware_interface::CommandInterface>
+CartesianControllerBase::on_export_reference_interfaces()
+{
+  std::vector<hardware_interface::CommandInterface> reference_interfaces;
+
+  std::vector<std::string> cartesian_interfaces_names_;
+  if (controller_mode_)
+  {
+    cartesian_interfaces_names_ = {
+      "position.x", "position.y", "position.z", "orientation.x", "orientation.y", "orientation.z", "orientation.w"};
+  }
+  else
+  {
+    cartesian_interfaces_names_ = {
+      "wrench.x", "wrench.y", "wrench.z", "torque.x", "torque.y", "torque.z"};
+  }
+
+  for (const auto & type : cartesian_interfaces_names_)
+  {
+    reference_interface_names_.push_back(type);
+  }
+
+  for (size_t i = 0; i < reference_interface_names_.size(); ++i)
+  {
+    reference_interfaces.push_back(hardware_interface::CommandInterface(
+      get_node()->get_name(), reference_interface_names_[i], &reference_interfaces_[i]));
+  }
+
+  reference_interfaces_.assign(reference_interface_names_.size(), 0.0);
+
+  return reference_interfaces;
 }
 
 void CartesianControllerBase::writeJointControlCmds()

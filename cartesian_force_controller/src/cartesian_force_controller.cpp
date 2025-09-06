@@ -42,7 +42,7 @@
 #include <cmath>
 
 #include "cartesian_controller_base/Utility.h"
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
 
 namespace cartesian_force_controller
 {
@@ -53,7 +53,8 @@ CartesianForceController::CartesianForceController()
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 CartesianForceController::on_init()
-{
+{ 
+  Base::controller_mode_ = false;
   const auto ret = Base::on_init();
   if (ret != rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS)
   {
@@ -74,6 +75,9 @@ CartesianForceController::on_configure(const rclcpp_lifecycle::State & previous_
   {
     return ret;
   }
+
+  target_available_ = false;
+  reference_interfaces_.resize(6, std::numeric_limits<double>::quiet_NaN());
 
   // Make sure sensor link is part of the robot chain
   m_ft_sensor_ref_link = get_node()->get_parameter("ft_sensor_ref_link").as_string();
@@ -118,9 +122,20 @@ CartesianForceController::on_deactivate(const rclcpp_lifecycle::State & previous
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-controller_interface::return_type CartesianForceController::update(const rclcpp::Time & time,
+controller_interface::return_type CartesianForceController::update_and_write_commands(const rclcpp::Time & time,
                                                                    const rclcpp::Duration & period)
-{
+{ 
+  // check if chained mode available, in order to use references
+    if (Base::chained_mode_available_)
+  {
+    m_target_wrench[0] = Base::reference_interfaces_[0];
+    m_target_wrench[1] = Base::reference_interfaces_[1];
+    m_target_wrench[2] = Base::reference_interfaces_[2];
+    m_target_wrench[3] = Base::reference_interfaces_[3];
+    m_target_wrench[4] = Base::reference_interfaces_[4];
+    m_target_wrench[5] = Base::reference_interfaces_[5];
+  }
+  
   // Synchronize the internal model and the real robot
   Base::m_ik_solver->synchronizeJointPositions(Base::m_joint_state_pos_handles);
 
@@ -196,12 +211,31 @@ void CartesianForceController::targetWrenchCallback(
     return;
   }
 
-  m_target_wrench[0] = wrench->wrench.force.x;
-  m_target_wrench[1] = wrench->wrench.force.y;
-  m_target_wrench[2] = wrench->wrench.force.z;
-  m_target_wrench[3] = wrench->wrench.torque.x;
-  m_target_wrench[4] = wrench->wrench.torque.y;
-  m_target_wrench[5] = wrench->wrench.torque.z;
+  rt_buffer_ptr_.writeFromNonRT(wrench);
+  target_available_ = true;
+
+}
+
+controller_interface::return_type CartesianForceController::update_reference_from_subscribers()
+{
+  if (!this->isActive())
+  {
+    return controller_interface::return_type::OK;
+  }
+
+  if (target_available_)
+  {
+    auto target = rt_buffer_ptr_.readFromRT();
+
+    m_target_wrench[0] = (*target)->wrench.force.x;
+    m_target_wrench[1] = (*target)->wrench.force.y;
+    m_target_wrench[2] = (*target)->wrench.force.z;
+    m_target_wrench[3] = (*target)->wrench.torque.x;
+    m_target_wrench[4] = (*target)->wrench.torque.y;
+    m_target_wrench[5] = (*target)->wrench.torque.z;
+  }
+  
+  return controller_interface::return_type::OK;
 }
 
 void CartesianForceController::ftSensorWrenchCallback(
@@ -247,4 +281,4 @@ void CartesianForceController::ftSensorWrenchCallback(
 #include <pluginlib/class_list_macros.hpp>
 
 PLUGINLIB_EXPORT_CLASS(cartesian_force_controller::CartesianForceController,
-                       controller_interface::ControllerInterface)
+                       controller_interface::ChainableControllerInterface)

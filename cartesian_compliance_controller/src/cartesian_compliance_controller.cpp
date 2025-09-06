@@ -40,7 +40,7 @@
 #include <cartesian_compliance_controller/cartesian_compliance_controller.h>
 
 #include "cartesian_controller_base/Utility.h"
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
 
 namespace cartesian_compliance_controller
 {
@@ -129,7 +129,7 @@ CartesianComplianceController::on_deactivate(const rclcpp_lifecycle::State & pre
   return TYPE::SUCCESS;
 }
 
-controller_interface::return_type CartesianComplianceController::update(
+controller_interface::return_type CartesianComplianceController::update_and_write_commands(
   const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   // Synchronize the internal model and the real robot
@@ -137,6 +137,16 @@ controller_interface::return_type CartesianComplianceController::update(
 
   // Control the robot motion in such a way that the resulting net force
   // vanishes. This internal control needs some simulation time steps.
+
+  if (Base::chained_mode_available_)
+  {
+    ForceBase::m_target_wrench[0] = Base::reference_interfaces_[0];
+    ForceBase::m_target_wrench[1] = Base::reference_interfaces_[1];
+    ForceBase::m_target_wrench[2] = Base::reference_interfaces_[2];
+    ForceBase::m_target_wrench[3] = Base::reference_interfaces_[3];
+    ForceBase::m_target_wrench[4] = Base::reference_interfaces_[4];
+    ForceBase::m_target_wrench[5] = Base::reference_interfaces_[5];
+  }
   for (int i = 0; i < Base::m_iterations; ++i)
   {
     // The internal 'simulation time' is deliberately independent of the outer
@@ -179,10 +189,16 @@ ctrl::Vector6D CartesianComplianceController::computeComplianceError()
   return net_force;
 }
 
+controller_interface::return_type CartesianComplianceController::update_reference_from_subscribers()
+{
+  MotionBase::update_reference_from_subscribers();
+  ForceBase::update_reference_from_subscribers();
+  return controller_interface::return_type::OK;
+}
 }  // namespace cartesian_compliance_controller
 
 // Pluginlib
 #include <pluginlib/class_list_macros.hpp>
 
 PLUGINLIB_EXPORT_CLASS(cartesian_compliance_controller::CartesianComplianceController,
-                       controller_interface::ControllerInterface)
+                       controller_interface::ChainableControllerInterface)
