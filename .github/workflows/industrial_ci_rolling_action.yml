@@ -1,4 +1,4 @@
-name: Iron
+name: Rolling
 
 on:
   push:
@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {ROS_DISTRO: iron, ROS_REPO: testing}
-          - {ROS_DISTRO: iron, ROS_REPO: main}
+          - {ROS_DISTRO: rolling, ROS_REPO: testing}
+          - {ROS_DISTRO: rolling, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -313,7 +313,12 @@ geometry_msgs::msg::PoseStamped MotionControlHandle::getEndEffectorPose()
   KDL::JntArray positions(m_joint_handles.size());
   for (size_t i = 0; i < m_joint_handles.size(); ++i)
   {
-    positions(i) = m_joint_handles[i].get().get_value();
+    #if defined CARTESIAN_CONTROLLERS_HUMBLE
+      positions(i) = m_joint_handles[i].get().get_value();
+    #else
+      positions(i) = m_joint_handles[i].get().get_optional().value();
+
+    #endif
   }
 
   KDL::Frame tmp;

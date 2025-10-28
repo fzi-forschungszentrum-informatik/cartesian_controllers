@@ -43,7 +43,7 @@
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
-#include <realtime_tools/realtime_publisher.h>
+#include <realtime_tools/realtime_publisher.hpp>
 
 #include <controller_interface/controller_interface.hpp>
 #include <functional>
@@ -204,7 +204,7 @@ private:
   {
     for (size_t i = 0; i < m_joint_cmd_vel_handles.size(); ++i)
     {
-      m_joint_cmd_vel_handles[i].get().set_value(0.0);
+      static_cast<void>(m_joint_cmd_vel_handles[i].get().set_value(0.0));
     }
   }
 
