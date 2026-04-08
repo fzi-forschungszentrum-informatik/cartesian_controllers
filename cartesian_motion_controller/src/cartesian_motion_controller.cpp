@@ -189,6 +189,19 @@ void CartesianMotionController::targetFrameCallback(
     return;
   }
 
+  const double quat_norm_sq =
+    target->pose.orientation.x * target->pose.orientation.x +
+    target->pose.orientation.y * target->pose.orientation.y +
+    target->pose.orientation.z * target->pose.orientation.z +
+    target->pose.orientation.w * target->pose.orientation.w;
+  if (quat_norm_sq < 1e-6)
+  {
+    auto & clock = *get_node()->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(get_node()->get_logger(), clock, 3000,
+                                "Zero quaternion detected in target pose. Ignoring input.");
+    return;
+  }
+
   if (target->header.frame_id != Base::m_robot_base_link)
   {
     auto & clock = *get_node()->get_clock();
