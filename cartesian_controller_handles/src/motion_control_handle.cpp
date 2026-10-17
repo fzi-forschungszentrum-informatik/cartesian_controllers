@@ -58,6 +58,9 @@ MotionControlHandle::~MotionControlHandle() {}
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MotionControlHandle::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
+  m_joint_handles.clear();
+  m_joint_handles.reserve(m_joint_names.size());
+
   // Get state handles.
   if (!controller_interface::get_ordered_interfaces(
         state_interfaces_, m_joint_names, hardware_interface::HW_IF_POSITION, m_joint_handles))
@@ -195,7 +198,7 @@ MotionControlHandle::on_configure(const rclcpp_lifecycle::State & previous_state
 
   // Publishers
   m_pose_publisher = get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
-    get_node()->get_name() + std::string("/target_frame"), 10);
+    "~/target_frame", 10);
 
   // Initialize kinematics
   m_fk_solver.reset(new KDL::ChainFkSolverPos_recursive(m_robot_chain));

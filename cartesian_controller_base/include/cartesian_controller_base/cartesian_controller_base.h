@@ -43,7 +43,7 @@
 #include <cartesian_controller_base/IKSolver.h>
 #include <cartesian_controller_base/SpatialPDController.h>
 #include <cartesian_controller_base/Utility.h>
-#include <realtime_tools/realtime_publisher.h>
+#include <realtime_tools/realtime_publisher.hpp>
 
 #include <controller_interface/controller_interface.hpp>
 #include <functional>
@@ -87,7 +87,8 @@ public:
   virtual controller_interface::InterfaceConfiguration state_interface_configuration()
     const override;
 
-  virtual LifecycleNodeInterface::CallbackReturn on_init() override;
+  virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_init()
+    override;
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
     const rclcpp_lifecycle::State & previous_state) override;
@@ -223,6 +224,9 @@ private:
     m_feedback_pose_publisher;
   realtime_tools::RealtimePublisherSharedPtr<geometry_msgs::msg::TwistStamped>
     m_feedback_twist_publisher;
+
+  geometry_msgs::msg::TwistStamped feedback_twist_publisher_msg;
+  geometry_msgs::msg::PoseStamped feedback_pose_publisher_msg;
 
   std::vector<std::string> m_cmd_interface_types;
   std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface>>

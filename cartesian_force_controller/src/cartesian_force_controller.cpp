@@ -90,12 +90,12 @@ CartesianForceController::on_configure(const rclcpp_lifecycle::State & previous_
   setFtSensorReferenceFrame(Base::m_end_effector_link);
 
   m_target_wrench_subscriber = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-    get_node()->get_name() + std::string("/target_wrench"), 10,
+    "~/target_wrench", 10,
     std::bind(&CartesianForceController::targetWrenchCallback, this, std::placeholders::_1));
 
   m_ft_sensor_wrench_subscriber =
     get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      get_node()->get_name() + std::string("/ft_sensor_wrench"), 10,
+      "~/ft_sensor_wrench", 10,
       std::bind(&CartesianForceController::ftSensorWrenchCallback, this, std::placeholders::_1));
 
   m_target_wrench.setZero();

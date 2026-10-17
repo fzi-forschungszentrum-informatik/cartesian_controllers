@@ -93,25 +93,21 @@ def generate_launch_description():
         parameters=[robot_description, robot_controllers],
         # prefix="screen -d -m gdb -command=/home/stefan/.gdb_debug_config --ex run --args",  # noqa E501
         output="both",
-        remappings=[
-            ("~/robot_description", "/robot_description"),
-            ("motion_control_handle/target_frame", "target_frame"),
-            ("cartesian_motion_controller/target_frame", "target_frame"),
-            ("cartesian_compliance_controller/target_frame", "target_frame"),
-            ("cartesian_force_controller/target_wrench", "target_wrench"),
-            ("cartesian_compliance_controller/target_wrench", "target_wrench"),
-            ("cartesian_force_controller/ft_sensor_wrench", "ft_sensor_wrench"),
-            ("cartesian_compliance_controller/ft_sensor_wrench", "ft_sensor_wrench"),
-        ],
     )
 
     # Convenience function for easy spawner construction
-    def controller_spawner(name, *args):
+    def controller_spawner(name, *args, controller_ros_args=None):
+        controller_ros_args = controller_ros_args or []
+        ros_args = [
+            argument
+            for ros_arg in controller_ros_args
+            for argument in ("--controller-ros-args", ros_arg)
+        ]
         return Node(
             package="controller_manager",
             executable="spawner",
             output="screen",
-            arguments=[name] + [a for a in args],
+            arguments=[name] + list(args) + ros_args,
         )
 
     # Active controllers
@@ -132,7 +128,28 @@ def generate_launch_description():
     ]
     state = "--inactive"
     inactive_spawners = [
-        controller_spawner(controller, state) for controller in inactive_list
+        controller_spawner(
+            controller,
+            state,
+            controller_ros_args={
+                "cartesian_compliance_controller": [
+                    "-r /cartesian_compliance_controller/target_frame:=/target_frame",
+                    "-r /cartesian_compliance_controller/target_wrench:=/target_wrench",
+                    "-r /cartesian_compliance_controller/ft_sensor_wrench:=/ft_sensor_wrench",
+                ],
+                "cartesian_force_controller": [
+                    "-r /cartesian_force_controller/target_wrench:=/target_wrench",
+                    "-r /cartesian_force_controller/ft_sensor_wrench:=/ft_sensor_wrench",
+                ],
+                "cartesian_motion_controller": [
+                    "-r /cartesian_motion_controller/target_frame:=/target_frame"
+                ],
+                "motion_control_handle": [
+                    "-r /motion_control_handle/target_frame:=/target_frame"
+                ],
+            }.get(controller),
+        )
+        for controller in inactive_list
     ]
 
     # TF tree
